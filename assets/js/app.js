@@ -211,28 +211,83 @@ var ResultBarChart = React.createClass({
     }
 });
 
+var ResultModal = React.createClass({
+    render: function() {
+        return (
+            <div class="modal fade" tabindex="-1" role="dialog">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Genes</h4>
+                  </div>
+                  <div class="modal-body">
+                    <p>One fine body&hellip;</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+        );
+    }
+});
+
+var SortIcon = React.createClass({
+    render: function() {
+        var direction = (this.props.direction.length > 0) ? "-" + this.props.direction: "";
+        return <i className={"fa fa-fw fa-sort" + direction}></i>;
+    }
+});
+
 var ResultTable = React.createClass({
     render: function() {
             var component = this,
-                result = component.props.result;
+                result = component.props.result,
+                directions = component.props.sortDirections;
             return (
                 <div className="table-responsive">
                     <table className="table table-striped">
                         <thead>
                             <tr>
-                                <th onClick={component.props.onSort} id={result.id + "-geneSet"}>Gene set</th>
-                                <th onClick={component.props.onSort} id={result.id + "-percent"}>%</th>
-                                <th onClick={component.props.onSort} id={result.id + "-fPValue"}>Func. p-value</th>
-                                <th onClick={component.props.onSort} id={result.id + "-fPValueCorr"}>Func. p-value corr.</th>
-                                <th onClick={component.props.onSort} id={result.id + "-gSPValue"}>G. set p-value</th>
-                                <th onClick={component.props.onSort} id={result.id + "-cPValue"}>Comb. p-value</th>
+                                <th>
+                                    Gene set
+                                </th>
+                                <th
+                                    onClick={component.props.onSort}
+                                    id={result.id + "-percent"}>
+                                    %
+                                    <SortIcon direction={directions.percent} />
+                                </th>
+                                <th
+                                    onClick={component.props.onSort}
+                                    id={result.id + "-fPValue"}>
+                                    Func. p-value
+                                    <SortIcon direction={directions.fPValue} />
+                                </th>
+                                <th
+                                    onClick={component.props.onSort}
+                                    id={result.id + "-fPValueCorr"}>
+                                    Func. p-value corr.
+                                    <SortIcon direction={directions.fPValueCorr} />
+                                </th>
+                                <th
+                                    onClick={component.props.onSort}
+                                    id={result.id + "-gSPValue"}>
+                                    G. set p-value
+                                    <SortIcon direction={directions.gSPValue} />
+                                </th>
+                                <th
+                                    onClick={component.props.onSort}
+                                    id={result.id + "-cPValue"}>
+                                    Comb. p-value
+                                    <SortIcon direction={directions.cPValue} />
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             {result.enrichment.map(function(row) {
                                 var geneSet = row.geneSet;
-                                if (geneSet.length > 60) {
-                                    geneSet = <abbr title={geneSet}>{geneSet.substr(0, 60)}</abbr>;
+                                if (geneSet.length > 45) {
+                                    geneSet = <abbr title={geneSet}>{geneSet.substr(0, 45)}</abbr>;
                                 }
                                 return (
                                     <tr>
@@ -257,26 +312,6 @@ var ResultTable = React.createClass({
             );
         }
     });
-
-var ResultModal = React.createClass({
-    render: function() {
-        return (
-            <div class="modal fade" tabindex="-1" role="dialog">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Genes</h4>
-                  </div>
-                  <div class="modal-body">
-                    <p>One fine body&hellip;</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-        );
-    }
-});
 
 var Result = React.createClass({
     render: function() {
@@ -313,6 +348,7 @@ var Result = React.createClass({
                     {resultBarChart}
                     <ResultTable
                         result={result}
+                        sortDirections={this.props.sortDirections}
                         onSort={this.props.onSort}
                         onViewGenes={this.props.onViewGenes}
                         />
@@ -331,6 +367,7 @@ var ResultGroup = React.createClass({
                       return (
                             <Result
                                 result={result}
+                                sortDirections={component.props.sortDirections}
                                 onSort={component.props.onSort}
                                 onViewGenes={component.props.onViewGenes}
                                 onDownload={component.props.onDownload}
@@ -351,7 +388,15 @@ var SetenApp = React.createClass({
                 results: [],
                 isActive: true,
                 isRunning: false,
-                sortAscOrder: true
+                sortAscOrder: true,
+                sortDirections: {
+                    geneSet: '',
+                    percent: '',
+                    fPValue: '',
+                    fPValueCorr: '',
+                    gSPValue: '',
+                    cPValue: 'asc'
+                }
             };
     },
     togglePanelAnalyze: function(e) {
@@ -409,8 +454,10 @@ var SetenApp = React.createClass({
         var id = e.currentTarget.id.split('-')[0],
             sort = e.currentTarget.id.split('-')[1],
             order = this.state.sortAscOrder,
+            directions = this.state.sortDirections,
             results = this.state.results,
-            sorted_results = [],
+            _directions = {},
+            _results = [],
             n = this.state.results.length,
             i = 0;
 
@@ -420,12 +467,25 @@ var SetenApp = React.createClass({
                     return (order) ? a[sort] - b[sort]: b[sort] - a[sort];
                 });
             }
-            sorted_results.push(results[i]);
+            _results.push(results[i]);
             i++;
         }
 
-        this.setState({results: sorted_results});
+        for (var d in directions) {
+            if (d == sort) {
+                if (order) {
+                    _directions[d] = 'asc';
+                } else {
+                    _directions[d] = 'desc';
+                }
+            } else {
+                _directions[d] = '';
+            }
+        }
+
+        this.setState({results: _results});
         this.setState({sortAscOrder: !order});
+        this.setState({sortDirections: _directions});
     },
     handleViewGenes: function(e) {
         console.log('Viewing genes');
@@ -563,6 +623,7 @@ var SetenApp = React.createClass({
                     <div className="col-sm-12">
                         <ResultGroup
                             results={this.state.results}
+                            sortDirections={this.state.sortDirections}
                             onSort={this.handleSort}
                             onViewGenes={this.handleViewGenes}
                             onDownload={this.handleDownload}
