@@ -1,0 +1,61 @@
+.header {
+    display: none;
+    padding: 20px 0px;
+    color: #ffffff;
+    background-color: #00bf8f;
+}
+.navbar-inverse .navbar-brand {
+    color: #00bf8f;
+}
+.bar {
+    fill: #00bf8f;
+}
+.axis text {
+    font: 10px sans-serif;
+}
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+.x.axis path {
+    display: none;
+}
+.btn-download {
+    display: inline-block;
+    cursor: pointer;
+}
+.panel-explore, .panel-analyze {
+    margin-top: 20px;
+}
+.list-group-explore {
+    max-height: 350px;
+    overflow-y: auto;
+}
+.table-responsive, .table {
+    margin-bottom: 0px;
+}
+th {
+    white-space: nowrap;
+    cursor: pointer;
+}
+.footer {
+    margin-top: 70px;
+    padding: 70px 0px;
+    color: #ffffff;
+    background-color: #101010;
+    box-shadow: 0px 500px 0px 500px #101010;
+}
+@media (min-width: 768px) {
+    .form-horizontal .control-label {
+        padding-top: 2px;
+        margin-bottom: 0;
+        text-align: right;
+    }
+    .header {
+        display: block;
+    }
+    .navbar-brand {
+        display: none;
+    }
+}

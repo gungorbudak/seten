@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Seten</title>
+    <link rel="stylesheet" href="assets/css/libs/bootstrap.min.css" charset="utf-8">
+    <link rel="stylesheet" href="assets/css/libs/font-awesome.css" charset="utf-8">
+    <link rel="stylesheet" href="assets/css/app.css" charset="utf-8">
+    <script src="https://fb.me/react-0.14.3.min.js"></script>
+    <script src="https://fb.me/react-dom-0.14.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="assets/js/libs/d3.min.js" charset="utf-8"></script>
+    <script src="assets/js/libs/jquery-1.11.3.min.js" charset="utf-8"></script>
+    <script src="assets/js/libs/bootstrap.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Seten</h1>
+            <p>
+                Gene set enrichment on CLIP-seq RNA-binding protein binding signals datasets
+            </p>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Seten</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="index.html"><i class="fa fa-home"></i> Start</a></li>
+                    <li><a href="about.html"><i class="fa fa-info-circle"></i> About</a></li>
+                    <li><a href="contact.html"><i class="fa fa-envelope"></i> Contact</a></li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Start</h2>
+        <p>
+            Browse your BED file with peaks scored and select your gene set collections of interest or explore precomputed gene set enrichment analysis results for RBPs from CLIPdb and ENCODE projects to start wtih Seten.
+        </p>
+        <div class="container-app"></div>
+    </div>
+
+    <div class="footer text-center">
+        <div class="container">
+            <span>
+                Seten: Gene set enrichment on CLIP-seq RNA-binding protein binding signals datasets
+            </span>
+        </div>
+    </div>
+    <script src="assets/js/app.js" type="text/babel" charset="utf-8"></script>
+</body>
+
+</html>
