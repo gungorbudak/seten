@@ -169,8 +169,8 @@ var ResultBarChart = React.createClass({
         .selectAll("text")
           .style("text-anchor", "end")
           .attr("dx", "-1em")
-          .attr("dy", "0em")
-          .attr("transform", "rotate(-60)");
+          .attr("dy", "-0.5em")
+          .attr("transform", "rotate(-75)");
 
         chart.append("g")
           .attr("class", "y axis")
@@ -188,7 +188,7 @@ var ResultBarChart = React.createClass({
         var el = this.getDOMNode();
         var panelWidth = 1138;
         var size = {
-            margin: {top: 20, right: 10, bottom: 200, left: 50}
+            margin: {top: 20, right: 10, bottom: 225, left: 50}
         };
         size.width = panelWidth - size.margin.right - size.margin.left;
         size.height = 450 - size.margin.top - size.margin.bottom;
@@ -197,7 +197,7 @@ var ResultBarChart = React.createClass({
                 // -Log10 tranformation of p-values
                 // for better visualization
                 return {
-                    n: el.geneSet,
+                    n: (el.geneSet.length > 32) ? el.geneSet.substr(0, 29) + '...': el.geneSet,
                     val: -Math.log10(el.cPValue)
                 };
             })
@@ -358,22 +358,54 @@ var Result = React.createClass({
     }
 });
 
+var ResultProgress = React.createClass({
+    render: function() {
+        var barStyle = {
+            minWidth: "2em",
+            width: this.props.progress + "%"
+        };
+        return (
+            <div className="progress">
+                <div
+                    className="progress-bar progress-bar-info progress-bar-striped active"
+                    role="progressbar"
+                    aria-valuenow={this.props.progress}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    style={barStyle}
+                    >
+                    {this.props.progress + "%"}
+                </div>
+            </div>
+        );
+    }
+});
+
 var ResultGroup = React.createClass({
     render: function() {
         var component = this;
+        var progressBar;
+        if (component.props.isRunning) {
+            progressBar = (
+                <ResultProgress progress={component.props.progress} />
+            );
+        }
         return (
-            <div className="panel-group" role="tablist" aria-multiselectable="true">
-                {component.props.results.map(function(result) {
-                      return (
-                            <Result
-                                result={result}
-                                sortDirections={component.props.sortDirections}
-                                onSort={component.props.onSort}
-                                onViewGenes={component.props.onViewGenes}
-                                onDownload={component.props.onDownload}
-                                />
-                      );
-                })}
+            <div>
+                {progressBar}
+                <div className="panel-group" role="tablist" aria-multiselectable="true">
+                    {component.props.results.map(function(result) {
+                          return (
+                                <Result
+                                    result={result}
+                                    sortDirections={component.props.sortDirections}
+                                    onSort={component.props.onSort}
+                                    onViewGenes={component.props.onViewGenes}
+                                    onDownload={component.props.onDownload}
+                                    />
+                          );
+                    })}
+                </div>
             </div>
         );
     }
@@ -382,11 +414,11 @@ var ResultGroup = React.createClass({
 var SetenApp = React.createClass({
     getInitialState: function() {
         return {
-                bedFile: undefined,
-                collections: undefined,
+                inputBedFile: undefined,
+                inputCollections: undefined,
                 geneScores: [],
+                geneCollections: [],
                 results: [],
-                isActive: true,
                 isRunning: false,
                 sortAscOrder: true,
                 sortDirections: {
@@ -403,19 +435,20 @@ var SetenApp = React.createClass({
         this.setState({isRunning: !this.state.isRunning});
     },
     handleInputBedFileChange: function(e) {
-        this.setState({bedFile: e.target.files[0]});
+        this.setState({inputBedFile: e.target.files[0]});
     },
     handleSelectCollectionsChange: function(e) {
         var options = e.target.options,
             n = e.target.options.length,
             i = 0,
             collections = [];
+
         while (i < n) {
             if (options[i].selected) {
                 collections.push({
-                    value: options[i].value,
-                    name: options[i].id,
-                    text: options[i].text
+                    id: options[i].value,
+                    filename: options[i].id,
+                    name: options[i].text
                 });
             }
             i++;
@@ -423,15 +456,17 @@ var SetenApp = React.createClass({
         if (!collections.length) {
             collections = undefined;
         }
-        this.setState({collections: collections});
+        this.setState({inputCollections: collections});
     },
     handleInputSubmit: function(e) {
         e.preventDefault();
-        var bedFile = this.state.bedFile;
-        var collections = this.state.collections;
+        var bedFile = this.state.inputBedFile,
+            collections = this.state.inputCollections;
+
         if (bedFile !== undefined && collections !== undefined) {
-            // empty results
+            // empty results and gene collections
             this.state.results = [];
+            this.state.geneCollections = [];
             // toggle form
             this.togglePanelAnalyze();
             // start worker for reading given file
@@ -439,7 +474,7 @@ var SetenApp = React.createClass({
             fileWorker.postMessage(bedFile);
             fileWorker.onmessage = this.fileWorkerOnMessage;
         } else {
-            console.log('Missing input');
+            console.log('Missing input...');
         }
     },
     handleExplore: function(e) {
@@ -548,7 +583,8 @@ var SetenApp = React.createClass({
     fileWorkerOnMessage: function(e) {
         var chunks = e.data,
             component = this;
-        this.parallelMapping('assets/js/mapWorker.js', chunks, function(r) {
+
+        component.parallelMapping('assets/js/mapWorker.js', chunks, function(r) {
             var preprocessWorker = new Worker('assets/js/preprocessWorker.js');
             preprocessWorker.postMessage(r);
             preprocessWorker.onmessage = component.preprocessWorkerOnMessage;
@@ -557,42 +593,54 @@ var SetenApp = React.createClass({
     preprocessWorkerOnMessage: function(e) {
         var component = this,
             geneScores = e.data,
-            cols = this.state.collections,
+            cols = this.state.inputCollections,
             collectionWorker;
-
+        // store gene scores in the state
         component.setState({geneScores: geneScores});
-
+        // collect all collections
         cols.forEach(function(col) {
             collectionWorker = new Worker('assets/js/collectionWorker.js');
-            collectionWorker.postMessage(col.name);
+            collectionWorker.postMessage(col);
             collectionWorker.onmessage = function(e) {
-                component.collectionWorkerOnMessage(e, col);
+                component.collectionWorkerOnMessage(e);
             };
         });
     },
-    collectionWorkerOnMessage: function(e, col) {
+    collectionWorkerOnMessage: function(e) {
         var component = this,
             geneScores = this.state.geneScores,
-            collection = e.data,
-            enrichmentWorker = new Worker('assets/js/enrichmentWorker.js');
-
-        enrichmentWorker.postMessage({
-            'geneScores': geneScores,
-            'collection': collection
-        });
-        enrichmentWorker.onmessage = function(e) {
-            component.enrichmentWorkerOnMessage(e, col);
-        };
+            geneCollection = e.data,
+            geneCollectionsSize,
+            enrichmentWorker;
+        // append to gene collections everytime one has been collected
+        var geneCollections = this.state.geneCollections.concat([geneCollection]);
+        // store gene collections in the state
+        this.setState({geneCollections: geneCollections});
+        // check if all gene collections have been collected
+        if (this.state.inputCollections.length == this.state.geneCollections.length) {
+            // get unique number of genes in all collections
+            geneCollectionsSize = 20000;
+            // start an enrichment worker for each collection
+            geneCollections.forEach(function(geneCollection) {
+                enrichmentWorker = new Worker('assets/js/enrichmentWorker.js')
+                enrichmentWorker.postMessage({
+                    'geneScores': geneScores,
+                    'geneCollection': geneCollection,
+                    'geneCollectionsSize': geneCollectionsSize
+                });
+                enrichmentWorker.onmessage = function(e) {
+                    component.enrichmentWorkerOnMessage(e);
+                };
+            });
+        }
     },
-    enrichmentWorkerOnMessage: function(e, col) {
-        var results = this.state.results.concat([{
-                            id: col.value,
-                            title: col.text,
-                            enrichment: e.data
-                        }]);
+    enrichmentWorkerOnMessage: function(e) {
+        var results = this.state.results.concat([e.data]);
+        // add results to the state
         this.setState({results: results});
         // check if job is complete
-        if (this.state.results.length == this.state.collections.length) {
+        if (this.state.results.length == this.state.geneCollections.length) {
+            // enable the panel back
             this.togglePanelAnalyze();
         }
     },
@@ -600,6 +648,11 @@ var SetenApp = React.createClass({
         this.setState({results: e.data});
     },
     render: function() {
+        var progress;
+        if (this.state.inputCollections !== undefined) {
+            progress = Math.round(
+                (this.state.results.length/this.state.inputCollections.length)*100);
+        }
         return (
             <div>
                 <div className="row">
@@ -623,6 +676,8 @@ var SetenApp = React.createClass({
                     <div className="col-sm-12">
                         <ResultGroup
                             results={this.state.results}
+                            progress={progress}
+                            isRunning={this.state.isRunning}
                             sortDirections={this.state.sortDirections}
                             onSort={this.handleSort}
                             onViewGenes={this.handleViewGenes}

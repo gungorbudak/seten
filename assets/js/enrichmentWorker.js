@@ -2,7 +2,11 @@
 
 importScripts('libs/mannwhitneyu.js', 'libs/fishersexact.js');
 
-function _overlap(a, b) {
+/*
+a: list of genes from data
+b: list of genes from gene set
+*/
+function _overlapGenes(a, b) {
     var rs = [],
         i = a.length;
     while (i--) b.indexOf(a[i]) != -1 && rs.push(a[i]);
@@ -16,11 +20,15 @@ function _scores(geneScores, genes) {
     return rs;
 }
 
-function _randomScores(scores, i) {
-    var rs = [],
-        n = scores.length;
-    while (i--) rs.push(scores[Math.floor(Math.random() * n)]);
-    return rs;
+/*
+s: list of scores
+n: number of random scores
+*/
+function _randomScores(s, n) {
+    var r = [],
+        l = s.length;
+    while (n--) r.push(s[Math.floor(Math.random() * l)]);
+    return r;
 }
 
 function _median(values) {
@@ -34,25 +42,25 @@ function _median(values) {
         return (values[half - 1] + values[half]) / 2.0;
 };
 
-function _mwu(a, b) {
-    var r;
-    r = mannwhitneyu.test(a, b)
-    return r.p;
-}
-
 /*
  * a: overlap size
  * b: gene set size
  * c: data size
  * d: gene collections size
 */
-function _fe(a, b, c, d, alternative) {
-    var p;
-    p = fishersexact.test(a, b, c-a, d-b, alternative)
-    return p;
+function _fETest(a, b, c, d) {
+    var r;
+    r = fishersexact.test(a, b, c-a, d-b, 'one-sided')
+    return r.p;
 }
 
-function _test(scores, overlapScores, c, t) {
+function _mwu(a, b) {
+    var r;
+    r = mannwhitneyu.test(a, b)
+    return r.p;
+}
+
+function _gSETest(scores, overlapScores, c, t) {
     var tests = [],
         i = t,
         n = overlapScores.length,
@@ -77,34 +85,61 @@ self.onmessage = function(e) {
     var t0 = performance.now(),
         geneScores = e.data.geneScores,
         genes = Object.keys(e.data.geneScores),
-        scores = _scores(geneScores, Object.keys(e.data.geneScores)),
-        sets = e.data.collection,
+        scores = _scores(geneScores, genes),
+        geneCollection = e.data.geneCollection,
+        geneCollectionsSize = e.data.geneCollectionsSize,
         c0 = 5,
         c1 = 0.05,
         times = 1000,
-        enrichment = [],
-        overlap,
+        results = [],
+        overlapGenes,
         overlapScores,
-        result,
+        fPValue,
+        gSPValue,
         t1;
-    for (var set in sets) {
-        overlap = _overlap(genes, sets[set]);
-        if (overlap.length > c0) {
-            overlapScores = _scores(geneScores, overlap);
-            result = _test(scores, overlapScores, c1, times);
-            enrichment.push({
-                geneSet: set,
-                overlapSize: overlap.length,
-                geneSetSize: sets[set].length,
-                percent: Math.round((overlap.length/sets[set].length) * 100),
-                pValue: result
+    // tests for each gene set in the collection
+    geneCollection.geneSets.forEach(function(geneSet) {
+        // find common genes between data and gene set
+        overlapGenes = _overlapGenes(genes, geneSet.genes);
+        if (overlapGenes.length > c0) {
+            // get scores of overlapping genes
+            overlapScores = _scores(geneScores, overlapGenes);
+            fPValue = _fETest(overlapGenes.length,
+                geneSet.genes.length, genes.length, geneCollectionsSize);
+            gSPValue = _gSETest(scores, overlapScores, c1, times);
+            results.push({
+                geneSet: geneSet.name,
+                genes: overlapGenes,
+                overlapSize: overlapGenes.length,
+                geneSetSize: geneSet.genes.length,
+                percent: Math.round((overlapGenes.length/geneSet.genes.length)*100),
+                fPValue: fPValue,
+                fPValueCorr: fPValue,
+                gSPValue: gSPValue,
+                cPValue: gSPValue
             });
         }
-    };
-    enrichment = enrichment.sort(function(a, b) {
-        return a.pValue - b.pValue;
+    });
+    // TODO: correct for functional enrichment p-values
+
+    // TODO: combine corrected functional enrichment p-values
+    // and gene set enrichment p-values
+
+    // sort by combined p-value in ascending order
+    results = results.sort(function(a, b) {
+        return a.cPValue - b.cPValue;
     });
     t1 = performance.now();
-    console.log('[enrichmentWorker] Enrichment completed in ' + ((t1 - t0) / 1000) + ' seconds');
-    self.postMessage(enrichment);
+    console.log([
+        '[enrichmentWorker] Enrichment for',
+        geneCollection.name,
+        'completed in',
+        ((t1 - t0) / 1000),
+        'seconds'
+    ].join(' '));
+    self.postMessage({
+        id: geneCollection.id,
+        title: geneCollection.name,
+        enrichment: results
+    });
 };

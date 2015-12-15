@@ -1,31 +1,38 @@
 'use strict';
 
-function collectGeneSets(colName) {
+function collectGeneSets(filename) {
     var request = new XMLHttpRequest(),
-        sets = {},
+        geneSets = [],
         rows,
         cols;
-    request.open('GET', '/assets/resources/collections/' + colName + '.gmt', false);
+    request.open('GET', '/assets/resources/collections/' + filename + '.gmt', false);
     request.send(null);
     if (request.status === 200) {
         rows = request.responseText.trim().split(/\r?\n/);
         rows.forEach(function (row) {
             cols = row.split(/\s/);
-            sets[cols[0]] = cols.slice(2, cols.length - 1);
+            geneSets.push({
+                name: cols[0],
+                genes: cols.slice(2, cols.length - 1)
+            });
         });
     }
-    return sets;
+    return geneSets;
 }
 
 self.onmessage = function(e) {
     var t0 = performance.now(),
-        colName = e.data,
-        col,
+        collection = e.data,
+        _collection,
         t1;
 
-    col = collectGeneSets(colName)
+    _collection = {
+        id: collection.id,
+        name: collection.name,
+        geneSets: collectGeneSets(collection.filename)
+    }
 
     t1 = performance.now();
-    console.log('[collectionWorker] ' + Object.keys(col).length + ' gene sets collected from ' + colName + ' in ' + ((t1 - t0) / 1000) + ' seconds');
-    self.postMessage(col);
+    console.log('[collectionWorker] ' + Object.keys(_collection.geneSets).length + ' gene sets collected from ' + _collection.name + ' in ' + ((t1 - t0) / 1000) + ' seconds');
+    self.postMessage(_collection);
 };

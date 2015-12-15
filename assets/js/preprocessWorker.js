@@ -11,7 +11,7 @@ self.onmessage = function(e) {
     var t0 = performance.now(),
         chunks = e.data,
         scores = [],
-        geneScores = [],
+        geneScores = {},
         n = 0,
         t1;
 
