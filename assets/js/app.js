@@ -148,6 +148,10 @@ var ResultBarChart = React.createClass({
         };
     },
     renderChart: function(el, size, data) {
+        data = data.sort(function(a, b) {
+            return b.val - a.val;
+        });
+
         var xScale = d3.scale.ordinal()
             .rangeBands([0, size.width], 0.1)
             .domain(data.map(function(d) { return d.n; }));
