@@ -109,7 +109,7 @@ var PanelExplore = React.createClass({
                     </div>
                     {clipdb.map(function(item) {
                         return (
-                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol} ({item.name})</a>
+                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol}</a>
                         );
                     })}
                     <div className="list-group-item">
@@ -118,7 +118,7 @@ var PanelExplore = React.createClass({
                     </div>
                     {encode.map(function(item) {
                         return (
-                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol} ({item.name})</a>
+                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol} ({item.cellLine})</a>
                         );
                     })}
                 </div>
@@ -128,71 +128,15 @@ var PanelExplore = React.createClass({
 });
 
 var ResultBarChart = React.createClass({
-    createChart: function(el, size, state) {
-        var x = d3.scale.ordinal()
-            .rangeBands([0, size.width], 0.1)
-            .domain(state.data.map(function(d) { return d.n; }));
-
-        var y = d3.scale.linear()
-            .range([size.height, 0])
-            .domain([0, d3.max(state.data, function(d) { return d.val; })]);
-
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
-
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
-
-        var chart = d3.select(el)
-            .append("svg")
-            .attr("width", size.width + size.margin.left + size.margin.right)
-            .attr("height", size.height + size.margin.top + size.margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + size.margin.left + "," + size.margin.top + ")");
-
-        chart.append("g").attr("class", "bars")
-          .selectAll(".bar")
-          .data(state.data)
-        .enter().append("rect")
-          .attr("class", "bar")
-          .attr("x", function(d) { return x(d.n); })
-          .attr("width", x.rangeBand())
-          .attr("y", function(d) { return y(d.val); })
-          .attr("height", function(d) { return size.height - y(d.val); });
-
-        chart.append("g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(0," + size.height + ")")
-          .call(xAxis)
-        .selectAll("text")
-          .style("text-anchor", "end")
-          .attr("dx", "-1em")
-          .attr("dy", "-0.5em")
-          .attr("transform", "rotate(-75)");
-
-        chart.append("g")
-          .attr("class", "y axis")
-          .call(yAxis)
-        .append("text")
-          .attr("transform", "rotate(-90)")
-          .attr("y", -40)
-          .attr("x", -(size.height / 2))
-          .attr("dy", "1em")
-          .style("text-anchor", "middle")
-          .text("-Log10(Comb. p-value)");
-
-    },
-    componentDidMount: function() {
-        var el = this.getDOMNode();
+    getChartState: function() {
         var panelWidth = 1138;
         var size = {
             margin: {top: 20, right: 10, bottom: 225, left: 50}
         };
         size.width = panelWidth - size.margin.right - size.margin.left;
         size.height = 450 - size.margin.top - size.margin.bottom;
-        var state = {
+        return {
+            size: size,
             data: this.props.enrichment.map(function(el) {
                 // -Log10 tranformation of p-values
                 // for better visualization
@@ -202,7 +146,87 @@ var ResultBarChart = React.createClass({
                 };
             })
         };
-        this.createChart(el, size, state);
+    },
+    renderChart: function(el, size, data) {
+        var xScale = d3.scale.ordinal()
+            .rangeBands([0, size.width], 0.1)
+            .domain(data.map(function(d) { return d.n; }));
+
+        var yScale = d3.scale.linear()
+            .range([size.height, 0])
+            .domain([0, d3.max(data, function(d) { return d.val; })]);
+
+        var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left");
+
+        var chart = d3.select(el).selectAll('.chart');
+
+        var x = chart.selectAll('.x')
+            .attr("transform", "translate(0," + size.height + ")")
+            .call(xAxis)
+
+        x.selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-1em")
+            .attr("dy", "-0.5em")
+            .attr("transform", "rotate(-75)");
+
+        chart.selectAll('.y')
+            .call(yAxis);
+
+        var bar = chart.selectAll('.bars')
+            .selectAll(".bar")
+            .data(data);
+
+        bar.enter().append("rect")
+            .attr("class", "bar")
+
+        bar.attr("x", function(d) { return xScale(d.n); })
+            .attr("width", xScale.rangeBand())
+            .attr("y", function(d) { return yScale(d.val); })
+            .attr("height", function(d) { return size.height - yScale(d.val); });
+
+        bar.exit().remove();
+    },
+    updateChart: function(el, size, data) {
+        this.renderChart(el, size, data);
+    },
+    createChart: function(el, size, data) {
+        var chart = d3.select(el)
+            .append("svg")
+            .attr("width", size.width + size.margin.left + size.margin.right)
+            .attr("height", size.height + size.margin.top + size.margin.bottom)
+          .append("g")
+            .attr("class", "chart")
+            .attr("transform", "translate(" + size.margin.left + "," + size.margin.top + ")");
+
+        chart.append("g").attr("class", "bars");
+        chart.append("g").attr("class", "x axis");
+        chart.append("g").attr("class", "y axis")
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -40)
+            .attr("x", -(size.height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("-Log10(Comb. p-value)");
+
+        this.updateChart(el, size, data);
+    },
+    componentDidMount: function() {
+        var el = this.getDOMNode();
+        var state = this.getChartState();
+        this.createChart(el, state.size, state.data);
+    },
+    componentDidUpdate: function() {
+        var el = this.getDOMNode();
+        var state = this.getChartState();
+        this.updateChart(el, state.size, state.data);
     },
     render: function() {
         return (
@@ -703,10 +727,98 @@ var collections = [
 
 var explore = {
     clipdb: [
-        {id: 'clipdb-nop58', symbol:'NOP58', name: 'NOP58'}
+        {id: 'clipdb-ago1', symbol: 'AGO1', name: 'AGO1', cellLine: null},
+        {id: 'clipdb-ago2', symbol: 'AGO2', name: 'AGO2', cellLine: null},
+        {id: 'clipdb-ago3', symbol: 'AGO3', name: 'AGO3', cellLine: null},
+        {id: 'clipdb-ago4', symbol: 'AGO4', name: 'AGO4', cellLine: null},
+        {id: 'clipdb-alkbh5', symbol: 'ALKBH5', name: 'ALKBH5', cellLine: null},
+        {id: 'clipdb-c17orf85', symbol: 'C17ORF85', name: 'C17ORF85', cellLine: null},
+        {id: 'clipdb-caprin1', symbol: 'CAPRIN1', name: 'CAPRIN1', cellLine: null},
+        {id: 'clipdb-cpsf1', symbol: 'CPSF1', name: 'CPSF1', cellLine: null},
+        {id: 'clipdb-cpsf2', symbol: 'CPSF2', name: 'CPSF2', cellLine: null},
+        {id: 'clipdb-cpsf3', symbol: 'CPSF3', name: 'CPSF3', cellLine: null},
+        {id: 'clipdb-cpsf4', symbol: 'CPSF4', name: 'CPSF4', cellLine: null},
+        {id: 'clipdb-cpsf6', symbol: 'CPSF6', name: 'CPSF6', cellLine: null},
+        {id: 'clipdb-cpsf7', symbol: 'CPSF7', name: 'CPSF7', cellLine: null},
+        {id: 'clipdb-cstf2', symbol: 'CSTF2', name: 'CSTF2', cellLine: null},
+        {id: 'clipdb-cstf2t', symbol: 'CSTF2T', name: 'CSTF2T', cellLine: null},
+        {id: 'clipdb-dgcr8', symbol: 'DGCR8', name: 'DGCR8', cellLine: null},
+        {id: 'clipdb-eif4a3', symbol: 'EIF4A3', name: 'EIF4A3', cellLine: null},
+        {id: 'clipdb-elavl1', symbol: 'ELAVL1', name: 'ELAVL1', cellLine: null},
+        {id: 'clipdb-ezh2', symbol: 'EZH2', name: 'EZH2', cellLine: null},
+        {id: 'clipdb-fbl', symbol: 'FBL', name: 'FBL', cellLine: null},
+        {id: 'clipdb-fip1l1', symbol: 'FIP1L1', name: 'FIP1L1', cellLine: null},
+        {id: 'clipdb-fmr1', symbol: 'FMR1', name: 'FMR1', cellLine: null},
+        {id: 'clipdb-fus', symbol: 'FUS', name: 'FUS', cellLine: null},
+        {id: 'clipdb-fxr1', symbol: 'FXR1', name: 'FXR1', cellLine: null},
+        {id: 'clipdb-fxr2', symbol: 'FXR2', name: 'FXR2', cellLine: null},
+        {id: 'clipdb-hnrnpa1', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: null},
+        {id: 'clipdb-hnrnpa2b1', symbol: 'HNRNPA2B1', name: 'HNRNPA2B1', cellLine: null},
+        {id: 'clipdb-hnrnpc', symbol: 'HNRNPC', name: 'HNRNPC', cellLine: null},
+        {id: 'clipdb-hnrnpf', symbol: 'HNRNPF', name: 'HNRNPF', cellLine: null},
+        {id: 'clipdb-hnrnpm', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: null},
+        {id: 'clipdb-hnrnpu', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: null},
+        {id: 'clipdb-igf2bp1', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: null},
+        {id: 'clipdb-igf2bp2', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: null},
+        {id: 'clipdb-igf2bp3', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: null},
+        {id: 'clipdb-lin28a', symbol: 'LIN28A', name: 'LIN28A', cellLine: null},
+        {id: 'clipdb-lin28b', symbol: 'LIN28B', name: 'LIN28B', cellLine: null},
+        {id: 'clipdb-mov10', symbol: 'MOV10', name: 'MOV10', cellLine: null},
+        {id: 'clipdb-nop56', symbol: 'NOP56', name: 'NOP56', cellLine: null},
+        {id: 'clipdb-nop58', symbol: 'NOP58', name: 'NOP58', cellLine: null},
+        {id: 'clipdb-nudt21', symbol: 'NUDT21', name: 'NUDT21', cellLine: null},
+        {id: 'clipdb-ptbp1_ptbp2', symbol: 'PTBP1_PTBP2', name: 'PTBP1_PTBP2', cellLine: null},
+        {id: 'clipdb-pum2', symbol: 'PUM2', name: 'PUM2', cellLine: null},
+        {id: 'clipdb-qki', symbol: 'QKI', name: 'QKI', cellLine: null},
+        {id: 'clipdb-rtcb', symbol: 'RTCB', name: 'RTCB', cellLine: null},
+        {id: 'clipdb-taf15', symbol: 'TAF15', name: 'TAF15', cellLine: null},
+        {id: 'clipdb-tardbp', symbol: 'TARDBP', name: 'TARDBP', cellLine: null},
+        {id: 'clipdb-tia1', symbol: 'TIA1', name: 'TIA1', cellLine: null},
+        {id: 'clipdb-tial1', symbol: 'TIAL1', name: 'TIAL1', cellLine: null},
+        {id: 'clipdb-tnrc6a', symbol: 'TNRC6A', name: 'TNRC6A', cellLine: null},
+        {id: 'clipdb-tnrc6b', symbol: 'TNRC6B', name: 'TNRC6B', cellLine: null},
+        {id: 'clipdb-tnrc6c', symbol: 'TNRC6C', name: 'TNRC6C', cellLine: null},
+        {id: 'clipdb-ythdf2', symbol: 'YTHDF2', name: 'YTHDF2', cellLine: null},
+        {id: 'clipdb-zc3h7b', symbol: 'ZC3H7B', name: 'ZC3H7B', cellLine: null}
     ],
     encode: [
-        {id: 'encode-prpf8', symbol:'PRPF8', name: 'Pre-MRNA Processing Factor 8'}
+        {id: 'encode-AUH_HepG2_ENCSR334QFR', symbol: 'AUH', name: 'AUH', cellLine: 'HepG2'},
+        {id: 'encode-AUH_K562_ENCSR541QHS', symbol: 'AUH', name: 'AUH', cellLine: 'K562'},
+        {id: 'encode-BCCIP_HepG2_ENCSR485QCG', symbol: 'BCCIP', name: 'BCCIP', cellLine: 'HepG2'},
+        {id: 'encode-CPSF6_K562_ENCSR532VUB', symbol: 'CPSF6', name: 'CPSF6', cellLine: 'K562'},
+        {id: 'encode-DDX42_K562_ENCSR576SHT', symbol: 'DDX42', name: 'DDX42', cellLine: 'K562'},
+        {id: 'encode-EIF4G1_K562_ENCSR961WWI', symbol: 'EIF4G1', name: 'EIF4G1', cellLine: 'K562'},
+        {id: 'encode-EIF4G2_K562_ENCSR307YIW', symbol: 'EIF4G2', name: 'EIF4G2', cellLine: 'K562'},
+        {id: 'encode-FKBP4_HepG2_ENCSR018ZUE', symbol: 'FKBP4', name: 'FKBP4', cellLine: 'HepG2'},
+        {id: 'encode-FMR1_K562_ENCSR331VNX', symbol: 'FMR1', name: 'FMR1', cellLine: 'K562'},
+        {id: 'encode-FUS_K562_ENCSR477TRN', symbol: 'FUS', name: 'FUS', cellLine: 'K562'},
+        {id: 'encode-HNRNPA1_HepG2_ENCSR769UEW', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: 'HepG2'},
+        {id: 'encode-HNRNPA1_K562_ENCSR154HRN', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: 'K562'},
+        {id: 'encode-HNRNPM_HepG2_ENCSR267UCX', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: 'HepG2'},
+        {id: 'encode-HNRNPM_K562_ENCSR412NOW', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: 'K562'},
+        {id: 'encode-HNRNPU_HepG2_ENCSR240MVJ', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: 'HepG2'},
+        {id: 'encode-HNRNPU_K562_ENCSR520BZQ', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: 'K562'},
+        {id: 'encode-IGF2BP1_HepG2_ENCSR744GEU', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'HepG2'},
+        {id: 'encode-IGF2BP1_K562_ENCSR427DED', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'K562'},
+        {id: 'encode-IGF2BP1_K562_ENCSR975KIR', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'K562'},
+        {id: 'encode-IGF2BP2_K562_ENCSR062NNB', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: 'K562'},
+        {id: 'encode-IGF2BP2_K562_ENCSR193PVE', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: 'K562'},
+        {id: 'encode-IGF2BP3_HepG2_ENCSR993OLA', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: 'HepG2'},
+        {id: 'encode-IGF2BP3_K562_ENCSR096IJV', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: 'K562'},
+        {id: 'encode-LARP7_K562_ENCSR456KXI', symbol: 'LARP7', name: 'LARP7', cellLine: 'K562'},
+        {id: 'encode-PRPF8_K562_ENCSR534YOI', symbol: 'PRPF8', name: 'PRPF8', cellLine: 'K562'},
+        {id: 'encode-RBFOX2_HepG2_ENCSR987FTF', symbol: 'RBFOX2', name: 'RBFOX2', cellLine: 'HepG2'},
+        {id: 'encode-SAFB2_K562_ENCSR943MHU', symbol: 'SAFB2', name: 'SAFB2', cellLine: 'K562'},
+        {id: 'encode-SLBP_K562_ENCSR483NOP', symbol: 'SLBP', name: 'SLBP', cellLine: 'K562'},
+        {id: 'encode-SLTM_K562_ENCSR000SSH', symbol: 'SLTM', name: 'SLTM', cellLine: 'K562'},
+        {id: 'encode-SRSF9_HepG2_ENCSR773KRC', symbol: 'SRSF9', name: 'SRSF9', cellLine: 'HepG2'},
+        {id: 'encode-TIA1_HepG2_ENCSR623VEQ', symbol: 'TIA1', name: 'TIA1', cellLine: 'HepG2'},
+        {id: 'encode-TIAL1_K562_ENCSR441YTO', symbol: 'TIAL1', name: 'TIAL1', cellLine: 'K562'},
+        {id: 'encode-TRA2A_HepG2_ENCSR314UMJ', symbol: 'TRA2A', name: 'TRA2A', cellLine: 'HepG2'},
+        {id: 'encode-TRA2A_K562_ENCSR365NVO', symbol: 'TRA2A', name: 'TRA2A', cellLine: 'K562'},
+        {id: 'encode-U2AF1_K562_ENCSR862QCH', symbol: 'U2AF1', name: 'U2AF1', cellLine: 'K562'},
+        {id: 'encode-U2AF2_K562_ENCSR893RAV', symbol: 'U2AF2', name: 'U2AF2', cellLine: 'K562'},
+        {id: 'encode-XRN2_K562_ENCSR657TZB', symbol: 'XRN2', name: 'XRN2', cellLine: 'K562'}
     ]
 };
 

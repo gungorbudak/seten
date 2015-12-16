@@ -29,7 +29,7 @@
     margin-top: 20px;
 }
 .list-group-explore {
-    max-height: 350px;
+    max-height: 244px;
     overflow-y: auto;
 }
 .table-responsive, .table {
