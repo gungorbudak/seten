@@ -448,7 +448,7 @@ var SetenApp = React.createClass({
                 geneCollections: [],
                 results: [],
                 isRunning: false,
-                sortAscOrder: true,
+                sortAscOrder: false,
                 sortDirections: {
                     geneSet: '',
                     percent: '',
