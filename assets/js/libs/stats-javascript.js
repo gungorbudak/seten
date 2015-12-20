@@ -74,6 +74,7 @@
         },
         /*
         * Log-gamma function
+        *
         * Copyright (c) 2013 jStat
         */
         gammaln: function(x) {
@@ -93,6 +94,7 @@
         /*
         * The lower regularized incomplete gamma function
         * usually written P(a,x)
+        *
         * Copyright (c) 2013 jStat
         */
         lowRegGamma: function(a, x) {
@@ -130,7 +132,7 @@
             return (1 - h * Math.exp(-x + a * Math.log(x) - (aln)));
         },
         /*
-        * Upper regularized gamma function
+        * Upper regularized incomplete gamma function
         *
         * Copyright (c) 2001, 2002 Enthought, Inc.
         * All rights reserved.
