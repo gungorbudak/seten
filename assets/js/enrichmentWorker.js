@@ -1,6 +1,8 @@
 'use strict';
 
-importScripts('libs/mannwhitneyu.js', 'libs/fishersexact.js');
+importScripts('libs/mannwhitneyu.js',
+              'libs/fishersexact.js',
+              'libs/stats-javascript.js');
 
 /*
 a: list of genes from data
@@ -81,6 +83,12 @@ function _gSETest(scores, overlapScores, c, t) {
     return Math.max(1 - (tests.length/t), 1/t)
 }
 
+function _combinePVals(pVals) {
+    var r;
+    r = stats.combinepvals.fishers(pVals);
+    return r.p
+}
+
 self.onmessage = function(e) {
     var t0 = performance.now(),
         geneScores = e.data.geneScores,
@@ -95,6 +103,7 @@ self.onmessage = function(e) {
         overlapGenes,
         overlapScores,
         fPValue,
+        fPValueCorr,
         gSPValue,
         t1;
     // tests for each gene set in the collection
@@ -114,17 +123,21 @@ self.onmessage = function(e) {
                 geneSetSize: geneSet.genes.length,
                 percent: Math.round((overlapGenes.length/geneSet.genes.length)*100),
                 fPValue: fPValue,
-                fPValueCorr: fPValue,
-                gSPValue: gSPValue,
-                cPValue: gSPValue
+                gSPValue: gSPValue
             });
         }
     });
-    // TODO: correct for functional enrichment p-values
-
-    // TODO: combine corrected functional enrichment p-values
+    // correct for functional enrichment p-values
+    fPValueCorr = stats.multicomp.bh(results.map(function(r) {
+        return r.fPValue;
+    }));
+    // combine corrected functional enrichment p-values
     // and gene set enrichment p-values
-
+    results = results.map(function(r, i) {
+        r.fPValueCorr = fPValueCorr[i];
+        r.cPValue = _combinePVals([r.fPValueCorr, r.gSPValue]);
+        return r
+    });
     // sort by combined p-value in ascending order
     results = results.sort(function(a, b) {
         return a.cPValue - b.cPValue;
