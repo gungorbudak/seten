@@ -1,5 +1,13 @@
 'use strict';
 
+Array.prototype.unique = function() {
+    var a = [];
+    for (var i=0, l=this.length; i<l; i++)
+        if (a.indexOf(this[i]) === -1)
+            a.push(this[i]);
+    return a;
+}
+
 function collectGeneSets(filename) {
     var request = new XMLHttpRequest(),
         geneSets = [],
@@ -13,7 +21,7 @@ function collectGeneSets(filename) {
             cols = row.split(/\s/);
             geneSets.push({
                 name: cols[0],
-                genes: cols.slice(2, cols.length - 1)
+                genes: cols.slice(2, cols.length)
             });
         });
     }
@@ -22,17 +30,27 @@ function collectGeneSets(filename) {
 
 self.onmessage = function(e) {
     var t0 = performance.now(),
-        collection = e.data,
-        _collection,
+        collections = e.data,
+        _collections = {
+            collections: {},
+            size: 0
+        },
+        genes = [],
+        r,
         t1;
 
-    _collection = {
-        id: collection.id,
-        name: collection.name,
-        geneSets: collectGeneSets(collection.filename)
-    }
+    collections.forEach(function(collection) {
+        _collections.collections[collection.id] = {
+            id: collection.id,
+            name: collection.name,
+            geneSets: collectGeneSets(collection.filename)
+        };
+    });
+
+    // size of all collections
+    _collections.size = 20651;
 
     t1 = performance.now();
-    console.log('[collectionWorker] ' + Object.keys(_collection.geneSets).length + ' gene sets collected from ' + _collection.name + ' in ' + ((t1 - t0) / 1000) + ' seconds');
-    self.postMessage(_collection);
+    console.log('[collectionWorker] ' + _collections.size + ' unique genes collected from gene set collections in ' + ((t1 - t0) / 1000) + ' seconds');
+    self.postMessage(_collections);
 };

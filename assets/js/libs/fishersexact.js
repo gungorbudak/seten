@@ -8,6 +8,10 @@
      */
 
     function lngamm(z) {
+        // Reference: "Lanczos, C. 'A precision approximation
+        // of the gamma function', J. SIAM Numer. Anal., B, 1, 86-96, 1964."
+        // Translation of  Alan Miller's FORTRAN-implementation
+        // See http://lib.stat.cmu.edu/apstat/245
         var x = 0;
         x += 0.1659470187408462e-06 / (z + 7);
         x += 0.9934937113930748e-05 / (z + 6);
@@ -23,7 +27,7 @@
 
     function lnfact(n) {
         if (n <= 1) return (0);
-        return lngamm(n + 1);
+        return (lngamm(n + 1));
     }
 
     function lnbico(n, k) {
@@ -35,6 +39,10 @@
     }
 
     var sn11, sn1_, sn_1, sn, sprob;
+
+    function hyper(n11) {
+        return (hyper0(n11, 0, 0, 0));
+    }
 
     function hyper0(n11i, n1_i, n_1i, ni) {
         if (!(n1_i | n_1i | ni)) {
@@ -61,11 +69,7 @@
         return sprob;
     }
 
-    function hyper(n11) {
-        return (hyper0(n11, 0, 0, 0));
-    }
-
-    function exact(n11, n1_, n_1, n, alternative) {
+    function exact(n11, n1_, n_1, n) {
         var sleft, sright, sless, slarg;
         var p, i, j, prob;
         var max = n1_;
@@ -105,26 +109,32 @@
             sless = 1 - sright + prob;
             slarg = sright;
         }
-        if (alternative === 'two-sided') {
-            return {
-                p: Math.min(sleft + sright, 1)
-            };
-        } else if (alternative === 'one-sided') {
-            return {
-                p: sright
-            };
-        } else {
-            console.log('Incorrect alternative argument');
-        }
+        return {
+            less: sless,
+            greater: slarg,
+            twoTailed: Math.max(sleft + sright, 1)
+        };
     }
 
-    exports.test = function(t11, t12, t21, t22, alternative) {
-        var t1_ = t11 + t12,
-            t_1 = t11 + t21,
-            t = t11 + t12 + t21 + t22;
-        var a = typeof alternative !== 'undefined' ? alternative: 'two-sided';
-        var p = exact(t11, t1_, t_1, t, a);
-        return p
-    }
+    exports.test = function (n11, n12, n21, n22, alternative) {
+        var n1_ = n11 + n12,
+            n_1 = n11 + n21,
+            n = n11 + n12 + n21 + n22,
+            r = exact(n11, n1_, n_1, n);
+
+        if (alternative == 'less') {
+            return {
+                p: r.less
+            }
+        } else if (alternative == 'greater') {
+            return {
+                p: r.greater
+            }
+        } else {
+            return {
+                p: r.twoTailed
+            }
+        }
+    };
 
 })(typeof exports === 'undefined' ? this['fishersexact'] = {} : exports);

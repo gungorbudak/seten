@@ -2,49 +2,74 @@
 
 (function(exports) {
 
-    /*
-     * standart and fractional functions adapted from rank.js
-     * The MIT License, Copyright (c) 2014 Ben Magyar
-     */
-    // Standard Ranking
-    var standard = function(array, key) {
-        // sort the array
-        array = array.sort(function(a, b) {
-            var x = a[key];
-            var y = b[key];
-            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-        });
-        // assign a naive ranking
-        for (var i = 1; i < array.length + 1; i++) {
-            array[i - 1]['rank'] = i;
-        }
-        return array;
-    }
-
-    // Fractional Ranking
-    // A faster way exists but this works for now
-    var fractional = function(array, key) {
-        array = standard(array, key);
-        // now apply fractional
-        var pos = 0;
-        while (pos < array.length) {
-            var sum = 0;
-            var i = 0;
-            for (i = 0; array[pos + i + 1] && (array[pos + i][key] === array[pos + i + 1][key]); i++) {
+    var rank = {
+        /*
+         * Standart ranking
+         *
+         * The MIT License, Copyright (c) 2014 Ben Magyar
+         */
+        standard: function(array, key) {
+            // sort the array
+            array = array.sort(function(a, b) {
+                var x = a[key];
+                var y = b[key];
+                return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+            });
+            // assign a naive ranking
+            for (var i = 1; i < array.length + 1; i++) {
+                array[i - 1]['rank'] = i;
+            }
+            return array;
+        },
+        /*
+         * Fractional ranking
+         *
+         * The MIT License, Copyright (c) 2014 Ben Magyar
+         */
+        fractional: function(array, key) {
+            array = this.standard(array, key);
+            // now apply fractional
+            var pos = 0;
+            while (pos < array.length) {
+                var sum = 0;
+                var i = 0;
+                for (i = 0; array[pos + i + 1] && (array[pos + i][key] === array[pos + i + 1][key]); i++) {
+                    sum += array[pos + i]['rank'];
+                }
                 sum += array[pos + i]['rank'];
+                var endPos = pos + i + 1;
+                for (pos; pos < endPos; pos++) {
+                    array[pos]['rank'] = sum / (i + 1);
+                }
+                pos = endPos;
             }
-            sum += array[pos + i]['rank'];
-            var endPos = pos + i + 1;
-            for (pos; pos < endPos; pos++) {
-                array[pos]['rank'] = sum / (i + 1);
+            return array;
+        },
+        rank: function(x, y) {
+            var nx = x.length,
+                ny = y.length,
+                combined = [],
+                ranked;
+            while (nx--) {
+                combined.push({
+                    set: 'x',
+                    val: x[nx]
+                });
             }
-            pos = endPos;
+            while (ny--) {
+                combined.push({
+                    set: 'y',
+                    val: y[ny]
+                });
+            }
+            ranked = this.fractional(combined, 'val');
+            return ranked
         }
-        return array;
-    }
+    };
 
     /*
-    * erf and dnorm functions adapted from jstat.js
+    * Error function
+    *
     * The MIT License, Copyright (c) 2013 jStat
     */
     var erf = function erf(x) {
@@ -77,59 +102,92 @@
         return isneg ? res - 1 : 1 - res;
     };
 
+    /*
+    * Normal distribution CDF
+    *
+    * The MIT License, Copyright (c) 2013 jStat
+    */
     var dnorm = function(x, mean, std) {
         return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * std * std)));
     }
 
-    var rank = function(x, y) {
-        var nx = x.length,
-            ny = y.length,
-            combined = [],
-            ranked;
-        while (nx--) {
-            combined.push({
-                set: 'x',
-                val: x[nx]
-            });
-        }
-        while (ny--) {
-            combined.push({
-                set: 'y',
-                val: y[ny]
-            });
-        }
-        ranked = fractional(combined, 'val');
-        return ranked
-    };
-
     var statistic = function(x, y) {
-        var ranked = rank(x, y),
+        var ranked = rank.rank(x, y),
             nr = ranked.length,
             nx = x.length,
             ny = y.length,
             ranksums = {
                 x: 0,
                 y: 0
-            };
-        while (nr--) {
-            ranksums[ranked[nr].set] += ranked[nr].rank
+            },
+            i = 0, t = 0, nt = 1, tcf, ux, uy;
+
+        while (i < nr) {
+            if (i > 0) {
+                if (ranked[i].val == ranked[i-1].val) {
+                    nt++;
+                } else {
+                    if (nt > 1) {
+                        t += Math.pow(nt, 3) - nt
+                        nt = 1;
+                    }
+                }
+            }
+            ranksums[ranked[i].set] += ranked[i].rank
+            i++;
         }
-        return Math.min(ranksums.x - (nx*(nx+1)/2), ranksums.y - (ny*(ny+1)/2));
+        tcf = 1 - (t / (Math.pow(nr, 3) - nr))
+        ux = nx*ny + (nx*(nx+1)/2) - ranksums.x;
+        uy = nx*ny - ux;
+
+        return {
+            tcf: tcf,
+            big: Math.max(ux, uy),
+            small: Math.min(ux, uy)
+        }
     }
 
-    exports.test = function(x, y) {
+    exports.test = function(x, y, alt, corr) {
+        // set default value for alternative
+        alt = typeof alt !== 'undefined' ? alt : 'two-sided';
+        // set default value for continuity
+        corr = typeof corr !== 'undefined' ? corr : true;
         var nx = x.length, // x's size
-            ny = y.length; // y's size
+            ny = y.length, // y's size
+            f = 1,
+            u, mu, std, z, p;
 
         // test statistic
-        var u = statistic(x, y);
-        // normal approximation
-        var mu = nx * ny / 2;
-        var std = Math.sqrt(nx * ny * (nx + ny + 1) / 12);
-        var z = (u - mu) / std;
-        var p = Math.min(dnorm(z, 0, 1) * 2, 1);
+        u = statistic(x, y);
 
-        return {U: u, p: p};
+        // mean compute and correct if given
+        if (corr) {
+            mu = (nx * ny / 2) + 0.5;
+        } else {
+            mu = nx * ny / 2;
+        }
+
+        // compute standard deviation using tie correction factor
+        std = Math.sqrt(u.tcf * nx * ny * (nx + ny + 1) / 12);
+
+        // compute z according to given alternative
+        if (alt == 'less') {
+            z = -Math.abs((u.small - mu) / std);
+        } else if (alt == 'greater' || alt == 'two-sided') {
+            z = Math.abs((u.big - mu) / std);
+        } else {
+            console.log('Unknown alternative argument');
+        }
+
+        // factor to correct two sided p-value
+        if (alt == 'two-sided') {
+            f = 2;
+        }
+
+        // compute p-value using CDF of standard normal
+        p = dnorm(-z, 0, 1) * f;
+
+        return {U: u.small, p: p};
     }
 
 })(typeof exports === 'undefined' ? this['mannwhitneyu'] = {} : exports);

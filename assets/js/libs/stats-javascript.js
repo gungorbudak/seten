@@ -77,7 +77,7 @@
         *
         * Copyright (c) 2013 jStat
         */
-        gammaln: function(x) {
+        lnGamma: function(x) {
             var j = 0;
             var cof = [
                 76.18009172947146, -86.50532032941677, 24.01409824083091,
@@ -98,7 +98,7 @@
         * Copyright (c) 2013 jStat
         */
         lowRegGamma: function(a, x) {
-            var aln = this.gammaln(a);
+            var aln = this.lnGamma(a);
             var ap = a;
             var sum = 1 / a;
             var del = sum;
@@ -158,12 +158,12 @@
             }
 
             if ((x < 1.0) || (x < a))
-	            return 1.0 - this.lowRegGamma(a, x);
+                return 1.0 - this.lowRegGamma(a, x);
 
             if (!isFinite(x))
                 return 0.0;
 
-            ax = a * Math.log(x) - x - this.gammaln(a);
+            ax = a * Math.log(x) - x - this.lnGamma(a);
             if (ax < -MAXLOG) {
                 return 0.0;
             }
@@ -205,7 +205,7 @@
                 }
             } while (t > MACHEP);
 
-            return (ans * ax);
+            return ans * ax;
         }
     };
 

@@ -9,7 +9,7 @@ function collectResults(result, collections) {
 
     collections.forEach(function (collection) {
         var enrichment = [];
-        request.open('GET', '/assets/resources/explore/' + name + '-' + collection.value + '.tsv', false);
+        request.open('GET', '/assets/resources/explore/' + name + '-' + collection.id + '.tsv', false);
         request.send(null);
         if (request.status === 200) {
             rows = request.responseText.trim().split(/\r?\n/);
@@ -33,8 +33,8 @@ function collectResults(result, collections) {
             return a.cPValue - b.cPValue;
         });
         results.push({
-            id: collection.value,
-            title: collection.label,
+            id: collection.id,
+            title: collection.name,
             enrichment: enrichment
         });
     });
@@ -45,11 +45,11 @@ function collectResults(result, collections) {
 self.onmessage = function(e) {
     var t0 = performance.now(),
         result = e.data.result,
-        col = e.data.collections,
+        cols = e.data.collections,
         results,
         t1;
 
-    results = collectResults(result, col);
+    results = collectResults(result, cols);
 
     console.log('[exploreWorker] ' + results.length + ' gene collection(s) collected');
     t1 = performance.now();

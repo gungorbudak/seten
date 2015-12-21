@@ -52,13 +52,13 @@ function _median(values) {
 */
 function _fETest(a, b, c, d) {
     var r;
-    r = fishersexact.test(a, b, c-a, d-b, 'one-sided')
+    r = fishersexact.test(a, b, c-a, d-b, 'greater')
     return r.p;
 }
 
 function _mwu(a, b) {
     var r;
-    r = mannwhitneyu.test(a, b)
+    r = mannwhitneyu.test(a, b, 'greater')
     return r.p;
 }
 

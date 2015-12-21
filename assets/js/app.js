@@ -32,7 +32,7 @@ var SelectCollections = React.createClass({
 
                         {this.props.options.map(function (option) {
                             return (
-                                <option value={option.value} id={option.name}>{option.label}</option>
+                                <option value={option.id} id={option.filename}>{option.name}</option>
                             );
                         })}
 
@@ -588,86 +588,59 @@ var SetenApp = React.createClass({
             a.remove();
         }
     },
-    parallelMapping: function(workerFile, chunks, callback) {
-        var n = chunks.length,
-            c = 0,
-            r = [],
+    fileWorkerOnMessage: function(e) {
+        var component = this,
+            rows = e.data,
             mapWorker;
 
-        function mapWorkerOnMessage(e) {
-            r.push(e.data);
-            c++;
-            if (c == n) {
-                callback(r);
-            }
-        };
-
-        chunks.forEach(function(chunk) {
-            mapWorker = new Worker(workerFile);
-            mapWorker.postMessage(chunk);
-            mapWorker.onmessage = mapWorkerOnMessage;
-        });
+        mapWorker = new Worker('assets/js/mapWorker.js');
+        mapWorker.postMessage(rows);
+        mapWorker.onmessage = component.mapWorkerOnMessage;
     },
-    fileWorkerOnMessage: function(e) {
-        var chunks = e.data,
-            component = this;
-
-        component.parallelMapping('assets/js/mapWorker.js', chunks, function(r) {
-            var preprocessWorker = new Worker('assets/js/preprocessWorker.js');
-            preprocessWorker.postMessage(r);
-            preprocessWorker.onmessage = component.preprocessWorkerOnMessage;
-        });
-    },
-    preprocessWorkerOnMessage: function(e) {
+    mapWorkerOnMessage: function(e) {
         var component = this,
             geneScores = e.data,
-            cols = this.state.inputCollections,
+            collections = component.props.collections,
             collectionWorker;
+
         // store gene scores in the state
         component.setState({geneScores: geneScores});
         // collect all collections
-        cols.forEach(function(col) {
-            collectionWorker = new Worker('assets/js/collectionWorker.js');
-            collectionWorker.postMessage(col);
-            collectionWorker.onmessage = function(e) {
-                component.collectionWorkerOnMessage(e);
-            };
-        });
+        collectionWorker = new Worker('assets/js/collectionWorker.js');
+        collectionWorker.postMessage(collections);
+        collectionWorker.onmessage = function(e) {
+            component.collectionWorkerOnMessage(e);
+        };
     },
     collectionWorkerOnMessage: function(e) {
         var component = this,
-            geneScores = this.state.geneScores,
-            geneCollection = e.data,
-            geneCollectionsSize,
+            inputCollections = component.state.inputCollections,
+            geneScores = component.state.geneScores,
+            geneCollections = e.data,
             enrichmentWorker;
-        // append to gene collections everytime one has been collected
-        var geneCollections = this.state.geneCollections.concat([geneCollection]);
+
         // store gene collections in the state
-        this.setState({geneCollections: geneCollections});
-        // check if all gene collections have been collected
-        if (this.state.inputCollections.length == this.state.geneCollections.length) {
-            // get unique number of genes in all collections
-            geneCollectionsSize = 20000;
-            // start an enrichment worker for each collection
-            geneCollections.forEach(function(geneCollection) {
-                enrichmentWorker = new Worker('assets/js/enrichmentWorker.js')
-                enrichmentWorker.postMessage({
-                    'geneScores': geneScores,
-                    'geneCollection': geneCollection,
-                    'geneCollectionsSize': geneCollectionsSize
-                });
-                enrichmentWorker.onmessage = function(e) {
-                    component.enrichmentWorkerOnMessage(e);
-                };
+        component.setState({geneCollections: geneCollections});
+
+        // start an enrichment worker for each collection
+        inputCollections.forEach(function(inputCollection) {
+            enrichmentWorker = new Worker('assets/js/enrichmentWorker.js')
+            enrichmentWorker.postMessage({
+                'geneScores': geneScores,
+                'geneCollection': geneCollections.collections[inputCollection.id],
+                'geneCollectionsSize': geneCollections.size
             });
-        }
+            enrichmentWorker.onmessage = function(e) {
+                component.enrichmentWorkerOnMessage(e);
+            };
+        });
     },
     enrichmentWorkerOnMessage: function(e) {
         var results = this.state.results.concat([e.data]);
         // add results to the state
         this.setState({results: results});
         // check if job is complete
-        if (this.state.results.length == this.state.geneCollections.length) {
+        if (this.state.results.length == this.state.inputCollections.length) {
             // enable the panel back
             this.togglePanelAnalyze();
         }
@@ -719,14 +692,14 @@ var SetenApp = React.createClass({
 });
 
 var collections = [
-    {value: 'reactome', name: 'c2.cp.reactome.v5.0.symbols', label: 'Pathways: REACTOME'},
-    {value: 'biocarta', name: 'c2.cp.biocarta.v5.0.symbols', label: 'Pathways: BIOCARTA'},
-    {value: 'kegg', name: 'c2.cp.kegg.v5.0.symbols', label: 'Pathways: KEGG'},
-    {value: 'bp', name: 'c5.bp.v5.0.symbols', label: 'GO: Biological Process'},
-    {value: 'mf', name: 'c5.mf.v5.0.symbols', label: 'GO: Molecular Function'},
-    {value: 'cc', name: 'c5.cc.v5.0.symbols', label: 'GO: Cellular Component'},
-    {value: 'hpo', name: 'cx.hpo.v5.0.symbols', label: 'Human Phenotype Ontology'},
-    {value: 'malacards', name: 'cx.malacards.v5.0.symbols', label: 'MalaCards Disease Ontology'}
+    {id: 'reactome', filename: 'c2.cp.reactome.v5.0.symbols', name: 'Pathways: REACTOME'},
+    {id: 'biocarta', filename: 'c2.cp.biocarta.v5.0.symbols', name: 'Pathways: BIOCARTA'},
+    {id: 'kegg', filename: 'c2.cp.kegg.v5.0.symbols', name: 'Pathways: KEGG'},
+    {id: 'bp', filename: 'c5.bp.v5.0.symbols', name: 'GO: Biological Process'},
+    {id: 'mf', filename: 'c5.mf.v5.0.symbols', name: 'GO: Molecular Function'},
+    {id: 'cc', filename: 'c5.cc.v5.0.symbols', name: 'GO: Cellular Component'},
+    {id: 'hpo', filename: 'cx.hpo.v5.0.symbols', name: 'Human Phenotype Ontology'},
+    {id: 'malacards', filename: 'cx.malacards.v5.0.symbols', name: 'MalaCards Disease Ontology'}
 ];
 
 var explore = {
