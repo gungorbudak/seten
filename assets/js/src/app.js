@@ -497,10 +497,10 @@ var SetenApp = React.createClass({
             this.state.geneCollections = [];
             // toggle form
             this.togglePanelAnalyze();
-            // start worker for reading given file
-            var fileWorker = new Worker('assets/js/fileWorker.js');
-            fileWorker.postMessage(bedFile);
-            fileWorker.onmessage = this.fileWorkerOnMessage;
+            // start mapping worker to read and map the file
+            var mappingWorker = new Worker('assets/js/workers/mapping.js');
+            mappingWorker.postMessage(bedFile);
+            mappingWorker.onmessage = this.mappingWorkerOnMessage;
         } else {
             console.log('Missing input...');
         }
@@ -508,7 +508,7 @@ var SetenApp = React.createClass({
     handleExplore: function(e) {
         e.preventDefault();
         var result = e.currentTarget.id;
-        var exploreWorker = new Worker('assets/js/exploreWorker.js');
+        var exploreWorker = new Worker('assets/js/workers/explore.js');
         exploreWorker.postMessage({result:result, collections:collections});
         exploreWorker.onmessage = this.exploreWorkerOnMessage;
     },
@@ -588,16 +588,7 @@ var SetenApp = React.createClass({
             a.remove();
         }
     },
-    fileWorkerOnMessage: function(e) {
-        var component = this,
-            rows = e.data,
-            mapWorker;
-
-        mapWorker = new Worker('assets/js/mapWorker.js');
-        mapWorker.postMessage(rows);
-        mapWorker.onmessage = component.mapWorkerOnMessage;
-    },
-    mapWorkerOnMessage: function(e) {
+    mappingWorkerOnMessage: function(e) {
         var component = this,
             geneScores = e.data,
             collections = component.props.collections,
@@ -606,7 +597,7 @@ var SetenApp = React.createClass({
         // store gene scores in the state
         component.setState({geneScores: geneScores});
         // collect all collections
-        collectionWorker = new Worker('assets/js/collectionWorker.js');
+        collectionWorker = new Worker('assets/js/workers/collection.js');
         collectionWorker.postMessage(collections);
         collectionWorker.onmessage = function(e) {
             component.collectionWorkerOnMessage(e);
@@ -624,7 +615,7 @@ var SetenApp = React.createClass({
 
         // start an enrichment worker for each collection
         inputCollections.forEach(function(inputCollection) {
-            enrichmentWorker = new Worker('assets/js/enrichmentWorker.js')
+            enrichmentWorker = new Worker('assets/js/workers/enrichment.js')
             enrichmentWorker.postMessage({
                 'geneScores': geneScores,
                 'geneCollection': geneCollections.collections[inputCollection.id],

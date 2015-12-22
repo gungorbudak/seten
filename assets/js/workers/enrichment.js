@@ -1,8 +1,8 @@
 'use strict';
 
-importScripts('libs/mannwhitneyu.js',
-              'libs/fishersexact.js',
-              'libs/stats-javascript.js');
+importScripts('../libs/mannwhitneyu.js',
+              '../libs/fishersexact.js',
+              '../libs/stats-javascript.js');
 
 /*
 a: list of genes from data
@@ -56,6 +56,10 @@ function _fETest(a, b, c, d) {
     return r.p;
 }
 
+/*
+ * a: overlapping set
+ * b: random set
+*/
 function _mwu(a, b) {
     var r;
     r = mannwhitneyu.test(a, b, 'greater')

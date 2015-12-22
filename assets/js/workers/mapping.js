@@ -20,7 +20,7 @@ function _generateMapping() {
             }
             mapping[d.chromosome_name].push(d)
         });
-        console.log('[mapWorker] ' + data.length + ' mappings loaded');
+        console.log('[mappingWorker] ' + data.length + ' mappings loaded');
     }
     return mapping;
 };
@@ -54,36 +54,46 @@ function _search(mapping, chr_name, start, end) {
 
 self.onmessage = function(e) {
     var t0 = performance.now(),
-        rows = e.data,
+        reader = new FileReader(),
         mapping = _generateMapping(),
         scores = {},
         geneScores = {},
         n = 0,
+        rows,
         cols,
         genes,
         t1;
 
-    rows.forEach(function(row) {
-        cols = row.split(/\t/);
-        genes = _search(mapping, cols[0], cols[1], cols[2]);
-        if (genes.length > 0) {
-            genes.forEach(function(gene) {
-                if (!scores.hasOwnProperty(gene.hgnc_symbol)) {
-                    scores[gene.hgnc_symbol] = [];
-                }
-                scores[gene.hgnc_symbol].push(parseFloat(cols[4]));
-            });
+    // read the file
+    reader.readAsText(e.data);
+    reader.onload = function(e) {
+        // entire file into rows
+        rows = e.target.result.trim().split(/\r?\n/);
+        // do the mapping for each row
+        rows.forEach(function(row) {
+            cols = row.split(/\t/);
+            genes = _search(mapping, cols[0], cols[1], cols[2]);
+            if (genes.length > 0) {
+                // might return multiple genes
+                genes.forEach(function(gene) {
+                    if (!scores.hasOwnProperty(gene.hgnc_symbol)) {
+                        scores[gene.hgnc_symbol] = [];
+                    }
+                    scores[gene.hgnc_symbol].push(parseFloat(cols[4]));
+                });
+            }
+        });
+
+        // compute gene level scores
+        for (var gene in scores) {
+            geneScores[gene] = _computeGeneScore(scores[gene]);
+            n++;
         }
-    });
 
-    // compute gene level scores
-    for (var gene in scores) {
-        geneScores[gene] = _computeGeneScore(scores[gene]);
-        n++;
-    }
-
-    console.log('[mapWorker] ' + n + ' gene level scores collected');
-    t1 = performance.now();
-    console.log('[mapWorker] Mapping completed in ' + ((t1 - t0)/1000) + ' seconds');
-    self.postMessage(geneScores);
+        console.log('[mappingWorker] ' + rows.length + ' binding events detected');
+        console.log('[mappingWorker] ' + n + ' gene level scores collected');
+        t1 = performance.now();
+        console.log('[mappingWorker] Mapping completed in ' + ((t1 - t0)/1000) + ' seconds');
+        self.postMessage(geneScores);
+    };
 };
