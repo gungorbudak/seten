@@ -54,21 +54,18 @@ function _search(mapping, chr_name, start, end) {
 
 self.onmessage = function(e) {
     var t0 = performance.now(),
-        reader = new FileReader(),
         mapping = _generateMapping(),
         scores = {},
         geneScores = {},
         n = 0,
+        reader,
         rows,
         cols,
         genes,
         t1;
 
-    // read the file
-    reader.readAsText(e.data);
-    reader.onload = function(e) {
-        // entire file into rows
-        rows = e.target.result.trim().split(/\r?\n/);
+    // main function to map rows in a BED file
+    var mapRows = function(rows) {
         // do the mapping for each row
         rows.forEach(function(row) {
             cols = row.split(/\t/);
@@ -96,4 +93,23 @@ self.onmessage = function(e) {
         console.log('[mappingWorker] Mapping completed in ' + ((t1 - t0)/1000) + ' seconds');
         self.postMessage(geneScores);
     };
+
+    // read the file
+    if (typeof FileReader !== 'undefined') {
+        console.log('[mappingWorker] Asynchronous reading...');
+        reader = new FileReader();
+        reader.onload = function(e) {
+            rows = e.target.result.trim().split(/\r?\n/);
+            mapRows(rows);
+        };
+        reader.readAsText(e.data);
+    } else {
+        // synchronous reader for browsers
+        // that don't support async FileReader
+        console.log('[mappingWorker] Synchronous reading...');
+        reader = new FileReaderSync();
+        var content = reader.readAsText(e.data);
+        rows = content.trim().split(/\r?\n/);
+        mapRows(rows);
+    }
 };
