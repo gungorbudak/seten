@@ -43,7 +43,7 @@ function collectResults(result, collections) {
 }
 
 self.onmessage = function(e) {
-    var t0 = performance.now(),
+    var t0 = new Date().getTime(),
         result = e.data.result,
         cols = e.data.collections,
         results,
@@ -52,7 +52,7 @@ self.onmessage = function(e) {
     results = collectResults(result, cols);
 
     console.log('[exploreWorker] ' + results.length + ' gene collection(s) collected');
-    t1 = performance.now();
+    t1 = new Date().getTime();
     console.log('[exploreWorker] Completed in ' + ((t1 - t0) / 1000) + ' seconds');
     self.postMessage(results);
 };

@@ -53,7 +53,7 @@ function _search(mapping, chr_name, start, end) {
 };
 
 self.onmessage = function(e) {
-    var t0 = performance.now(),
+    var t0 = new Date().getTime(),
         mapping = _generateMapping(),
         scores = {},
         geneScores = {},
@@ -89,7 +89,7 @@ self.onmessage = function(e) {
 
         console.log('[mappingWorker] ' + rows.length + ' binding events detected');
         console.log('[mappingWorker] ' + n + ' gene level scores collected');
-        t1 = performance.now();
+        t1 = new Date().getTime();
         console.log('[mappingWorker] Mapping completed in ' + ((t1 - t0)/1000) + ' seconds');
         self.postMessage(geneScores);
     };

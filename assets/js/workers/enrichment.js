@@ -94,7 +94,7 @@ function _combinePVals(pVals) {
 }
 
 self.onmessage = function(e) {
-    var t0 = performance.now(),
+    var t0 = new Date().getTime(),
         geneScores = e.data.geneScores,
         genes = Object.keys(e.data.geneScores),
         scores = _scores(geneScores, genes),
@@ -146,7 +146,7 @@ self.onmessage = function(e) {
     results = results.sort(function(a, b) {
         return a.cPValue - b.cPValue;
     });
-    t1 = performance.now();
+    t1 = new Date().getTime();
     console.log([
         '[enrichmentWorker] Enrichment for',
         geneCollection.name,

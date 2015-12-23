@@ -8,7 +8,7 @@ Array.prototype.unique = function() {
     return a;
 }
 
-function collectGeneSets(filename) {
+function _collectGeneSets(filename) {
     var request = new XMLHttpRequest(),
         geneSets = [],
         rows,
@@ -29,7 +29,7 @@ function collectGeneSets(filename) {
 }
 
 self.onmessage = function(e) {
-    var t0 = performance.now(),
+    var t0 = new Date().getTime(),
         collections = e.data,
         _collections = {
             collections: {},
@@ -43,14 +43,14 @@ self.onmessage = function(e) {
         _collections.collections[collection.id] = {
             id: collection.id,
             name: collection.name,
-            geneSets: collectGeneSets(collection.filename)
+            geneSets: _collectGeneSets(collection.filename)
         };
     });
 
     // size of all collections
     _collections.size = 20651;
 
-    t1 = performance.now();
+    t1 = new Date().getTime();
     console.log('[collectionWorker] ' + _collections.size + ' unique genes collected from gene set collections in ' + ((t1 - t0) / 1000) + ' seconds');
     self.postMessage(_collections);
 };

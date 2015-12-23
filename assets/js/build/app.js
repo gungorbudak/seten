@@ -1,127 +1,5 @@
 'use strict';
 
-var InputBedFile = React.createClass({
-    displayName: "InputBedFile",
-
-    render: function render() {
-        return React.createElement(
-            "div",
-            { className: "form-group" },
-            React.createElement(
-                "label",
-                { className: "col-sm-2 control-label" },
-                this.props.label
-            ),
-            React.createElement(
-                "div",
-                { className: "col-sm-10" },
-                React.createElement("input", {
-                    type: "file",
-                    name: "file",
-                    disabled: this.props.disabled,
-                    onChange: this.props.onChange
-                })
-            )
-        );
-    }
-});
-
-var SelectCollections = React.createClass({
-    displayName: "SelectCollections",
-
-    render: function render() {
-        return React.createElement(
-            "div",
-            { className: "form-group" },
-            React.createElement(
-                "label",
-                { className: "col-sm-2 control-label" },
-                this.props.label
-            ),
-            React.createElement(
-                "div",
-                { className: "col-sm-10" },
-                React.createElement(
-                    "select",
-                    {
-                        className: "form-control",
-                        multiple: "multiple",
-                        disabled: this.props.disabled,
-                        onChange: this.props.onChange },
-                    this.props.options.map(function (option) {
-                        return React.createElement(
-                            "option",
-                            { value: option.id, id: option.filename },
-                            option.name
-                        );
-                    })
-                ),
-                React.createElement(
-                    "p",
-                    { className: "help-block" },
-                    this.props.help
-                )
-            )
-        );
-    }
-});
-
-var PanelAnalyze = React.createClass({
-    displayName: "PanelAnalyze",
-
-    render: function render() {
-        return React.createElement(
-            "div",
-            { className: "panel panel-info panel-analyze" },
-            React.createElement(
-                "div",
-                { className: "panel-heading" },
-                React.createElement(
-                    "h3",
-                    { className: "panel-title" },
-                    React.createElement("i", { className: "fa fa-bar-chart" }),
-                    " Analyze"
-                )
-            ),
-            React.createElement(
-                "div",
-                { className: "panel-body" },
-                React.createElement(
-                    "div",
-                    { className: "form-horizontal" },
-                    React.createElement(InputBedFile, {
-                        label: "BED file",
-                        disabled: this.props.disabled,
-                        onChange: this.props.onInputBedFileChange
-                    }),
-                    React.createElement(SelectCollections, {
-                        label: "Collections",
-                        options: this.props.collections,
-                        help: "Hold Ctrl to select multiple collections.",
-                        disabled: this.props.disabled,
-                        onChange: this.props.onSelectCollectionsChange
-                    }),
-                    React.createElement(
-                        "div",
-                        { className: "form-group" },
-                        React.createElement(
-                            "div",
-                            { className: "col-sm-offset-2 col-sm-10" },
-                            React.createElement("input", {
-                                type: "submit",
-                                className: "btn btn-primary btn-sm btn-submit",
-                                value: "Submit",
-                                disabled: this.props.disabled,
-                                onClick: this.props.onInputSubmitClick
-                            })
-                        )
-                    )
-                )
-            )
-        );
-    }
-});
-
 var PanelExplore = React.createClass({
     displayName: "PanelExplore",
 
@@ -139,7 +17,7 @@ var PanelExplore = React.createClass({
                     "h3",
                     { className: "panel-title" },
                     React.createElement("i", { className: "fa fa-globe" }),
-                    " Explore"
+                    "  Explore"
                 )
             ),
             React.createElement(
@@ -190,6 +68,186 @@ var PanelExplore = React.createClass({
                         ")"
                     );
                 })
+            )
+        );
+    }
+});
+
+var InputBedFile = React.createClass({
+    displayName: "InputBedFile",
+
+    render: function render() {
+        return React.createElement(
+            "div",
+            { className: "form-group" },
+            React.createElement(
+                "label",
+                { className: "col-sm-2 control-label" },
+                this.props.label
+            ),
+            React.createElement(
+                "div",
+                { className: "col-sm-10" },
+                React.createElement(
+                    "div",
+                    { className: "input-group input-group-sm" },
+                    React.createElement(
+                        "span",
+                        { className: "input-group-btn" },
+                        React.createElement(
+                            "span",
+                            {
+                                className: "btn btn-default btn-file",
+                                disabled: this.props.disabled },
+                            "Browse…",
+                            React.createElement("input", {
+                                type: "file",
+                                name: "file",
+                                onChange: this.props.onChange
+                            })
+                        )
+                    ),
+                    React.createElement("input", {
+                        type: "text",
+                        className: "form-control",
+                        disabled: this.props.disabled,
+                        value: this.props.inputBedFileName,
+                        readOnly: true
+                    })
+                ),
+                React.createElement(
+                    "p",
+                    { className: "help-block" },
+                    "Sample datasets",
+                    React.createElement(
+                        "a",
+                        {
+                            className: "btn btn-link btn-xs",
+                            id: "fip1l1",
+                            onClick: this.props.onSampleClick
+                        },
+                        "FIP1l1"
+                    ),
+                    React.createElement(
+                        "a",
+                        {
+                            className: "btn btn-link btn-xs",
+                            id: "prpf8",
+                            onClick: this.props.onSampleClick
+                        },
+                        "PRPF8"
+                    )
+                )
+            )
+        );
+    }
+});
+
+var SelectCollections = React.createClass({
+    displayName: "SelectCollections",
+
+    render: function render() {
+        return React.createElement(
+            "div",
+            { className: "form-group" },
+            React.createElement(
+                "label",
+                { className: "col-sm-2 control-label" },
+                this.props.label
+            ),
+            React.createElement(
+                "div",
+                { className: "col-sm-10" },
+                React.createElement(
+                    "select",
+                    {
+                        className: "form-control",
+                        multiple: "multiple",
+                        disabled: this.props.disabled,
+                        onChange: this.props.onChange },
+                    this.props.options.map(function (option) {
+                        return React.createElement(
+                            "option",
+                            { value: option.id, id: option.filename },
+                            option.name
+                        );
+                    })
+                ),
+                React.createElement(
+                    "p",
+                    { className: "help-block" },
+                    this.props.help
+                )
+            )
+        );
+    }
+});
+
+var PanelAnalyze = React.createClass({
+    displayName: "PanelAnalyze",
+
+    render: function render() {
+        var button;
+        if (!this.props.disabled) {
+            button = React.createElement("input", {
+                type: "submit",
+                className: "btn btn-primary btn-sm btn-submit",
+                value: "Submit",
+                disabled: this.props.disabled,
+                onClick: this.props.onInputSubmitClick
+            });
+        } else {
+            button = React.createElement("input", {
+                type: "submit",
+                className: "btn btn-danger btn-sm btn-submit",
+                value: "Cancel",
+                disabled: !this.props.disabled,
+                onClick: this.props.onInputCancelClick
+            });
+        }
+        return React.createElement(
+            "div",
+            { className: "panel panel-info panel-analyze" },
+            React.createElement(
+                "div",
+                { className: "panel-heading" },
+                React.createElement(
+                    "h3",
+                    { className: "panel-title" },
+                    React.createElement("i", { className: "fa fa-bar-chart" }),
+                    "  Analyze"
+                )
+            ),
+            React.createElement(
+                "div",
+                { className: "panel-body" },
+                React.createElement(
+                    "div",
+                    { className: "form-horizontal" },
+                    React.createElement(InputBedFile, {
+                        label: "BED file",
+                        disabled: this.props.disabled,
+                        inputBedFileName: this.props.inputBedFileName,
+                        onSampleClick: this.props.onSampleClick,
+                        onChange: this.props.onInputBedFileChange
+                    }),
+                    React.createElement(SelectCollections, {
+                        label: "Collections",
+                        options: this.props.collections,
+                        help: "Hold Ctrl to select multiple gene set collections",
+                        disabled: this.props.disabled,
+                        onChange: this.props.onSelectCollectionsChange
+                    }),
+                    React.createElement(
+                        "div",
+                        { className: "form-group" },
+                        React.createElement(
+                            "div",
+                            { className: "col-sm-offset-2 col-sm-10" },
+                            button
+                        )
+                    )
+                )
             )
         );
     }
@@ -588,7 +646,9 @@ var SetenApp = React.createClass({
     getInitialState: function getInitialState() {
         return {
             inputBedFile: undefined,
+            inputBedFileName: '',
             inputCollections: undefined,
+            workers: [],
             geneScores: [],
             geneCollections: [],
             results: [],
@@ -608,7 +668,9 @@ var SetenApp = React.createClass({
         this.setState({ isRunning: !this.state.isRunning });
     },
     handleInputBedFileChange: function handleInputBedFileChange(e) {
-        this.setState({ inputBedFile: e.target.files[0] });
+        var file = e.target.files[0];
+        this.setState({ inputBedFile: file });
+        this.setState({ inputBedFileName: file.name });
     },
     handleSelectCollectionsChange: function handleSelectCollectionsChange(e) {
         var options = e.target.options,
@@ -637,23 +699,53 @@ var SetenApp = React.createClass({
             collections = this.state.inputCollections;
 
         if (bedFile !== undefined && collections !== undefined) {
+            var mappingWorker = new Worker('assets/js/workers/mapping.js');
+
             // empty results and gene collections
-            this.state.results = [];
-            this.state.geneCollections = [];
+            this.setState({ workers: [] });
+            this.setState({ results: [] });
+            this.setState({ geneCollections: [] });
             // toggle form
             this.togglePanelAnalyze();
             // start mapping worker to read and map the file
-            var mappingWorker = new Worker('assets/js/workers/mapping.js');
             mappingWorker.postMessage(bedFile);
             mappingWorker.onmessage = this.mappingWorkerOnMessage;
+            // add worker to the state
+            this.setState({ workers: this.state.workers.concat([mappingWorker]) });
         } else {
             console.log('Missing input...');
         }
     },
+    handleInputCancel: function handleInputCancel(e) {
+        e.preventDefault();
+        if (confirm('Are you sure you want to cancel this analysis?')) {
+            var workers = this.state.workers;
+
+            // terminate all available workers
+            workers.forEach(function (worker) {
+                worker.terminate();
+            });
+            // clear some state variables
+            this.setState({ workers: [] });
+            this.setState({ results: [] });
+            this.setState({ geneCollections: [] });
+            // enable the panel back
+            this.togglePanelAnalyze();
+        }
+    },
+    handleSample: function handleSample(e) {
+        e.preventDefault();
+        var sample = e.currentTarget.id,
+            sampleWorker = new Worker('assets/js/workers/sample.js');
+
+        sampleWorker.postMessage(sample);
+        sampleWorker.onmessage = this.sampleWorkerOnMessage;
+    },
     handleExplore: function handleExplore(e) {
         e.preventDefault();
-        var result = e.currentTarget.id;
-        var exploreWorker = new Worker('assets/js/workers/explore.js');
+        var result = e.currentTarget.id,
+            exploreWorker = new Worker('assets/js/workers/explore.js');
+
         exploreWorker.postMessage({ result: result, collections: collections });
         exploreWorker.onmessage = this.exploreWorkerOnMessage;
     },
@@ -720,19 +812,18 @@ var SetenApp = React.createClass({
         }
     },
     mappingWorkerOnMessage: function mappingWorkerOnMessage(e) {
-        var component = this,
-            geneScores = e.data,
-            collections = component.props.collections,
+        var geneScores = e.data,
+            collections = this.props.collections,
             collectionWorker;
 
         // store gene scores in the state
-        component.setState({ geneScores: geneScores });
+        this.setState({ geneScores: geneScores });
         // collect all collections
         collectionWorker = new Worker('assets/js/workers/collection.js');
         collectionWorker.postMessage(collections);
-        collectionWorker.onmessage = function (e) {
-            component.collectionWorkerOnMessage(e);
-        };
+        collectionWorker.onmessage = this.collectionWorkerOnMessage;
+        // add worker to the state
+        this.setState({ workers: this.state.workers.concat([collectionWorker]) });
     },
     collectionWorkerOnMessage: function collectionWorkerOnMessage(e) {
         var component = this,
@@ -752,9 +843,9 @@ var SetenApp = React.createClass({
                 'geneCollection': geneCollections.collections[inputCollection.id],
                 'geneCollectionsSize': geneCollections.size
             });
-            enrichmentWorker.onmessage = function (e) {
-                component.enrichmentWorkerOnMessage(e);
-            };
+            enrichmentWorker.onmessage = component.enrichmentWorkerOnMessage;
+            // add worker to the state
+            component.setState({ workers: component.state.workers.concat([enrichmentWorker]) });
         });
     },
     enrichmentWorkerOnMessage: function enrichmentWorkerOnMessage(e) {
@@ -766,6 +857,10 @@ var SetenApp = React.createClass({
             // enable the panel back
             this.togglePanelAnalyze();
         }
+    },
+    sampleWorkerOnMessage: function sampleWorkerOnMessage(e) {
+        this.setState({ inputBedFile: e.data.file });
+        this.setState({ inputBedFileName: e.data.name });
     },
     exploreWorkerOnMessage: function exploreWorkerOnMessage(e) {
         this.setState({ results: e.data });
@@ -795,9 +890,12 @@ var SetenApp = React.createClass({
                     React.createElement(PanelAnalyze, {
                         collections: this.props.collections,
                         disabled: this.state.isRunning,
+                        inputBedFileName: this.state.inputBedFileName,
                         onInputBedFileChange: this.handleInputBedFileChange,
+                        onSampleClick: this.handleSample,
                         onSelectCollectionsChange: this.handleSelectCollectionsChange,
-                        onInputSubmitClick: this.handleInputSubmit
+                        onInputSubmitClick: this.handleInputSubmit,
+                        onInputCancelClick: this.handleInputCancel
                     })
                 )
             ),

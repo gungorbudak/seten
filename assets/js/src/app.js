@@ -1,17 +1,89 @@
 'use strict';
 
+var PanelExplore = React.createClass({
+    render: function() {
+        var component = this;
+        var clipdb = this.props.explore.clipdb;
+        var encode = this.props.explore.encode;
+        return (
+            <div className="panel panel-info panel-explore">
+                <div className="panel-heading">
+                    <h3 className="panel-title">
+                        <i className="fa fa-globe"></i>
+                        &nbsp;
+                        Explore
+                    </h3>
+                </div>
+
+                <div className="list-group list-group-explore">
+                    <div className="list-group-item">
+                        <h4 className="list-group-item-heading">CLIPdb</h4>
+                        <p className="list-group-item-text">Precomputed gene set enrichment analysis results for RBPs from CLIPdb project.</p>
+                    </div>
+                    {clipdb.map(function(item) {
+                        return (
+                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol}</a>
+                        );
+                    })}
+                    <div className="list-group-item">
+                        <h4 className="list-group-item-heading">ENCODE</h4>
+                        <p className="list-group-item-text">Precomputed gene set enrichment analysis results for RBPs from ENCODE project.</p>
+                    </div>
+                    {encode.map(function(item) {
+                        return (
+                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol} ({item.cellLine})</a>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+});
+
 var InputBedFile = React.createClass({
     render: function () {
         return (
             <div className="form-group">
                 <label className="col-sm-2 control-label">{this.props.label}</label>
                 <div className="col-sm-10">
-                    <input
-                        type="file"
-                        name="file"
-                        disabled={this.props.disabled}
-                        onChange={this.props.onChange}
-                    />
+                    <div className="input-group input-group-sm">
+                        <span className="input-group-btn">
+                            <span
+                                className="btn btn-default btn-file"
+                                disabled={this.props.disabled}>
+                                Browse&hellip;
+                                <input
+                                    type="file"
+                                    name="file"
+                                    onChange={this.props.onChange}
+                                />
+                            </span>
+                        </span>
+                        <input
+                            type="text"
+                            className="form-control"
+                            disabled={this.props.disabled}
+                            value={this.props.inputBedFileName}
+                            readOnly={true}
+                            />
+                    </div>
+                    <p className="help-block">
+                        Sample datasets
+                        <a
+                            className="btn btn-link btn-xs"
+                            id="fip1l1"
+                            onClick={this.props.onSampleClick}
+                            >
+                            FIP1l1
+                        </a>
+                        <a
+                            className="btn btn-link btn-xs"
+                            id="prpf8"
+                            onClick={this.props.onSampleClick}
+                            >
+                            PRPF8
+                        </a>
+                    </p>
                 </div>
             </div>
         );
@@ -48,12 +120,35 @@ var SelectCollections = React.createClass({
 
 var PanelAnalyze = React.createClass({
     render: function() {
+        var button;
+        if (!this.props.disabled) {
+            button = (
+                <input
+                    type="submit"
+                    className="btn btn-primary btn-sm btn-submit"
+                    value="Submit"
+                    disabled={this.props.disabled}
+                    onClick={this.props.onInputSubmitClick}
+                />
+            );
+        } else {
+            button = (
+                <input
+                    type="submit"
+                    className="btn btn-danger btn-sm btn-submit"
+                    value="Cancel"
+                    disabled={!this.props.disabled}
+                    onClick={this.props.onInputCancelClick}
+                />
+            );
+        }
         return (
             <div className="panel panel-info panel-analyze">
                 <div className="panel-heading">
                     <h3 className="panel-title">
                         <i className="fa fa-bar-chart"></i>
-                        &nbsp;Analyze
+                        &nbsp;
+                        Analyze
                     </h3>
                 </div>
                 <div className="panel-body">
@@ -61,24 +156,20 @@ var PanelAnalyze = React.createClass({
                         <InputBedFile
                             label="BED file"
                             disabled={this.props.disabled}
+                            inputBedFileName={this.props.inputBedFileName}
+                            onSampleClick={this.props.onSampleClick}
                             onChange={this.props.onInputBedFileChange}
                         />
                         <SelectCollections
                             label="Collections"
                             options={this.props.collections}
-                            help="Hold Ctrl to select multiple collections."
+                            help="Hold Ctrl to select multiple gene set collections"
                             disabled={this.props.disabled}
                             onChange={this.props.onSelectCollectionsChange}
                         />
                         <div className="form-group">
                             <div className="col-sm-offset-2 col-sm-10">
-                                <input
-                                    type="submit"
-                                    className="btn btn-primary btn-sm btn-submit"
-                                    value="Submit"
-                                    disabled={this.props.disabled}
-                                    onClick={this.props.onInputSubmitClick}
-                                />
+                                {button}
                             </div>
                         </div>
                     </div>
@@ -86,45 +177,6 @@ var PanelAnalyze = React.createClass({
             </div>
             );
         }
-});
-
-var PanelExplore = React.createClass({
-    render: function() {
-        var component = this;
-        var clipdb = this.props.explore.clipdb;
-        var encode = this.props.explore.encode;
-        return (
-            <div className="panel panel-info panel-explore">
-                <div className="panel-heading">
-                    <h3 className="panel-title">
-                        <i className="fa fa-globe"></i>
-                        &nbsp;Explore
-                    </h3>
-                </div>
-
-                <div className="list-group list-group-explore">
-                    <div className="list-group-item">
-                        <h4 className="list-group-item-heading">CLIPdb</h4>
-                        <p className="list-group-item-text">Precomputed gene set enrichment analysis results for RBPs from CLIPdb project.</p>
-                    </div>
-                    {clipdb.map(function(item) {
-                        return (
-                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol}</a>
-                        );
-                    })}
-                    <div className="list-group-item">
-                        <h4 className="list-group-item-heading">ENCODE</h4>
-                        <p className="list-group-item-text">Precomputed gene set enrichment analysis results for RBPs from ENCODE project.</p>
-                    </div>
-                    {encode.map(function(item) {
-                        return (
-                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol} ({item.cellLine})</a>
-                        );
-                    })}
-                </div>
-            </div>
-        );
-    }
 });
 
 var ResultBarChart = React.createClass({
@@ -443,7 +495,9 @@ var SetenApp = React.createClass({
     getInitialState: function() {
         return {
                 inputBedFile: undefined,
+                inputBedFileName: '',
                 inputCollections: undefined,
+                workers: [],
                 geneScores: [],
                 geneCollections: [],
                 results: [],
@@ -463,7 +517,9 @@ var SetenApp = React.createClass({
         this.setState({isRunning: !this.state.isRunning});
     },
     handleInputBedFileChange: function(e) {
-        this.setState({inputBedFile: e.target.files[0]});
+        var file = e.target.files[0];
+        this.setState({inputBedFile: file});
+        this.setState({inputBedFileName: file.name});
     },
     handleSelectCollectionsChange: function(e) {
         var options = e.target.options,
@@ -492,23 +548,53 @@ var SetenApp = React.createClass({
             collections = this.state.inputCollections;
 
         if (bedFile !== undefined && collections !== undefined) {
+            var mappingWorker = new Worker('assets/js/workers/mapping.js');
+
             // empty results and gene collections
-            this.state.results = [];
-            this.state.geneCollections = [];
+            this.setState({workers: []});
+            this.setState({results: []});
+            this.setState({geneCollections: []});
             // toggle form
             this.togglePanelAnalyze();
             // start mapping worker to read and map the file
-            var mappingWorker = new Worker('assets/js/workers/mapping.js');
             mappingWorker.postMessage(bedFile);
             mappingWorker.onmessage = this.mappingWorkerOnMessage;
+            // add worker to the state
+            this.setState({workers: this.state.workers.concat([mappingWorker])});
         } else {
             console.log('Missing input...');
         }
     },
+    handleInputCancel: function(e) {
+        e.preventDefault();
+        if (confirm('Are you sure you want to cancel this analysis?')) {
+            var workers = this.state.workers;
+
+            // terminate all available workers
+            workers.forEach(function(worker) {
+                worker.terminate();
+            });
+            // clear some state variables
+            this.setState({workers: []});
+            this.setState({results: []});
+            this.setState({geneCollections: []});
+            // enable the panel back
+            this.togglePanelAnalyze();
+        }
+    },
+    handleSample: function(e) {
+        e.preventDefault();
+        var sample = e.currentTarget.id,
+            sampleWorker = new Worker('assets/js/workers/sample.js');
+
+        sampleWorker.postMessage(sample);
+        sampleWorker.onmessage = this.sampleWorkerOnMessage;
+    },
     handleExplore: function(e) {
         e.preventDefault();
-        var result = e.currentTarget.id;
-        var exploreWorker = new Worker('assets/js/workers/explore.js');
+        var result = e.currentTarget.id,
+            exploreWorker = new Worker('assets/js/workers/explore.js');
+
         exploreWorker.postMessage({result:result, collections:collections});
         exploreWorker.onmessage = this.exploreWorkerOnMessage;
     },
@@ -562,23 +648,27 @@ var SetenApp = React.createClass({
             return result.id == id;
         });
         if (result.length == 1) {
-            var tsv = ['Gene set',
+            var tsv = [
+                'Gene set',
                 'Overlap size',
                 'Gene set size',
                 '%',
                 'Func. p-value',
                 'Func. p-value corr.',
                 'G. set p-value',
-                'Comb. p-value'].join('\t') + '\n';
+                'Comb. p-value'
+            ].join('\t') + '\n';
             result[0].enrichment.forEach(function(row) {
-                tsv += [row.geneSet,
-                        row.overlapSize,
-                        row.geneSetSize,
-                        row.percent,
-                        row.fPValue,
-                        row.fPValueCorr,
-                        row.gSPValue,
-                        row.cPValue].join('\t') + '\n';
+                tsv += [
+                    row.geneSet,
+                    row.overlapSize,
+                    row.geneSetSize,
+                    row.percent,
+                    row.fPValue,
+                    row.fPValueCorr,
+                    row.gSPValue,
+                    row.cPValue
+                ].join('\t') + '\n';
             });
             var data = new Blob([tsv], {type: 'text/tsv'});
             var a = document.createElement('a');
@@ -589,19 +679,18 @@ var SetenApp = React.createClass({
         }
     },
     mappingWorkerOnMessage: function(e) {
-        var component = this,
-            geneScores = e.data,
-            collections = component.props.collections,
+        var geneScores = e.data,
+            collections = this.props.collections,
             collectionWorker;
 
         // store gene scores in the state
-        component.setState({geneScores: geneScores});
+        this.setState({geneScores: geneScores});
         // collect all collections
         collectionWorker = new Worker('assets/js/workers/collection.js');
         collectionWorker.postMessage(collections);
-        collectionWorker.onmessage = function(e) {
-            component.collectionWorkerOnMessage(e);
-        };
+        collectionWorker.onmessage = this.collectionWorkerOnMessage;
+        // add worker to the state
+        this.setState({workers: this.state.workers.concat([collectionWorker])});
     },
     collectionWorkerOnMessage: function(e) {
         var component = this,
@@ -621,9 +710,9 @@ var SetenApp = React.createClass({
                 'geneCollection': geneCollections.collections[inputCollection.id],
                 'geneCollectionsSize': geneCollections.size
             });
-            enrichmentWorker.onmessage = function(e) {
-                component.enrichmentWorkerOnMessage(e);
-            };
+            enrichmentWorker.onmessage = component.enrichmentWorkerOnMessage;
+            // add worker to the state
+            component.setState({workers: component.state.workers.concat([enrichmentWorker])});
         });
     },
     enrichmentWorkerOnMessage: function(e) {
@@ -635,6 +724,10 @@ var SetenApp = React.createClass({
             // enable the panel back
             this.togglePanelAnalyze();
         }
+    },
+    sampleWorkerOnMessage: function(e) {
+        this.setState({inputBedFile: e.data.file});
+        this.setState({inputBedFileName: e.data.name});
     },
     exploreWorkerOnMessage: function(e) {
         this.setState({results: e.data});
@@ -658,9 +751,12 @@ var SetenApp = React.createClass({
                         <PanelAnalyze
                             collections={this.props.collections}
                             disabled={this.state.isRunning}
+                            inputBedFileName={this.state.inputBedFileName}
                             onInputBedFileChange={this.handleInputBedFileChange}
+                            onSampleClick={this.handleSample}
                             onSelectCollectionsChange={this.handleSelectCollectionsChange}
                             onInputSubmitClick={this.handleInputSubmit}
+                            onInputCancelClick={this.handleInputCancel}
                             />
                     </div>
                 </div>
