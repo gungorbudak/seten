@@ -1,5 +1,10 @@
 'use strict';
 
+// polyfill for browsers lacking log10 method
+Math.log10 = Math.log10 || function(x) {
+    return Math.log(x) / Math.LN10;
+};
+
 var PanelExploreItem = React.createClass({
     componentDidMount: function(argument) {
         var item = this.getDOMNode();
@@ -250,10 +255,11 @@ var ResultBarChart = React.createClass({
         return {
             size: size,
             data: this.props.enrichment.map(function(el) {
-                // -Log10 tranformation of p-values
-                // for better visualization
                 return {
+                    // limit axis tick texts to 32 characters
                     n: (el.geneSet.length > 32) ? el.geneSet.substr(0, 29) + '...': el.geneSet,
+                    // -Log10 tranformation of p-values
+                    // for better visualization
                     val: -Math.log10(el.cPValue)
                 };
             })
