@@ -1,19 +1,31 @@
 'use strict';
 
-function collectResults(result, collections) {
+function _collectResult(name, collection_id) {
     var request = new XMLHttpRequest(),
-        name = result.split('-').join('/'),
+        rows;
+    request.open('GET', '/assets/resources/explore/' + name + '-' + collection_id + '.tsv', false);
+    request.send(null);
+    if (request.status === 200) {
+        rows = request.responseText.trim().split(/\r?\n/);
+        // get rid of the header line
+        rows.shift();
+        return rows;
+    }
+    return [];
+}
+
+function collectResults(result, collections) {
+    var result = result.split('-'),
+        name = [result[0], result.slice(1, result.length).join('-')].join('/'),
         results = [],
         rows,
         cols;
 
     collections.forEach(function (collection) {
         var enrichment = [];
-        request.open('GET', '/assets/resources/explore/' + name + '-' + collection.id + '.tsv', false);
-        request.send(null);
-        if (request.status === 200) {
-            rows = request.responseText.trim().split(/\r?\n/);
-            rows.shift();
+
+        rows = _collectResult(name, collection.id);
+        if (rows.length > 0) {
             rows.forEach(function (row) {
                 cols = row.split(/\t/);
                 enrichment.push({
@@ -28,15 +40,17 @@ function collectResults(result, collections) {
                     cPValue: parseFloat(cols[8])
                 });
             });
+
+            enrichment = enrichment.sort(function(a, b) {
+                return a.cPValue - b.cPValue;
+            });
+
+            results.push({
+                id: collection.id,
+                title: collection.name,
+                enrichment: enrichment
+            });
         }
-        enrichment = enrichment.sort(function(a, b) {
-            return a.cPValue - b.cPValue;
-        });
-        results.push({
-            id: collection.id,
-            title: collection.name,
-            enrichment: enrichment
-        });
     });
 
     return results;

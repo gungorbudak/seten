@@ -1,72 +1,101 @@
 'use strict';
 
+var PanelExploreItem = React.createClass({
+    displayName: 'PanelExploreItem',
+
+    componentDidMount: function componentDidMount(argument) {
+        var item = this.getDOMNode();
+
+        $(item).popover({
+            trigger: 'hover',
+            placement: 'auto',
+            html: true,
+            delay: { show: 50, hide: 100 }
+        });
+    },
+    render: function render() {
+        var item = this.props.item,
+            dataContent = ['<p><strong>Symbol:</strong> ' + item.symbol + '</p>', '<p><strong>Cell line:</strong> ' + item.cellLine + '</p>', '<p><strong>Species:</strong> ' + item.species + '</p>', '<p><strong>Disease state:</strong> ' + item.diseaseState + '</p>'].join('');
+        return React.createElement(
+            'a',
+            {
+                href: '#',
+                className: 'list-group-item',
+                id: item.id,
+                title: item.symbol + ' (' + item.cellLine + ') ',
+                'data-content': dataContent,
+                onClick: this.props.onExplore
+            },
+            item.symbol,
+            ' (',
+            item.cellLine,
+            ')'
+        );
+    }
+});
+
 var PanelExplore = React.createClass({
-    displayName: "PanelExplore",
+    displayName: 'PanelExplore',
 
     render: function render() {
         var component = this;
         var clipdb = this.props.explore.clipdb;
         var encode = this.props.explore.encode;
         return React.createElement(
-            "div",
-            { className: "panel panel-info panel-explore" },
+            'div',
+            { className: 'panel panel-info panel-explore' },
             React.createElement(
-                "div",
-                { className: "panel-heading" },
+                'div',
+                { className: 'panel-heading' },
                 React.createElement(
-                    "h3",
-                    { className: "panel-title" },
-                    React.createElement("i", { className: "fa fa-globe" }),
-                    "  Explore"
+                    'h3',
+                    { className: 'panel-title' },
+                    React.createElement('i', { className: 'fa fa-globe' }),
+                    '  Explore'
                 )
             ),
             React.createElement(
-                "div",
-                { className: "list-group list-group-explore" },
+                'div',
+                { className: 'list-group list-group-explore' },
                 React.createElement(
-                    "div",
-                    { className: "list-group-item" },
+                    'div',
+                    { className: 'list-group-item' },
                     React.createElement(
-                        "h4",
-                        { className: "list-group-item-heading" },
-                        "CLIPdb"
+                        'h4',
+                        { className: 'list-group-item-heading' },
+                        'CLIPdb'
                     ),
                     React.createElement(
-                        "p",
-                        { className: "list-group-item-text" },
-                        "Precomputed gene set enrichment analysis results for RBPs from CLIPdb project."
+                        'p',
+                        { className: 'list-group-item-text' },
+                        'Precomputed gene set enrichment analysis results for RBPs from CLIPdb project.'
                     )
                 ),
                 clipdb.map(function (item) {
-                    return React.createElement(
-                        "a",
-                        { href: "#", className: "list-group-item", id: item.id, onClick: component.props.onExplore },
-                        item.symbol
-                    );
+                    return React.createElement(PanelExploreItem, {
+                        item: item,
+                        onExplore: component.props.onExplore
+                    });
                 }),
                 React.createElement(
-                    "div",
-                    { className: "list-group-item" },
+                    'div',
+                    { className: 'list-group-item' },
                     React.createElement(
-                        "h4",
-                        { className: "list-group-item-heading" },
-                        "ENCODE"
+                        'h4',
+                        { className: 'list-group-item-heading' },
+                        'ENCODE'
                     ),
                     React.createElement(
-                        "p",
-                        { className: "list-group-item-text" },
-                        "Precomputed gene set enrichment analysis results for RBPs from ENCODE project."
+                        'p',
+                        { className: 'list-group-item-text' },
+                        'Precomputed gene set enrichment analysis results for RBPs from ENCODE project.'
                     )
                 ),
                 encode.map(function (item) {
-                    return React.createElement(
-                        "a",
-                        { href: "#", className: "list-group-item", id: item.id, onClick: component.props.onExplore },
-                        item.symbol,
-                        " (",
-                        item.cellLine,
-                        ")"
-                    );
+                    return React.createElement(PanelExploreItem, {
+                        item: item,
+                        onExplore: component.props.onExplore
+                    });
                 })
             )
         );
@@ -74,69 +103,83 @@ var PanelExplore = React.createClass({
 });
 
 var InputBedFile = React.createClass({
-    displayName: "InputBedFile",
+    displayName: 'InputBedFile',
 
+    componentDidMount: function componentDidMount(argument) {
+        var el = this.getDOMNode(),
+            buttons = el.querySelectorAll('.btn-explore');
+
+        [].forEach.call(buttons, function (button) {
+            $(button).popover({
+                trigger: 'hover',
+                placement: 'auto',
+                html: true,
+                delay: { show: 50, hide: 100 }
+            });
+        });
+    },
     render: function render() {
+        var component = this;
         return React.createElement(
-            "div",
-            { className: "form-group" },
+            'div',
+            { className: 'form-group' },
             React.createElement(
-                "label",
-                { className: "col-sm-2 control-label" },
-                this.props.label
+                'label',
+                { className: 'col-sm-2 control-label' },
+                component.props.label
             ),
             React.createElement(
-                "div",
-                { className: "col-sm-10" },
+                'div',
+                { className: 'col-sm-10' },
                 React.createElement(
-                    "div",
-                    { className: "input-group input-group-sm" },
+                    'div',
+                    { className: 'input-group input-group-sm' },
                     React.createElement(
-                        "span",
-                        { className: "input-group-btn" },
+                        'span',
+                        { className: 'input-group-btn' },
                         React.createElement(
-                            "span",
+                            'span',
                             {
-                                className: "btn btn-default btn-file",
-                                disabled: this.props.disabled },
-                            "Browse…",
-                            React.createElement("input", {
-                                type: "file",
-                                name: "file",
-                                onChange: this.props.onChange
+                                className: 'btn btn-default btn-file',
+                                disabled: component.props.disabled },
+                            'Browse…',
+                            React.createElement('input', {
+                                type: 'file',
+                                name: 'file',
+                                onChange: component.props.onChange
                             })
                         )
                     ),
-                    React.createElement("input", {
-                        type: "text",
-                        className: "form-control",
-                        disabled: this.props.disabled,
-                        value: this.props.inputBedFileName,
+                    React.createElement('input', {
+                        type: 'text',
+                        className: 'form-control',
+                        disabled: component.props.disabled,
+                        value: component.props.inputBedFileName,
                         readOnly: true
                     })
                 ),
                 React.createElement(
-                    "p",
-                    { className: "help-block" },
-                    "Sample datasets",
+                    'p',
+                    { className: 'help-block-samples' },
                     React.createElement(
-                        "a",
-                        {
-                            className: "btn btn-link btn-xs",
-                            id: "fip1l1",
-                            onClick: this.props.onSampleClick
-                        },
-                        "FIP1l1"
+                        'span',
+                        { className: 'text-muted' },
+                        'Sample datasets'
                     ),
-                    React.createElement(
-                        "a",
-                        {
-                            className: "btn btn-link btn-xs",
-                            id: "prpf8",
-                            onClick: this.props.onSampleClick
-                        },
-                        "PRPF8"
-                    )
+                    component.props.samples.map(function (item) {
+                        var dataContent = ['<p><strong>Symbol:</strong> ' + item.symbol + '</p>', '<p><strong>Cell line:</strong> ' + item.cellLine + '</p>', '<p><strong>Species:</strong> ' + item.species + '</p>', '<p><strong>Disease state:</strong> ' + item.diseaseState + '</p>'].join('');
+                        return React.createElement(
+                            'a',
+                            {
+                                className: 'btn btn-link btn-xs btn-explore',
+                                id: item.id,
+                                title: item.symbol,
+                                'data-content': dataContent,
+                                onClick: component.props.onSampleClick
+                            },
+                            item.symbol
+                        );
+                    })
                 )
             )
         );
@@ -144,38 +187,38 @@ var InputBedFile = React.createClass({
 });
 
 var SelectCollections = React.createClass({
-    displayName: "SelectCollections",
+    displayName: 'SelectCollections',
 
     render: function render() {
         return React.createElement(
-            "div",
-            { className: "form-group" },
+            'div',
+            { className: 'form-group' },
             React.createElement(
-                "label",
-                { className: "col-sm-2 control-label" },
+                'label',
+                { className: 'col-sm-2 control-label' },
                 this.props.label
             ),
             React.createElement(
-                "div",
-                { className: "col-sm-10" },
+                'div',
+                { className: 'col-sm-10' },
                 React.createElement(
-                    "select",
+                    'select',
                     {
-                        className: "form-control",
-                        multiple: "multiple",
+                        className: 'form-control',
+                        multiple: 'multiple',
                         disabled: this.props.disabled,
                         onChange: this.props.onChange },
                     this.props.options.map(function (option) {
                         return React.createElement(
-                            "option",
+                            'option',
                             { value: option.id, id: option.filename },
                             option.name
                         );
                     })
                 ),
                 React.createElement(
-                    "p",
-                    { className: "help-block" },
+                    'p',
+                    { className: 'help-block' },
                     this.props.help
                 )
             )
@@ -184,66 +227,67 @@ var SelectCollections = React.createClass({
 });
 
 var PanelAnalyze = React.createClass({
-    displayName: "PanelAnalyze",
+    displayName: 'PanelAnalyze',
 
     render: function render() {
         var button;
         if (!this.props.disabled) {
-            button = React.createElement("input", {
-                type: "submit",
-                className: "btn btn-primary btn-sm btn-submit",
-                value: "Submit",
+            button = React.createElement('input', {
+                type: 'submit',
+                className: 'btn btn-primary btn-sm btn-submit',
+                value: 'Submit',
                 disabled: this.props.disabled,
                 onClick: this.props.onInputSubmitClick
             });
         } else {
-            button = React.createElement("input", {
-                type: "submit",
-                className: "btn btn-danger btn-sm btn-submit",
-                value: "Cancel",
+            button = React.createElement('input', {
+                type: 'submit',
+                className: 'btn btn-danger btn-sm btn-submit',
+                value: 'Cancel',
                 disabled: !this.props.disabled,
                 onClick: this.props.onInputCancelClick
             });
         }
         return React.createElement(
-            "div",
-            { className: "panel panel-info panel-analyze" },
+            'div',
+            { className: 'panel panel-info panel-analyze' },
             React.createElement(
-                "div",
-                { className: "panel-heading" },
+                'div',
+                { className: 'panel-heading' },
                 React.createElement(
-                    "h3",
-                    { className: "panel-title" },
-                    React.createElement("i", { className: "fa fa-bar-chart" }),
-                    "  Analyze"
+                    'h3',
+                    { className: 'panel-title' },
+                    React.createElement('i', { className: 'fa fa-bar-chart' }),
+                    '  Analyze'
                 )
             ),
             React.createElement(
-                "div",
-                { className: "panel-body" },
+                'div',
+                { className: 'panel-body' },
                 React.createElement(
-                    "div",
-                    { className: "form-horizontal" },
+                    'div',
+                    { className: 'form-horizontal' },
                     React.createElement(InputBedFile, {
-                        label: "BED file",
+                        label: 'BED file',
+                        samples: this.props.samples,
                         disabled: this.props.disabled,
                         inputBedFileName: this.props.inputBedFileName,
                         onSampleClick: this.props.onSampleClick,
                         onChange: this.props.onInputBedFileChange
                     }),
                     React.createElement(SelectCollections, {
-                        label: "Collections",
+                        label: 'Collections',
                         options: this.props.collections,
-                        help: "Hold Ctrl to select multiple gene set collections",
+                        help: 'Hold Ctrl to select multiple gene set collections',
                         disabled: this.props.disabled,
                         onChange: this.props.onSelectCollectionsChange
                     }),
                     React.createElement(
-                        "div",
-                        { className: "form-group" },
+                        'div',
+                        { className: 'form-group' },
                         React.createElement(
-                            "div",
-                            { className: "col-sm-offset-2 col-sm-10" },
+                            'div',
+                            { className: 'col-sm-offset-2 col-sm-10' },
                             button
                         )
                     )
@@ -254,7 +298,7 @@ var PanelAnalyze = React.createClass({
 });
 
 var ResultBarChart = React.createClass({
-    displayName: "ResultBarChart",
+    displayName: 'ResultBarChart',
 
     getChartState: function getChartState() {
         var panelWidth = 1138;
@@ -337,48 +381,48 @@ var ResultBarChart = React.createClass({
         this.updateChart(el, state.size, state.data);
     },
     render: function render() {
-        return React.createElement("div", { className: "bar-chart" });
+        return React.createElement('div', { className: 'bar-chart' });
     }
 });
 
 var ResultModal = React.createClass({
-    displayName: "ResultModal",
+    displayName: 'ResultModal',
 
     render: function render() {
         return React.createElement(
-            "div",
-            { "class": "modal fade", tabindex: "-1", role: "dialog" },
+            'div',
+            { 'class': 'modal fade', tabindex: '-1', role: 'dialog' },
             React.createElement(
-                "div",
-                { "class": "modal-dialog" },
+                'div',
+                { 'class': 'modal-dialog' },
                 React.createElement(
-                    "div",
-                    { "class": "modal-content" },
+                    'div',
+                    { 'class': 'modal-content' },
                     React.createElement(
-                        "div",
-                        { "class": "modal-header" },
+                        'div',
+                        { 'class': 'modal-header' },
                         React.createElement(
-                            "button",
-                            { type: "button", "class": "close", "data-dismiss": "modal", "aria-label": "Close" },
+                            'button',
+                            { type: 'button', 'class': 'close', 'data-dismiss': 'modal', 'aria-label': 'Close' },
                             React.createElement(
-                                "span",
-                                { "aria-hidden": "true" },
-                                "×"
+                                'span',
+                                { 'aria-hidden': 'true' },
+                                '×'
                             )
                         ),
                         React.createElement(
-                            "h4",
-                            { "class": "modal-title" },
-                            "Genes"
+                            'h4',
+                            { 'class': 'modal-title' },
+                            'Genes'
                         )
                     ),
                     React.createElement(
-                        "div",
-                        { "class": "modal-body" },
+                        'div',
+                        { 'class': 'modal-body' },
                         React.createElement(
-                            "p",
+                            'p',
                             null,
-                            "One fine body…"
+                            'One fine body…'
                         )
                     )
                 )
@@ -388,189 +432,202 @@ var ResultModal = React.createClass({
 });
 
 var SortIcon = React.createClass({
-    displayName: "SortIcon",
+    displayName: 'SortIcon',
 
     render: function render() {
         var direction = this.props.direction.length > 0 ? "-" + this.props.direction : "";
-        return React.createElement("i", { className: "fa fa-fw fa-sort" + direction });
+        return React.createElement('i', { className: "fa fa-fw fa-sort" + direction });
     }
 });
 
 var ResultTable = React.createClass({
-    displayName: "ResultTable",
+    displayName: 'ResultTable',
 
     render: function render() {
         var component = this,
             result = component.props.result,
             directions = component.props.sortDirections;
-        return React.createElement(
-            "div",
-            { className: "table-responsive" },
-            React.createElement(
-                "table",
-                { className: "table table-striped" },
+
+        if (result.enrichment.length > 0) {
+            return React.createElement(
+                'div',
+                { className: 'table-responsive' },
                 React.createElement(
-                    "thead",
-                    null,
+                    'table',
+                    { className: 'table table-striped table-hover table-panel' },
                     React.createElement(
-                        "tr",
+                        'thead',
                         null,
                         React.createElement(
-                            "th",
-                            null,
-                            "Gene set"
-                        ),
-                        React.createElement(
-                            "th",
-                            {
-                                onClick: component.props.onSort,
-                                id: result.id + "-percent" },
-                            "%",
-                            React.createElement(SortIcon, { direction: directions.percent })
-                        ),
-                        React.createElement(
-                            "th",
-                            {
-                                onClick: component.props.onSort,
-                                id: result.id + "-fPValue" },
-                            "Func. p-value",
-                            React.createElement(SortIcon, { direction: directions.fPValue })
-                        ),
-                        React.createElement(
-                            "th",
-                            {
-                                onClick: component.props.onSort,
-                                id: result.id + "-fPValueCorr" },
-                            "Func. p-value corr.",
-                            React.createElement(SortIcon, { direction: directions.fPValueCorr })
-                        ),
-                        React.createElement(
-                            "th",
-                            {
-                                onClick: component.props.onSort,
-                                id: result.id + "-gSPValue" },
-                            "G. set p-value",
-                            React.createElement(SortIcon, { direction: directions.gSPValue })
-                        ),
-                        React.createElement(
-                            "th",
-                            {
-                                onClick: component.props.onSort,
-                                id: result.id + "-cPValue" },
-                            "Comb. p-value",
-                            React.createElement(SortIcon, { direction: directions.cPValue })
-                        )
-                    )
-                ),
-                React.createElement(
-                    "tbody",
-                    null,
-                    result.enrichment.map(function (row) {
-                        var geneSet = row.geneSet;
-                        if (geneSet.length > 45) {
-                            geneSet = React.createElement(
-                                "abbr",
-                                { title: geneSet },
-                                geneSet.substr(0, 45)
-                            );
-                        }
-                        return React.createElement(
-                            "tr",
+                            'tr',
                             null,
                             React.createElement(
-                                "td",
+                                'th',
                                 null,
-                                geneSet
+                                'Gene set'
                             ),
                             React.createElement(
-                                "td",
-                                null,
-                                React.createElement(
-                                    "abbr",
-                                    { title: "Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes",
-                                        onClick: component.props.onViewGenes
-                                    },
-                                    row.percent
-                                )
+                                'th',
+                                {
+                                    onClick: component.props.onSort,
+                                    id: result.id + "-percent" },
+                                '%',
+                                React.createElement(SortIcon, { direction: directions.percent })
                             ),
                             React.createElement(
-                                "td",
-                                null,
-                                row.fPValue.toPrecision(3)
+                                'th',
+                                {
+                                    onClick: component.props.onSort,
+                                    id: result.id + "-fPValue" },
+                                'Func. p-value',
+                                React.createElement(SortIcon, { direction: directions.fPValue })
                             ),
                             React.createElement(
-                                "td",
-                                null,
-                                row.fPValueCorr.toPrecision(3)
+                                'th',
+                                {
+                                    onClick: component.props.onSort,
+                                    id: result.id + "-fPValueCorr" },
+                                'Func. p-value corr.',
+                                React.createElement(SortIcon, { direction: directions.fPValueCorr })
                             ),
                             React.createElement(
-                                "td",
-                                null,
-                                row.gSPValue.toPrecision(3)
+                                'th',
+                                {
+                                    onClick: component.props.onSort,
+                                    id: result.id + "-gSPValue" },
+                                'G. set p-value',
+                                React.createElement(SortIcon, { direction: directions.gSPValue })
                             ),
                             React.createElement(
-                                "td",
-                                null,
-                                row.cPValue.toPrecision(3)
-                            )
-                        );
-                    })
-                )
-            )
-        );
-    }
-});
-
-var Result = React.createClass({
-    displayName: "Result",
-
-    render: function render() {
-        var result = this.props.result,
-            sigEnrichment = result.enrichment.filter(function (el) {
-            return el.cPValue < 0.01;
-        }),
-            resultBarChart;
-
-        if (sigEnrichment.length > 0) {
-            resultBarChart = React.createElement(ResultBarChart, {
-                enrichment: sigEnrichment
-            });
-        }
-        return React.createElement(
-            "div",
-            { className: "panel panel-primary" },
-            React.createElement(
-                "div",
-                { className: "panel-heading", role: "tab", id: 'heading-' + result.id },
-                React.createElement(
-                    "div",
-                    { className: "row" },
-                    React.createElement(
-                        "div",
-                        { className: "col-xs-6" },
-                        React.createElement(
-                            "h4",
-                            { className: "panel-title" },
-                            React.createElement(
-                                "a",
-                                { className: "collapsed", role: "button", "data-toggle": "collapse", href: '#collapse-' + result.id, "aria-expanded": "true", "aria-controls": 'collapse-' + result.id },
-                                result.title,
-                                " (",
-                                result.enrichment.length,
-                                ")"
+                                'th',
+                                {
+                                    onClick: component.props.onSort,
+                                    id: result.id + "-cPValue" },
+                                'Comb. p-value',
+                                React.createElement(SortIcon, { direction: directions.cPValue })
                             )
                         )
                     ),
                     React.createElement(
-                        "div",
-                        { className: "col-xs-6" },
-                        React.createElement("span", { className: "glyphicon glyphicon-download-alt btn-download pull-right", title: "Export as TSV", id: result.id, onClick: this.props.onDownload, "aria-hidden": "true" })
+                        'tbody',
+                        null,
+                        result.enrichment.map(function (row) {
+                            var geneSet = row.geneSet;
+                            if (geneSet.length > 45) {
+                                geneSet = React.createElement(
+                                    'abbr',
+                                    { title: geneSet },
+                                    geneSet.substr(0, 45)
+                                );
+                            }
+                            return React.createElement(
+                                'tr',
+                                null,
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    geneSet
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    React.createElement(
+                                        'abbr',
+                                        { title: "Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes",
+                                            onClick: component.props.onViewGenes
+                                        },
+                                        row.percent
+                                    )
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    row.fPValue.toPrecision(3)
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    row.fPValueCorr.toPrecision(3)
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    row.gSPValue.toPrecision(3)
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    row.cPValue.toPrecision(3)
+                                )
+                            );
+                        })
+                    )
+                )
+            );
+        } else {
+            return React.createElement(
+                'div',
+                { className: 'panel-body' },
+                'No significant results available.'
+            );
+        }
+    }
+});
+
+var Result = React.createClass({
+    displayName: 'Result',
+
+    render: function render() {
+        var result = this.props.result,
+            result = {
+            id: result.id,
+            title: result.title,
+            enrichment: result.enrichment.filter(function (el) {
+                return el.cPValue < 0.01;
+            })
+        },
+            resultBarChart;
+
+        if (result.enrichment.length > 0) {
+            resultBarChart = React.createElement(ResultBarChart, {
+                enrichment: result.enrichment
+            });
+        }
+        return React.createElement(
+            'div',
+            { className: 'panel panel-primary' },
+            React.createElement(
+                'div',
+                { className: 'panel-heading', role: 'tab', id: 'heading-' + result.id },
+                React.createElement(
+                    'div',
+                    { className: 'row' },
+                    React.createElement(
+                        'div',
+                        { className: 'col-xs-6' },
+                        React.createElement(
+                            'h4',
+                            { className: 'panel-title' },
+                            React.createElement(
+                                'a',
+                                { className: 'collapsed', role: 'button', 'data-toggle': 'collapse', href: '#collapse-' + result.id, 'aria-expanded': 'true', 'aria-controls': 'collapse-' + result.id },
+                                result.title,
+                                ' (',
+                                result.enrichment.length,
+                                ')'
+                            )
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'col-xs-6' },
+                        React.createElement('span', { className: 'glyphicon glyphicon-download-alt btn-download pull-right', title: 'Export as TSV', id: result.id, onClick: this.props.onDownload, 'aria-hidden': 'true' })
                     )
                 )
             ),
             React.createElement(
-                "div",
-                { id: 'collapse-' + result.id, className: "panel-collapse collapse", role: "tabpanel", "aria-labelledby": 'heading-' + result.id },
+                'div',
+                { id: 'collapse-' + result.id, className: 'panel-collapse collapse', role: 'tabpanel', 'aria-labelledby': 'heading-' + result.id },
                 resultBarChart,
                 React.createElement(ResultTable, {
                     result: result,
@@ -583,49 +640,151 @@ var Result = React.createClass({
     }
 });
 
-var ResultProgress = React.createClass({
-    displayName: "ResultProgress",
+var ResultGroupProgressBar = React.createClass({
+    displayName: 'ResultGroupProgressBar',
 
     render: function render() {
-        var barStyle = {
-            minWidth: "2em",
-            width: this.props.progress + "%"
-        };
-        return React.createElement(
-            "div",
-            { className: "progress" },
-            React.createElement(
-                "div",
-                {
-                    className: "progress-bar progress-bar-info progress-bar-striped active",
-                    role: "progressbar",
-                    "aria-valuenow": this.props.progress,
-                    "aria-valuemin": "0",
-                    "aria-valuemax": "100",
-                    style: barStyle
-                },
-                this.props.progress + "%"
-            )
-        );
+        if (this.props.show) {
+            var barStyle = {
+                minWidth: "2em",
+                width: this.props.progress + "%"
+            };
+            return React.createElement(
+                'div',
+                { className: 'progress' },
+                React.createElement(
+                    'div',
+                    {
+                        className: 'progress-bar progress-bar-info progress-bar-striped active',
+                        role: 'progressbar',
+                        'aria-valuenow': this.props.progress,
+                        'aria-valuemin': '0',
+                        'aria-valuemax': '100',
+                        style: barStyle
+                    },
+                    this.props.progress + "%"
+                )
+            );
+        } else {
+            return React.createElement('div', null);
+        }
+    }
+});
+
+var ResultGroupInfo = React.createClass({
+    displayName: 'ResultGroupInfo',
+
+    render: function render(argument) {
+        var l = Object.keys(this.props.info).length;
+        if (l) {
+            if (l > 1) {
+                return React.createElement(
+                    'div',
+                    null,
+                    React.createElement(
+                        'h3',
+                        null,
+                        this.props.info.symbol,
+                        ' (',
+                        this.props.info.cellLine,
+                        ')'
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'table-responsive' },
+                        React.createElement(
+                            'table',
+                            { className: 'table' },
+                            React.createElement(
+                                'thead',
+                                null,
+                                React.createElement(
+                                    'tr',
+                                    null,
+                                    React.createElement(
+                                        'th',
+                                        null,
+                                        'Symbol'
+                                    ),
+                                    React.createElement(
+                                        'th',
+                                        null,
+                                        'Cell line'
+                                    ),
+                                    React.createElement(
+                                        'th',
+                                        null,
+                                        'Species'
+                                    ),
+                                    React.createElement(
+                                        'th',
+                                        null,
+                                        'Disease state'
+                                    )
+                                )
+                            ),
+                            React.createElement(
+                                'tbody',
+                                null,
+                                React.createElement(
+                                    'tr',
+                                    null,
+                                    React.createElement(
+                                        'td',
+                                        null,
+                                        this.props.info.symbol
+                                    ),
+                                    React.createElement(
+                                        'td',
+                                        null,
+                                        this.props.info.cellLine
+                                    ),
+                                    React.createElement(
+                                        'td',
+                                        null,
+                                        this.props.info.species
+                                    ),
+                                    React.createElement(
+                                        'td',
+                                        null,
+                                        this.props.info.diseaseState
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            } else {
+                return React.createElement(
+                    'h3',
+                    null,
+                    this.props.info.filename
+                );
+            }
+        } else {
+            return React.createElement('div', null);
+        }
     }
 });
 
 var ResultGroup = React.createClass({
-    displayName: "ResultGroup",
+    displayName: 'ResultGroup',
 
     render: function render() {
         var component = this;
-        var progressBar;
-        if (component.props.isRunning) {
-            progressBar = React.createElement(ResultProgress, { progress: component.props.progress });
-        }
         return React.createElement(
-            "div",
+            'div',
             null,
-            progressBar,
+            React.createElement(ResultGroupProgressBar, {
+                progress: component.props.progress,
+                show: component.props.isRunning
+            }),
+            React.createElement(ResultGroupInfo, {
+                info: component.props.resultsInfo
+            }),
             React.createElement(
-                "div",
-                { className: "panel-group", role: "tablist", "aria-multiselectable": "true" },
+                'div',
+                { className: 'panel-group', role: 'tablist', 'aria-multiselectable': 'true' },
                 component.props.results.map(function (result) {
                     return React.createElement(Result, {
                         result: result,
@@ -641,7 +800,7 @@ var ResultGroup = React.createClass({
 });
 
 var SetenApp = React.createClass({
-    displayName: "SetenApp",
+    displayName: 'SetenApp',
 
     getInitialState: function getInitialState() {
         return {
@@ -652,6 +811,7 @@ var SetenApp = React.createClass({
             geneScores: [],
             geneCollections: [],
             results: [],
+            resultsInfo: {},
             isRunning: false,
             sortAscOrder: false,
             sortDirections: {
@@ -663,6 +823,13 @@ var SetenApp = React.createClass({
                 cPValue: 'asc'
             }
         };
+    },
+    clearState: function clearState() {
+        // clear some state variables
+        this.setState({ workers: [] });
+        this.setState({ results: [] });
+        this.setState({ resultsInfo: {} });
+        this.setState({ geneCollections: [] });
     },
     togglePanelAnalyze: function togglePanelAnalyze(e) {
         this.setState({ isRunning: !this.state.isRunning });
@@ -701,15 +868,15 @@ var SetenApp = React.createClass({
         if (bedFile !== undefined && collections !== undefined) {
             var mappingWorker = new Worker('assets/js/workers/mapping.js');
 
-            // empty results and gene collections
-            this.setState({ workers: [] });
-            this.setState({ results: [] });
-            this.setState({ geneCollections: [] });
+            // clear the state
+            this.clearState();
             // toggle form
             this.togglePanelAnalyze();
             // start mapping worker to read and map the file
             mappingWorker.postMessage(bedFile);
             mappingWorker.onmessage = this.mappingWorkerOnMessage;
+            // filename as results title
+            this.setState({ resultsInfo: { filename: this.state.inputBedFileName } });
             // add worker to the state
             this.setState({ workers: this.state.workers.concat([mappingWorker]) });
         } else {
@@ -725,10 +892,8 @@ var SetenApp = React.createClass({
             workers.forEach(function (worker) {
                 worker.terminate();
             });
-            // clear some state variables
-            this.setState({ workers: [] });
-            this.setState({ results: [] });
-            this.setState({ geneCollections: [] });
+            // clear the state
+            this.clearState();
             // enable the panel back
             this.togglePanelAnalyze();
         }
@@ -743,11 +908,14 @@ var SetenApp = React.createClass({
     },
     handleExplore: function handleExplore(e) {
         e.preventDefault();
-        var result = e.currentTarget.id,
+        var component = this,
+            result = e.currentTarget.id,
             exploreWorker = new Worker('assets/js/workers/explore.js');
 
         exploreWorker.postMessage({ result: result, collections: collections });
-        exploreWorker.onmessage = this.exploreWorkerOnMessage;
+        exploreWorker.onmessage = function (e) {
+            component.exploreWorkerOnMessage(e, result);
+        };
     },
     handleSort: function handleSort(e) {
         e.preventDefault();
@@ -862,7 +1030,12 @@ var SetenApp = React.createClass({
         this.setState({ inputBedFile: e.data.file });
         this.setState({ inputBedFileName: e.data.name });
     },
-    exploreWorkerOnMessage: function exploreWorkerOnMessage(e) {
+    exploreWorkerOnMessage: function exploreWorkerOnMessage(e, result) {
+        var resultsParent = this.props.explore[result.split('-')[0]],
+            resultsInfo = resultsParent.filter(function (el) {
+            return el.id == result;
+        });
+        this.setState({ resultsInfo: resultsInfo[0] });
         this.setState({ results: e.data });
     },
     render: function render() {
@@ -871,24 +1044,25 @@ var SetenApp = React.createClass({
             progress = Math.round(this.state.results.length / this.state.inputCollections.length * 100);
         }
         return React.createElement(
-            "div",
+            'div',
             null,
             React.createElement(
-                "div",
-                { className: "row" },
+                'div',
+                { className: 'row' },
                 React.createElement(
-                    "div",
-                    { className: "col-sm-4" },
+                    'div',
+                    { className: 'col-sm-4' },
                     React.createElement(PanelExplore, {
                         explore: this.props.explore,
                         onExplore: this.handleExplore
                     })
                 ),
                 React.createElement(
-                    "div",
-                    { className: "col-sm-8" },
+                    'div',
+                    { className: 'col-sm-8' },
                     React.createElement(PanelAnalyze, {
                         collections: this.props.collections,
+                        samples: this.props.samples,
                         disabled: this.state.isRunning,
                         inputBedFileName: this.state.inputBedFileName,
                         onInputBedFileChange: this.handleInputBedFileChange,
@@ -900,13 +1074,14 @@ var SetenApp = React.createClass({
                 )
             ),
             React.createElement(
-                "div",
-                { className: "row" },
+                'div',
+                { className: 'row' },
                 React.createElement(
-                    "div",
-                    { className: "col-sm-12" },
+                    'div',
+                    { className: 'col-sm-12' },
                     React.createElement(ResultGroup, {
                         results: this.state.results,
+                        resultsInfo: this.state.resultsInfo,
                         progress: progress,
                         isRunning: this.state.isRunning,
                         sortDirections: this.state.sortDirections,
@@ -922,9 +1097,15 @@ var SetenApp = React.createClass({
 
 var collections = [{ id: 'reactome', filename: 'c2.cp.reactome.v5.0.symbols', name: 'Pathways: REACTOME' }, { id: 'biocarta', filename: 'c2.cp.biocarta.v5.0.symbols', name: 'Pathways: BIOCARTA' }, { id: 'kegg', filename: 'c2.cp.kegg.v5.0.symbols', name: 'Pathways: KEGG' }, { id: 'bp', filename: 'c5.bp.v5.0.symbols', name: 'GO: Biological Process' }, { id: 'mf', filename: 'c5.mf.v5.0.symbols', name: 'GO: Molecular Function' }, { id: 'cc', filename: 'c5.cc.v5.0.symbols', name: 'GO: Cellular Component' }, { id: 'hpo', filename: 'cx.hpo.v5.0.symbols', name: 'Human Phenotype Ontology' }, { id: 'malacards', filename: 'cx.malacards.v5.0.symbols', name: 'MalaCards Disease Ontology' }];
 
+var samples = [{ id: "FIP1L1_HEK293", symbol: "FIP1L1", name: "FIP1L1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "PRPF8_K562_ENCSR534YOI", symbol: "PRPF8", diseaseState: "Hepatocellular carcinoma", cellLine: "K562", species: "Human" }];
+
 var explore = {
-    clipdb: [{ id: 'clipdb-ago1', symbol: 'AGO1', name: 'AGO1', cellLine: null }, { id: 'clipdb-ago2', symbol: 'AGO2', name: 'AGO2', cellLine: null }, { id: 'clipdb-ago3', symbol: 'AGO3', name: 'AGO3', cellLine: null }, { id: 'clipdb-ago4', symbol: 'AGO4', name: 'AGO4', cellLine: null }, { id: 'clipdb-alkbh5', symbol: 'ALKBH5', name: 'ALKBH5', cellLine: null }, { id: 'clipdb-c17orf85', symbol: 'C17ORF85', name: 'C17ORF85', cellLine: null }, { id: 'clipdb-caprin1', symbol: 'CAPRIN1', name: 'CAPRIN1', cellLine: null }, { id: 'clipdb-cpsf1', symbol: 'CPSF1', name: 'CPSF1', cellLine: null }, { id: 'clipdb-cpsf2', symbol: 'CPSF2', name: 'CPSF2', cellLine: null }, { id: 'clipdb-cpsf3', symbol: 'CPSF3', name: 'CPSF3', cellLine: null }, { id: 'clipdb-cpsf4', symbol: 'CPSF4', name: 'CPSF4', cellLine: null }, { id: 'clipdb-cpsf6', symbol: 'CPSF6', name: 'CPSF6', cellLine: null }, { id: 'clipdb-cpsf7', symbol: 'CPSF7', name: 'CPSF7', cellLine: null }, { id: 'clipdb-cstf2', symbol: 'CSTF2', name: 'CSTF2', cellLine: null }, { id: 'clipdb-cstf2t', symbol: 'CSTF2T', name: 'CSTF2T', cellLine: null }, { id: 'clipdb-dgcr8', symbol: 'DGCR8', name: 'DGCR8', cellLine: null }, { id: 'clipdb-eif4a3', symbol: 'EIF4A3', name: 'EIF4A3', cellLine: null }, { id: 'clipdb-elavl1', symbol: 'ELAVL1', name: 'ELAVL1', cellLine: null }, { id: 'clipdb-ezh2', symbol: 'EZH2', name: 'EZH2', cellLine: null }, { id: 'clipdb-fbl', symbol: 'FBL', name: 'FBL', cellLine: null }, { id: 'clipdb-fip1l1', symbol: 'FIP1L1', name: 'FIP1L1', cellLine: null }, { id: 'clipdb-fmr1', symbol: 'FMR1', name: 'FMR1', cellLine: null }, { id: 'clipdb-fus', symbol: 'FUS', name: 'FUS', cellLine: null }, { id: 'clipdb-fxr1', symbol: 'FXR1', name: 'FXR1', cellLine: null }, { id: 'clipdb-fxr2', symbol: 'FXR2', name: 'FXR2', cellLine: null }, { id: 'clipdb-hnrnpa1', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: null }, { id: 'clipdb-hnrnpa2b1', symbol: 'HNRNPA2B1', name: 'HNRNPA2B1', cellLine: null }, { id: 'clipdb-hnrnpc', symbol: 'HNRNPC', name: 'HNRNPC', cellLine: null }, { id: 'clipdb-hnrnpf', symbol: 'HNRNPF', name: 'HNRNPF', cellLine: null }, { id: 'clipdb-hnrnpm', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: null }, { id: 'clipdb-hnrnpu', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: null }, { id: 'clipdb-igf2bp1', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: null }, { id: 'clipdb-igf2bp2', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: null }, { id: 'clipdb-igf2bp3', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: null }, { id: 'clipdb-lin28a', symbol: 'LIN28A', name: 'LIN28A', cellLine: null }, { id: 'clipdb-lin28b', symbol: 'LIN28B', name: 'LIN28B', cellLine: null }, { id: 'clipdb-mov10', symbol: 'MOV10', name: 'MOV10', cellLine: null }, { id: 'clipdb-nop56', symbol: 'NOP56', name: 'NOP56', cellLine: null }, { id: 'clipdb-nop58', symbol: 'NOP58', name: 'NOP58', cellLine: null }, { id: 'clipdb-nudt21', symbol: 'NUDT21', name: 'NUDT21', cellLine: null }, { id: 'clipdb-ptbp1_ptbp2', symbol: 'PTBP1_PTBP2', name: 'PTBP1_PTBP2', cellLine: null }, { id: 'clipdb-pum2', symbol: 'PUM2', name: 'PUM2', cellLine: null }, { id: 'clipdb-qki', symbol: 'QKI', name: 'QKI', cellLine: null }, { id: 'clipdb-rtcb', symbol: 'RTCB', name: 'RTCB', cellLine: null }, { id: 'clipdb-taf15', symbol: 'TAF15', name: 'TAF15', cellLine: null }, { id: 'clipdb-tardbp', symbol: 'TARDBP', name: 'TARDBP', cellLine: null }, { id: 'clipdb-tia1', symbol: 'TIA1', name: 'TIA1', cellLine: null }, { id: 'clipdb-tial1', symbol: 'TIAL1', name: 'TIAL1', cellLine: null }, { id: 'clipdb-tnrc6a', symbol: 'TNRC6A', name: 'TNRC6A', cellLine: null }, { id: 'clipdb-tnrc6b', symbol: 'TNRC6B', name: 'TNRC6B', cellLine: null }, { id: 'clipdb-tnrc6c', symbol: 'TNRC6C', name: 'TNRC6C', cellLine: null }, { id: 'clipdb-ythdf2', symbol: 'YTHDF2', name: 'YTHDF2', cellLine: null }, { id: 'clipdb-zc3h7b', symbol: 'ZC3H7B', name: 'ZC3H7B', cellLine: null }],
-    encode: [{ id: 'encode-AUH_HepG2_ENCSR334QFR', symbol: 'AUH', name: 'AUH', cellLine: 'HepG2' }, { id: 'encode-AUH_K562_ENCSR541QHS', symbol: 'AUH', name: 'AUH', cellLine: 'K562' }, { id: 'encode-BCCIP_HepG2_ENCSR485QCG', symbol: 'BCCIP', name: 'BCCIP', cellLine: 'HepG2' }, { id: 'encode-CPSF6_K562_ENCSR532VUB', symbol: 'CPSF6', name: 'CPSF6', cellLine: 'K562' }, { id: 'encode-DDX42_K562_ENCSR576SHT', symbol: 'DDX42', name: 'DDX42', cellLine: 'K562' }, { id: 'encode-EIF4G1_K562_ENCSR961WWI', symbol: 'EIF4G1', name: 'EIF4G1', cellLine: 'K562' }, { id: 'encode-EIF4G2_K562_ENCSR307YIW', symbol: 'EIF4G2', name: 'EIF4G2', cellLine: 'K562' }, { id: 'encode-FKBP4_HepG2_ENCSR018ZUE', symbol: 'FKBP4', name: 'FKBP4', cellLine: 'HepG2' }, { id: 'encode-FMR1_K562_ENCSR331VNX', symbol: 'FMR1', name: 'FMR1', cellLine: 'K562' }, { id: 'encode-FUS_K562_ENCSR477TRN', symbol: 'FUS', name: 'FUS', cellLine: 'K562' }, { id: 'encode-HNRNPA1_HepG2_ENCSR769UEW', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: 'HepG2' }, { id: 'encode-HNRNPA1_K562_ENCSR154HRN', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: 'K562' }, { id: 'encode-HNRNPM_HepG2_ENCSR267UCX', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: 'HepG2' }, { id: 'encode-HNRNPM_K562_ENCSR412NOW', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: 'K562' }, { id: 'encode-HNRNPU_HepG2_ENCSR240MVJ', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: 'HepG2' }, { id: 'encode-HNRNPU_K562_ENCSR520BZQ', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: 'K562' }, { id: 'encode-IGF2BP1_HepG2_ENCSR744GEU', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'HepG2' }, { id: 'encode-IGF2BP1_K562_ENCSR427DED', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'K562' }, { id: 'encode-IGF2BP1_K562_ENCSR975KIR', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'K562' }, { id: 'encode-IGF2BP2_K562_ENCSR062NNB', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: 'K562' }, { id: 'encode-IGF2BP2_K562_ENCSR193PVE', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: 'K562' }, { id: 'encode-IGF2BP3_HepG2_ENCSR993OLA', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: 'HepG2' }, { id: 'encode-IGF2BP3_K562_ENCSR096IJV', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: 'K562' }, { id: 'encode-LARP7_K562_ENCSR456KXI', symbol: 'LARP7', name: 'LARP7', cellLine: 'K562' }, { id: 'encode-PRPF8_K562_ENCSR534YOI', symbol: 'PRPF8', name: 'PRPF8', cellLine: 'K562' }, { id: 'encode-RBFOX2_HepG2_ENCSR987FTF', symbol: 'RBFOX2', name: 'RBFOX2', cellLine: 'HepG2' }, { id: 'encode-SAFB2_K562_ENCSR943MHU', symbol: 'SAFB2', name: 'SAFB2', cellLine: 'K562' }, { id: 'encode-SLBP_K562_ENCSR483NOP', symbol: 'SLBP', name: 'SLBP', cellLine: 'K562' }, { id: 'encode-SLTM_K562_ENCSR000SSH', symbol: 'SLTM', name: 'SLTM', cellLine: 'K562' }, { id: 'encode-SRSF9_HepG2_ENCSR773KRC', symbol: 'SRSF9', name: 'SRSF9', cellLine: 'HepG2' }, { id: 'encode-TIA1_HepG2_ENCSR623VEQ', symbol: 'TIA1', name: 'TIA1', cellLine: 'HepG2' }, { id: 'encode-TIAL1_K562_ENCSR441YTO', symbol: 'TIAL1', name: 'TIAL1', cellLine: 'K562' }, { id: 'encode-TRA2A_HepG2_ENCSR314UMJ', symbol: 'TRA2A', name: 'TRA2A', cellLine: 'HepG2' }, { id: 'encode-TRA2A_K562_ENCSR365NVO', symbol: 'TRA2A', name: 'TRA2A', cellLine: 'K562' }, { id: 'encode-U2AF1_K562_ENCSR862QCH', symbol: 'U2AF1', name: 'U2AF1', cellLine: 'K562' }, { id: 'encode-U2AF2_K562_ENCSR893RAV', symbol: 'U2AF2', name: 'U2AF2', cellLine: 'K562' }, { id: 'encode-XRN2_K562_ENCSR657TZB', symbol: 'XRN2', name: 'XRN2', cellLine: 'K562' }]
+    clipdb: [{ id: "clipdb-AGO1_HEK293", symbol: "AGO1", name: "AGO1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-AGO2_LCL35", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL35", species: "Human" }, { id: "clipdb-AGO2_LCL-BAC-D2", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL-BAC-D2", species: "Human" }, { id: "clipdb-AGO2_LCL-BAC-D3", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL-BAC-D3", species: "Human" }, { id: "clipdb-AGO2_BCBL-1", symbol: "AGO2", name: "AGO2", diseaseState: "Primary effusion lymphoma", cellLine: "BCBL-1", species: "Human" }, { id: "clipdb-AGO2_LCL-BAC", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL-BAC", species: "Human" }, { id: "clipdb-AGO2_EF3D-AGO2", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "EF3D-AGO2", species: "Human" }, { id: "clipdb-AGO2_HeLa", symbol: "AGO2", name: "AGO2", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-AGO2_BC-1", symbol: "AGO2", name: "AGO2", diseaseState: "Primary effusion lymphoma", cellLine: "BC-1", species: "Human" }, { id: "clipdb-AGO2_HEK293S", symbol: "AGO2", name: "AGO2", diseaseState: "Cancer", cellLine: "HEK293S", species: "Human" }, { id: "clipdb-AGO2_BC-3", symbol: "AGO2", name: "AGO2", diseaseState: "Primary effusion lymphoma", cellLine: "BC-3", species: "Human" }, { id: "clipdb-AGO2_HEK293", symbol: "AGO2", name: "AGO2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-AGO2_LCL-BAC-D1", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL-BAC-D1", species: "Human" }, { id: "clipdb-AGO3_HEK293", symbol: "AGO3", name: "AGO3", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-AGO4_HEK293", symbol: "AGO4", name: "AGO4", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-ALKBH5_HEK293", symbol: "ALKBH5", name: "ALKBH5", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-C17orf85_HEK293", symbol: "C17orf85", name: "C17orf85", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CAPRIN1_HEK293", symbol: "CAPRIN1", name: "CAPRIN1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CPSF1_HEK293", symbol: "CPSF1", name: "CPSF1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CPSF2_HEK293", symbol: "CPSF2", name: "CPSF2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CPSF3_HEK293", symbol: "CPSF3", name: "CPSF3", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CPSF4_HEK293", symbol: "CPSF4", name: "CPSF4", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CPSF6_HEK293", symbol: "CPSF6", name: "CPSF6", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CPSF7_HEK293", symbol: "CPSF7", name: "CPSF7", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CSTF2_HeLa", symbol: "CSTF2", name: "CSTF2", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-CSTF2_HEK293", symbol: "CSTF2", name: "CSTF2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-CSTF2T_HEK293", symbol: "CSTF2T", name: "CSTF2T", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-DGCR8_HEK293T", symbol: "DGCR8", name: "DGCR8", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human" }, { id: "clipdb-EIF4A3_HeLa", symbol: "EIF4A3", name: "EIF4A3", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-ELAVL1_HEK293", symbol: "ELAVL1", name: "ELAVL1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-ELAVL1_HeLa", symbol: "ELAVL1", name: "ELAVL1", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-EZH2_HCT116", symbol: "EZH2", name: "EZH2", diseaseState: "Colorectal adenocarcinoma", cellLine: "HCT116", species: "Human" }, { id: "clipdb-FBL_HEK293", symbol: "FBL", name: "FBL", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-FIP1L1_HEK293", symbol: "FIP1L1", name: "FIP1L1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-FMR1_HEK293", symbol: "FMR1", name: "FMR1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-FXR1_HEK293", symbol: "FXR1", name: "FXR1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-FXR2_HEK293", symbol: "FXR2", name: "FXR2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-HNRNPA1_HEK293T", symbol: "HNRNPA1", name: "HNRNPA1", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human" }, { id: "clipdb-HNRNPA2B1_HEK293T", symbol: "HNRNPA2B1", name: "HNRNPA2B1", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human" }, { id: "clipdb-HNRNPC_HeLa", symbol: "HNRNPC", name: "HNRNPC", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-HNRNPF_HEK293T", symbol: "HNRNPF", name: "HNRNPF", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human" }, { id: "clipdb-HNRNPH_HEK293T", symbol: "HNRNPH1", name: "HNRNPH1", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human" }, { id: "clipdb-HNRNPM_HEK293T", symbol: "HNRNPM", name: "HNRNPM", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human" }, { id: "clipdb-HNRNPU_HEK293T", symbol: "HNRNPU", name: "HNRNPU", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human" }, { id: "clipdb-HNRNPU_HeLa", symbol: "HNRNPU", name: "HNRNPU", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-IGF2BP1_HEK293", symbol: "IGF2BP1", name: "IGF2BP1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-IGF2BP2_HEK293", symbol: "IGF2BP2", name: "IGF2BP2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-IGF2BP3_HEK293", symbol: "IGF2BP3", name: "IGF2BP3", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-LIN28A_HEK293", symbol: "LIN28A", name: "LIN28A", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-LIN28A_H9", symbol: "LIN28A", name: "LIN28A", diseaseState: "Normal", cellLine: "H9", species: "Human" }, { id: "clipdb-LIN28B_HEK293", symbol: "LIN28B", name: "LIN28B", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-MOV10_HEK293", symbol: "MOV10", name: "MOV10", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-NOP56_HEK293", symbol: "NOP56", name: "NOP56", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-NOP58_HEK293", symbol: "NOP58", name: "NOP58", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-NUDT21_HEK293", symbol: "NUDT21", name: "NUDT21", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-PTBP1PTBP2_HeLa", symbol: "PTBP1/PTBP2", name: "PTBP1/PTBP2", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-PUM2_HEK293", symbol: "PUM2", name: "PUM2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-QKI_HEK293", symbol: "QKI", name: "QKI", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-RTCB_HEK293", symbol: "RTCB", name: "RTCB", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-TARDBP_SH-SY5Y", symbol: "TARDBP", name: "TARDBP", diseaseState: "Metastatic neuroblastoma", cellLine: "SH-SY5Y", species: "Human" }, { id: "clipdb-TARDBP_H9", symbol: "TARDBP", name: "TARDBP", diseaseState: "Normal", cellLine: "H9", species: "Human" }, { id: "clipdb-TIA1_HeLa", symbol: "TIA1", name: "TIA1", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-TIAL1_HeLa", symbol: "TIAL1", name: "TIAL1", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-TNRC6A_HEK293", symbol: "TNRC6A", name: "TNRC6A", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-TNRC6B_HEK293", symbol: "TNRC6B", name: "TNRC6B", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-TNRC6C_HEK293", symbol: "TNRC6C", name: "TNRC6C", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }, { id: "clipdb-YTHDF2_HeLa", symbol: "YTHDF2", name: "YTHDF2", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human" }, { id: "clipdb-ZC3H7B_HEK293", symbol: "ZC3H7B", name: "ZC3H7B", diseaseState: "Cancer", cellLine: "HEK293", species: "Human" }],
+    encode: [{ id: 'encode-AUH_HepG2_ENCSR334QFR', symbol: 'AUH', name: 'AUH', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-AUH_K562_ENCSR541QHS', symbol: 'AUH', name: 'AUH', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-BCCIP_HepG2_ENCSR485QCG', symbol: 'BCCIP', name: 'BCCIP', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-CPSF6_K562_ENCSR532VUB', symbol: 'CPSF6', name: 'CPSF6', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-DDX42_K562_ENCSR576SHT', symbol: 'DDX42', name: 'DDX42', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-EIF4G1_K562_ENCSR961WWI', symbol: 'EIF4G1', name: 'EIF4G1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-EIF4G2_K562_ENCSR307YIW', symbol: 'EIF4G2', name: 'EIF4G2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-FKBP4_HepG2_ENCSR018ZUE', symbol: 'FKBP4', name: 'FKBP4', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-FMR1_K562_ENCSR331VNX', symbol: 'FMR1', name: 'FMR1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-FUS_K562_ENCSR477TRN', symbol: 'FUS', name: 'FUS', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-HNRNPA1_HepG2_ENCSR769UEW', symbol: 'HNRNPA1', name: 'HNRNPA1', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-HNRNPA1_K562_ENCSR154HRN', symbol: 'HNRNPA1', name: 'HNRNPA1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-HNRNPM_HepG2_ENCSR267UCX', symbol: 'HNRNPM', name: 'HNRNPM', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-HNRNPM_K562_ENCSR412NOW', symbol: 'HNRNPM', name: 'HNRNPM', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-HNRNPU_HepG2_ENCSR240MVJ', symbol: 'HNRNPU', name: 'HNRNPU', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-HNRNPU_K562_ENCSR520BZQ', symbol: 'HNRNPU', name: 'HNRNPU', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-IGF2BP1_HepG2_ENCSR744GEU', symbol: 'IGF2BP1', name: 'IGF2BP1', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-IGF2BP1_K562_ENCSR427DED', symbol: 'IGF2BP1', name: 'IGF2BP1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-IGF2BP1_K562_ENCSR975KIR', symbol: 'IGF2BP1', name: 'IGF2BP1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-IGF2BP2_K562_ENCSR062NNB', symbol: 'IGF2BP2', name: 'IGF2BP2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-IGF2BP2_K562_ENCSR193PVE', symbol: 'IGF2BP2', name: 'IGF2BP2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-IGF2BP3_HepG2_ENCSR993OLA', symbol: 'IGF2BP3', name: 'IGF2BP3', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-IGF2BP3_K562_ENCSR096IJV', symbol: 'IGF2BP3', name: 'IGF2BP3', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-LARP7_K562_ENCSR456KXI', symbol: 'LARP7', name: 'LARP7', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-PRPF8_K562_ENCSR534YOI', symbol: 'PRPF8', name: 'PRPF8', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-RBFOX2_HepG2_ENCSR987FTF', symbol: 'RBFOX2', name: 'RBFOX2', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-SAFB2_K562_ENCSR943MHU', symbol: 'SAFB2', name: 'SAFB2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-SLBP_K562_ENCSR483NOP', symbol: 'SLBP', name: 'SLBP', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-SLTM_K562_ENCSR000SSH', symbol: 'SLTM', name: 'SLTM', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-SRSF9_HepG2_ENCSR773KRC', symbol: 'SRSF9', name: 'SRSF9', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-TIA1_HepG2_ENCSR623VEQ', symbol: 'TIA1', name: 'TIA1', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-TIAL1_K562_ENCSR441YTO', symbol: 'TIAL1', name: 'TIAL1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-TRA2A_HepG2_ENCSR314UMJ', symbol: 'TRA2A', name: 'TRA2A', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human" }, { id: 'encode-TRA2A_K562_ENCSR365NVO', symbol: 'TRA2A', name: 'TRA2A', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-U2AF1_K562_ENCSR862QCH', symbol: 'U2AF1', name: 'U2AF1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-U2AF2_K562_ENCSR893RAV', symbol: 'U2AF2', name: 'U2AF2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }, { id: 'encode-XRN2_K562_ENCSR657TZB', symbol: 'XRN2', name: 'XRN2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human" }]
 };
 
-ReactDOM.render(React.createElement(SetenApp, { collections: collections, explore: explore }), document.querySelector('.container-app'));
+ReactDOM.render(React.createElement(SetenApp, {
+    collections: collections,
+    samples: samples,
+    explore: explore
+}), document.querySelector('.container-app'));

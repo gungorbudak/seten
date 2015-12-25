@@ -1,5 +1,39 @@
 'use strict';
 
+var PanelExploreItem = React.createClass({
+    componentDidMount: function(argument) {
+        var item = this.getDOMNode();
+
+        $(item).popover({
+            trigger: 'hover',
+            placement: 'auto',
+            html: true,
+            delay: {show: 50, hide: 100}
+        });
+    },
+    render: function() {
+        var item = this.props.item,
+            dataContent = [
+                '<p><strong>Symbol:</strong> ' + item.symbol + '</p>',
+                '<p><strong>Cell line:</strong> ' + item.cellLine + '</p>',
+                '<p><strong>Species:</strong> ' + item.species + '</p>',
+                '<p><strong>Disease state:</strong> ' + item.diseaseState + '</p>'
+            ].join('');
+        return (
+            <a
+                href="#"
+                className="list-group-item"
+                id={item.id}
+                title={item.symbol + ' (' + item.cellLine + ') '}
+                data-content={dataContent}
+                onClick={this.props.onExplore}
+                >
+                {item.symbol} ({item.cellLine})
+            </a>
+        );
+    }
+});
+
 var PanelExplore = React.createClass({
     render: function() {
         var component = this;
@@ -22,7 +56,10 @@ var PanelExplore = React.createClass({
                     </div>
                     {clipdb.map(function(item) {
                         return (
-                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol}</a>
+                            <PanelExploreItem
+                                item={item}
+                                onExplore={component.props.onExplore}
+                                />
                         );
                     })}
                     <div className="list-group-item">
@@ -31,7 +68,10 @@ var PanelExplore = React.createClass({
                     </div>
                     {encode.map(function(item) {
                         return (
-                            <a href="#" className="list-group-item" id={item.id} onClick={component.props.onExplore}>{item.symbol} ({item.cellLine})</a>
+                            <PanelExploreItem
+                                item={item}
+                                onExplore={component.props.onExplore}
+                                />
                         );
                     })}
                 </div>
@@ -41,48 +81,67 @@ var PanelExplore = React.createClass({
 });
 
 var InputBedFile = React.createClass({
+    componentDidMount: function(argument) {
+        var el = this.getDOMNode(),
+            buttons = el.querySelectorAll('.btn-explore');
+
+        [].forEach.call(buttons, function(button) {
+            $(button).popover({
+                trigger: 'hover',
+                placement: 'auto',
+                html: true,
+                delay: {show: 50, hide: 100}
+            });
+        });
+    },
     render: function () {
+        var component = this;
         return (
             <div className="form-group">
-                <label className="col-sm-2 control-label">{this.props.label}</label>
+                <label className="col-sm-2 control-label">{component.props.label}</label>
                 <div className="col-sm-10">
                     <div className="input-group input-group-sm">
                         <span className="input-group-btn">
                             <span
                                 className="btn btn-default btn-file"
-                                disabled={this.props.disabled}>
+                                disabled={component.props.disabled}>
                                 Browse&hellip;
                                 <input
                                     type="file"
                                     name="file"
-                                    onChange={this.props.onChange}
+                                    onChange={component.props.onChange}
                                 />
                             </span>
                         </span>
                         <input
                             type="text"
                             className="form-control"
-                            disabled={this.props.disabled}
-                            value={this.props.inputBedFileName}
+                            disabled={component.props.disabled}
+                            value={component.props.inputBedFileName}
                             readOnly={true}
                             />
                     </div>
-                    <p className="help-block">
-                        Sample datasets
-                        <a
-                            className="btn btn-link btn-xs"
-                            id="fip1l1"
-                            onClick={this.props.onSampleClick}
-                            >
-                            FIP1l1
-                        </a>
-                        <a
-                            className="btn btn-link btn-xs"
-                            id="prpf8"
-                            onClick={this.props.onSampleClick}
-                            >
-                            PRPF8
-                        </a>
+                    <p className="help-block-samples">
+                        <span className="text-muted">Sample datasets</span>
+                        {component.props.samples.map(function(item) {
+                            var dataContent = [
+                                '<p><strong>Symbol:</strong> ' + item.symbol + '</p>',
+                                '<p><strong>Cell line:</strong> ' + item.cellLine + '</p>',
+                                '<p><strong>Species:</strong> ' + item.species + '</p>',
+                                '<p><strong>Disease state:</strong> ' + item.diseaseState + '</p>'
+                            ].join('');
+                            return (
+                                <a
+                                    className="btn btn-link btn-xs btn-explore"
+                                    id={item.id}
+                                    title={item.symbol}
+                                    data-content={dataContent}
+                                    onClick={component.props.onSampleClick}
+                                    >
+                                    {item.symbol}
+                                </a>
+                            );
+                        })}
                     </p>
                 </div>
             </div>
@@ -155,6 +214,7 @@ var PanelAnalyze = React.createClass({
                     <div className="form-horizontal">
                         <InputBedFile
                             label="BED file"
+                            samples={this.props.samples}
                             disabled={this.props.disabled}
                             inputBedFileName={this.props.inputBedFileName}
                             onSampleClick={this.props.onSampleClick}
@@ -323,88 +383,101 @@ var ResultTable = React.createClass({
             var component = this,
                 result = component.props.result,
                 directions = component.props.sortDirections;
-            return (
-                <div className="table-responsive">
-                    <table className="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>
-                                    Gene set
-                                </th>
-                                <th
-                                    onClick={component.props.onSort}
-                                    id={result.id + "-percent"}>
-                                    %
-                                    <SortIcon direction={directions.percent} />
-                                </th>
-                                <th
-                                    onClick={component.props.onSort}
-                                    id={result.id + "-fPValue"}>
-                                    Func. p-value
-                                    <SortIcon direction={directions.fPValue} />
-                                </th>
-                                <th
-                                    onClick={component.props.onSort}
-                                    id={result.id + "-fPValueCorr"}>
-                                    Func. p-value corr.
-                                    <SortIcon direction={directions.fPValueCorr} />
-                                </th>
-                                <th
-                                    onClick={component.props.onSort}
-                                    id={result.id + "-gSPValue"}>
-                                    G. set p-value
-                                    <SortIcon direction={directions.gSPValue} />
-                                </th>
-                                <th
-                                    onClick={component.props.onSort}
-                                    id={result.id + "-cPValue"}>
-                                    Comb. p-value
-                                    <SortIcon direction={directions.cPValue} />
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {result.enrichment.map(function(row) {
-                                var geneSet = row.geneSet;
-                                if (geneSet.length > 45) {
-                                    geneSet = <abbr title={geneSet}>{geneSet.substr(0, 45)}</abbr>;
-                                }
-                                return (
-                                    <tr>
-                                        <td>{geneSet}</td>
-                                        <td>
-                                            <abbr title={"Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes"}
-                                                onClick={component.props.onViewGenes}
-                                                >
-                                                {row.percent}
-                                            </abbr>
-                                        </td>
-                                        <td>{row.fPValue.toPrecision(3)}</td>
-                                        <td>{row.fPValueCorr.toPrecision(3)}</td>
-                                        <td>{row.gSPValue.toPrecision(3)}</td>
-                                        <td>{row.cPValue.toPrecision(3)}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            );
+
+            if (result.enrichment.length > 0) {
+                return (
+                    <div className="table-responsive">
+                        <table className="table table-striped table-hover table-panel">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Gene set
+                                    </th>
+                                    <th
+                                        onClick={component.props.onSort}
+                                        id={result.id + "-percent"}>
+                                        %
+                                        <SortIcon direction={directions.percent} />
+                                    </th>
+                                    <th
+                                        onClick={component.props.onSort}
+                                        id={result.id + "-fPValue"}>
+                                        Func. p-value
+                                        <SortIcon direction={directions.fPValue} />
+                                    </th>
+                                    <th
+                                        onClick={component.props.onSort}
+                                        id={result.id + "-fPValueCorr"}>
+                                        Func. p-value corr.
+                                        <SortIcon direction={directions.fPValueCorr} />
+                                    </th>
+                                    <th
+                                        onClick={component.props.onSort}
+                                        id={result.id + "-gSPValue"}>
+                                        G. set p-value
+                                        <SortIcon direction={directions.gSPValue} />
+                                    </th>
+                                    <th
+                                        onClick={component.props.onSort}
+                                        id={result.id + "-cPValue"}>
+                                        Comb. p-value
+                                        <SortIcon direction={directions.cPValue} />
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {result.enrichment.map(function(row) {
+                                    var geneSet = row.geneSet;
+                                    if (geneSet.length > 45) {
+                                        geneSet = <abbr title={geneSet}>{geneSet.substr(0, 45)}</abbr>;
+                                    }
+                                    return (
+                                        <tr>
+                                            <td>{geneSet}</td>
+                                            <td>
+                                                <abbr title={"Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes"}
+                                                    onClick={component.props.onViewGenes}
+                                                    >
+                                                    {row.percent}
+                                                </abbr>
+                                            </td>
+                                            <td>{row.fPValue.toPrecision(3)}</td>
+                                            <td>{row.fPValueCorr.toPrecision(3)}</td>
+                                            <td>{row.gSPValue.toPrecision(3)}</td>
+                                            <td>{row.cPValue.toPrecision(3)}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="panel-body">
+                        No significant results available.
+                    </div>
+                )
+            }
         }
     });
 
 var Result = React.createClass({
     render: function() {
         var result = this.props.result,
-            sigEnrichment = result.enrichment.filter(function(el) {
-                return el.cPValue < 0.01;
-            }),
+            result = {
+                id: result.id,
+                title: result.title,
+                enrichment: result.enrichment.filter(function(el) {
+                    return el.cPValue < 0.01;
+                })
+            },
             resultBarChart;
 
-        if (sigEnrichment.length > 0) {
+        if (result.enrichment.length > 0) {
             resultBarChart = (
                 <ResultBarChart
-                    enrichment={sigEnrichment}
+                    enrichment={result.enrichment}
                     />
             );
         }
@@ -438,41 +511,94 @@ var Result = React.createClass({
     }
 });
 
-var ResultProgress = React.createClass({
+var ResultGroupProgressBar = React.createClass({
     render: function() {
-        var barStyle = {
-            minWidth: "2em",
-            width: this.props.progress + "%"
-        };
-        return (
-            <div className="progress">
-                <div
-                    className="progress-bar progress-bar-info progress-bar-striped active"
-                    role="progressbar"
-                    aria-valuenow={this.props.progress}
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    style={barStyle}
-                    >
-                    {this.props.progress + "%"}
+        if (this.props.show) {
+            var barStyle = {
+                minWidth: "2em",
+                width: this.props.progress + "%"
+            };
+            return (
+                <div className="progress">
+                    <div
+                        className="progress-bar progress-bar-info progress-bar-striped active"
+                        role="progressbar"
+                        aria-valuenow={this.props.progress}
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        style={barStyle}
+                        >
+                        {this.props.progress + "%"}
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        } else {
+            return (
+                <div></div>
+            );
+        }
+    }
+});
+
+var ResultGroupInfo = React.createClass({
+    render: function(argument) {
+        var l = Object.keys(this.props.info).length;
+        if (l) {
+            if (l > 1) {
+                return (
+                    <div>
+                        <h3>
+                            {this.props.info.symbol} ({this.props.info.cellLine})
+                        </h3>
+                        <div className="table-responsive">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Cell line</th>
+                                        <th>Species</th>
+                                        <th>Disease state</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{this.props.info.symbol}</td>
+                                        <td>{this.props.info.cellLine}</td>
+                                        <td>{this.props.info.species}</td>
+                                        <td>{this.props.info.diseaseState}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            } else {
+                return (
+                    <h3>
+                        {this.props.info.filename}
+                    </h3>
+                );
+            }
+        } else {
+            return (
+                <div></div>
+            );
+        }
     }
 });
 
 var ResultGroup = React.createClass({
     render: function() {
         var component = this;
-        var progressBar;
-        if (component.props.isRunning) {
-            progressBar = (
-                <ResultProgress progress={component.props.progress} />
-            );
-        }
         return (
             <div>
-                {progressBar}
+                <ResultGroupProgressBar
+                    progress={component.props.progress}
+                    show={component.props.isRunning}
+                    />
+                <ResultGroupInfo
+                    info={component.props.resultsInfo}
+                    />
                 <div className="panel-group" role="tablist" aria-multiselectable="true">
                     {component.props.results.map(function(result) {
                           return (
@@ -501,6 +627,7 @@ var SetenApp = React.createClass({
                 geneScores: [],
                 geneCollections: [],
                 results: [],
+                resultsInfo: {},
                 isRunning: false,
                 sortAscOrder: false,
                 sortDirections: {
@@ -512,6 +639,13 @@ var SetenApp = React.createClass({
                     cPValue: 'asc'
                 }
             };
+    },
+    clearState: function() {
+        // clear some state variables
+        this.setState({workers: []});
+        this.setState({results: []});
+        this.setState({resultsInfo: {}});
+        this.setState({geneCollections: []});
     },
     togglePanelAnalyze: function(e) {
         this.setState({isRunning: !this.state.isRunning});
@@ -550,15 +684,15 @@ var SetenApp = React.createClass({
         if (bedFile !== undefined && collections !== undefined) {
             var mappingWorker = new Worker('assets/js/workers/mapping.js');
 
-            // empty results and gene collections
-            this.setState({workers: []});
-            this.setState({results: []});
-            this.setState({geneCollections: []});
+            // clear the state
+            this.clearState();
             // toggle form
             this.togglePanelAnalyze();
             // start mapping worker to read and map the file
             mappingWorker.postMessage(bedFile);
             mappingWorker.onmessage = this.mappingWorkerOnMessage;
+            // filename as results title
+            this.setState({resultsInfo: {filename: this.state.inputBedFileName}});
             // add worker to the state
             this.setState({workers: this.state.workers.concat([mappingWorker])});
         } else {
@@ -574,10 +708,8 @@ var SetenApp = React.createClass({
             workers.forEach(function(worker) {
                 worker.terminate();
             });
-            // clear some state variables
-            this.setState({workers: []});
-            this.setState({results: []});
-            this.setState({geneCollections: []});
+            // clear the state
+            this.clearState();
             // enable the panel back
             this.togglePanelAnalyze();
         }
@@ -592,11 +724,14 @@ var SetenApp = React.createClass({
     },
     handleExplore: function(e) {
         e.preventDefault();
-        var result = e.currentTarget.id,
+        var component = this,
+            result = e.currentTarget.id,
             exploreWorker = new Worker('assets/js/workers/explore.js');
 
         exploreWorker.postMessage({result:result, collections:collections});
-        exploreWorker.onmessage = this.exploreWorkerOnMessage;
+        exploreWorker.onmessage = function(e) {
+            component.exploreWorkerOnMessage(e, result);
+        }
     },
     handleSort: function(e) {
         e.preventDefault();
@@ -729,7 +864,12 @@ var SetenApp = React.createClass({
         this.setState({inputBedFile: e.data.file});
         this.setState({inputBedFileName: e.data.name});
     },
-    exploreWorkerOnMessage: function(e) {
+    exploreWorkerOnMessage: function(e, result) {
+        var resultsParent = this.props.explore[result.split('-')[0]],
+            resultsInfo = resultsParent.filter(function(el) {
+            return el.id == result;
+        });
+        this.setState({resultsInfo: resultsInfo[0]});
         this.setState({results: e.data});
     },
     render: function() {
@@ -750,6 +890,7 @@ var SetenApp = React.createClass({
                     <div className="col-sm-8">
                         <PanelAnalyze
                             collections={this.props.collections}
+                            samples={this.props.samples}
                             disabled={this.state.isRunning}
                             inputBedFileName={this.state.inputBedFileName}
                             onInputBedFileChange={this.handleInputBedFileChange}
@@ -764,6 +905,7 @@ var SetenApp = React.createClass({
                     <div className="col-sm-12">
                         <ResultGroup
                             results={this.state.results}
+                            resultsInfo={this.state.resultsInfo}
                             progress={progress}
                             isRunning={this.state.isRunning}
                             sortDirections={this.state.sortDirections}
@@ -789,101 +931,128 @@ var collections = [
     {id: 'malacards', filename: 'cx.malacards.v5.0.symbols', name: 'MalaCards Disease Ontology'}
 ];
 
+var samples = [
+    {id: "FIP1L1_HEK293", symbol: "FIP1L1", name: "FIP1L1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+    {id: "PRPF8_K562_ENCSR534YOI", symbol: "PRPF8", diseaseState: "Hepatocellular carcinoma", cellLine: "K562", species: "Human"},
+];
+
 var explore = {
     clipdb: [
-        {id: 'clipdb-ago1', symbol: 'AGO1', name: 'AGO1', cellLine: null},
-        {id: 'clipdb-ago2', symbol: 'AGO2', name: 'AGO2', cellLine: null},
-        {id: 'clipdb-ago3', symbol: 'AGO3', name: 'AGO3', cellLine: null},
-        {id: 'clipdb-ago4', symbol: 'AGO4', name: 'AGO4', cellLine: null},
-        {id: 'clipdb-alkbh5', symbol: 'ALKBH5', name: 'ALKBH5', cellLine: null},
-        {id: 'clipdb-c17orf85', symbol: 'C17ORF85', name: 'C17ORF85', cellLine: null},
-        {id: 'clipdb-caprin1', symbol: 'CAPRIN1', name: 'CAPRIN1', cellLine: null},
-        {id: 'clipdb-cpsf1', symbol: 'CPSF1', name: 'CPSF1', cellLine: null},
-        {id: 'clipdb-cpsf2', symbol: 'CPSF2', name: 'CPSF2', cellLine: null},
-        {id: 'clipdb-cpsf3', symbol: 'CPSF3', name: 'CPSF3', cellLine: null},
-        {id: 'clipdb-cpsf4', symbol: 'CPSF4', name: 'CPSF4', cellLine: null},
-        {id: 'clipdb-cpsf6', symbol: 'CPSF6', name: 'CPSF6', cellLine: null},
-        {id: 'clipdb-cpsf7', symbol: 'CPSF7', name: 'CPSF7', cellLine: null},
-        {id: 'clipdb-cstf2', symbol: 'CSTF2', name: 'CSTF2', cellLine: null},
-        {id: 'clipdb-cstf2t', symbol: 'CSTF2T', name: 'CSTF2T', cellLine: null},
-        {id: 'clipdb-dgcr8', symbol: 'DGCR8', name: 'DGCR8', cellLine: null},
-        {id: 'clipdb-eif4a3', symbol: 'EIF4A3', name: 'EIF4A3', cellLine: null},
-        {id: 'clipdb-elavl1', symbol: 'ELAVL1', name: 'ELAVL1', cellLine: null},
-        {id: 'clipdb-ezh2', symbol: 'EZH2', name: 'EZH2', cellLine: null},
-        {id: 'clipdb-fbl', symbol: 'FBL', name: 'FBL', cellLine: null},
-        {id: 'clipdb-fip1l1', symbol: 'FIP1L1', name: 'FIP1L1', cellLine: null},
-        {id: 'clipdb-fmr1', symbol: 'FMR1', name: 'FMR1', cellLine: null},
-        {id: 'clipdb-fus', symbol: 'FUS', name: 'FUS', cellLine: null},
-        {id: 'clipdb-fxr1', symbol: 'FXR1', name: 'FXR1', cellLine: null},
-        {id: 'clipdb-fxr2', symbol: 'FXR2', name: 'FXR2', cellLine: null},
-        {id: 'clipdb-hnrnpa1', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: null},
-        {id: 'clipdb-hnrnpa2b1', symbol: 'HNRNPA2B1', name: 'HNRNPA2B1', cellLine: null},
-        {id: 'clipdb-hnrnpc', symbol: 'HNRNPC', name: 'HNRNPC', cellLine: null},
-        {id: 'clipdb-hnrnpf', symbol: 'HNRNPF', name: 'HNRNPF', cellLine: null},
-        {id: 'clipdb-hnrnpm', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: null},
-        {id: 'clipdb-hnrnpu', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: null},
-        {id: 'clipdb-igf2bp1', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: null},
-        {id: 'clipdb-igf2bp2', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: null},
-        {id: 'clipdb-igf2bp3', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: null},
-        {id: 'clipdb-lin28a', symbol: 'LIN28A', name: 'LIN28A', cellLine: null},
-        {id: 'clipdb-lin28b', symbol: 'LIN28B', name: 'LIN28B', cellLine: null},
-        {id: 'clipdb-mov10', symbol: 'MOV10', name: 'MOV10', cellLine: null},
-        {id: 'clipdb-nop56', symbol: 'NOP56', name: 'NOP56', cellLine: null},
-        {id: 'clipdb-nop58', symbol: 'NOP58', name: 'NOP58', cellLine: null},
-        {id: 'clipdb-nudt21', symbol: 'NUDT21', name: 'NUDT21', cellLine: null},
-        {id: 'clipdb-ptbp1_ptbp2', symbol: 'PTBP1_PTBP2', name: 'PTBP1_PTBP2', cellLine: null},
-        {id: 'clipdb-pum2', symbol: 'PUM2', name: 'PUM2', cellLine: null},
-        {id: 'clipdb-qki', symbol: 'QKI', name: 'QKI', cellLine: null},
-        {id: 'clipdb-rtcb', symbol: 'RTCB', name: 'RTCB', cellLine: null},
-        {id: 'clipdb-taf15', symbol: 'TAF15', name: 'TAF15', cellLine: null},
-        {id: 'clipdb-tardbp', symbol: 'TARDBP', name: 'TARDBP', cellLine: null},
-        {id: 'clipdb-tia1', symbol: 'TIA1', name: 'TIA1', cellLine: null},
-        {id: 'clipdb-tial1', symbol: 'TIAL1', name: 'TIAL1', cellLine: null},
-        {id: 'clipdb-tnrc6a', symbol: 'TNRC6A', name: 'TNRC6A', cellLine: null},
-        {id: 'clipdb-tnrc6b', symbol: 'TNRC6B', name: 'TNRC6B', cellLine: null},
-        {id: 'clipdb-tnrc6c', symbol: 'TNRC6C', name: 'TNRC6C', cellLine: null},
-        {id: 'clipdb-ythdf2', symbol: 'YTHDF2', name: 'YTHDF2', cellLine: null},
-        {id: 'clipdb-zc3h7b', symbol: 'ZC3H7B', name: 'ZC3H7B', cellLine: null}
+        {id: "clipdb-AGO1_HEK293", symbol: "AGO1", name: "AGO1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-AGO2_LCL35", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL35", species: "Human"},
+        {id: "clipdb-AGO2_LCL-BAC-D2", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL-BAC-D2", species: "Human"},
+        {id: "clipdb-AGO2_LCL-BAC-D3", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL-BAC-D3", species: "Human"},
+        {id: "clipdb-AGO2_BCBL-1", symbol: "AGO2", name: "AGO2", diseaseState: "Primary effusion lymphoma", cellLine: "BCBL-1", species: "Human"},
+        {id: "clipdb-AGO2_LCL-BAC", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL-BAC", species: "Human"},
+        {id: "clipdb-AGO2_EF3D-AGO2", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "EF3D-AGO2", species: "Human"},
+        {id: "clipdb-AGO2_HeLa", symbol: "AGO2", name: "AGO2", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-AGO2_BC-1", symbol: "AGO2", name: "AGO2", diseaseState: "Primary effusion lymphoma", cellLine: "BC-1", species: "Human"},
+        {id: "clipdb-AGO2_HEK293S", symbol: "AGO2", name: "AGO2", diseaseState: "Cancer", cellLine: "HEK293S", species: "Human"},
+        {id: "clipdb-AGO2_BC-3", symbol: "AGO2", name: "AGO2", diseaseState: "Primary effusion lymphoma", cellLine: "BC-3", species: "Human"},
+        {id: "clipdb-AGO2_HEK293", symbol: "AGO2", name: "AGO2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-AGO2_LCL-BAC-D1", symbol: "AGO2", name: "AGO2", diseaseState: "Infected with EBV", cellLine: "LCL-BAC-D1", species: "Human"},
+        {id: "clipdb-AGO3_HEK293", symbol: "AGO3", name: "AGO3", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-AGO4_HEK293", symbol: "AGO4", name: "AGO4", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-ALKBH5_HEK293", symbol: "ALKBH5", name: "ALKBH5", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-C17orf85_HEK293", symbol: "C17orf85", name: "C17orf85", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CAPRIN1_HEK293", symbol: "CAPRIN1", name: "CAPRIN1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CPSF1_HEK293", symbol: "CPSF1", name: "CPSF1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CPSF2_HEK293", symbol: "CPSF2", name: "CPSF2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CPSF3_HEK293", symbol: "CPSF3", name: "CPSF3", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CPSF4_HEK293", symbol: "CPSF4", name: "CPSF4", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CPSF6_HEK293", symbol: "CPSF6", name: "CPSF6", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CPSF7_HEK293", symbol: "CPSF7", name: "CPSF7", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CSTF2_HeLa", symbol: "CSTF2", name: "CSTF2", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-CSTF2_HEK293", symbol: "CSTF2", name: "CSTF2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-CSTF2T_HEK293", symbol: "CSTF2T", name: "CSTF2T", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-DGCR8_HEK293T", symbol: "DGCR8", name: "DGCR8", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human"},
+        {id: "clipdb-EIF4A3_HeLa", symbol: "EIF4A3", name: "EIF4A3", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-ELAVL1_HEK293", symbol: "ELAVL1", name: "ELAVL1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-ELAVL1_HeLa", symbol: "ELAVL1", name: "ELAVL1", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-EZH2_HCT116", symbol: "EZH2", name: "EZH2", diseaseState: "Colorectal adenocarcinoma", cellLine: "HCT116", species: "Human"},
+        {id: "clipdb-FBL_HEK293", symbol: "FBL", name: "FBL", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-FIP1L1_HEK293", symbol: "FIP1L1", name: "FIP1L1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-FMR1_HEK293", symbol: "FMR1", name: "FMR1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-FXR1_HEK293", symbol: "FXR1", name: "FXR1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-FXR2_HEK293", symbol: "FXR2", name: "FXR2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-HNRNPA1_HEK293T", symbol: "HNRNPA1", name: "HNRNPA1", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human"},
+        {id: "clipdb-HNRNPA2B1_HEK293T", symbol: "HNRNPA2B1", name: "HNRNPA2B1", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human"},
+        {id: "clipdb-HNRNPC_HeLa", symbol: "HNRNPC", name: "HNRNPC", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-HNRNPF_HEK293T", symbol: "HNRNPF", name: "HNRNPF", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human"},
+        {id: "clipdb-HNRNPH_HEK293T", symbol: "HNRNPH1", name: "HNRNPH1", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human"},
+        {id: "clipdb-HNRNPM_HEK293T", symbol: "HNRNPM", name: "HNRNPM", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human"},
+        {id: "clipdb-HNRNPU_HEK293T", symbol: "HNRNPU", name: "HNRNPU", diseaseState: "Cancer", cellLine: "HEK293T", species: "Human"},
+        {id: "clipdb-HNRNPU_HeLa", symbol: "HNRNPU", name: "HNRNPU", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-IGF2BP1_HEK293", symbol: "IGF2BP1", name: "IGF2BP1", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-IGF2BP2_HEK293", symbol: "IGF2BP2", name: "IGF2BP2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-IGF2BP3_HEK293", symbol: "IGF2BP3", name: "IGF2BP3", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-LIN28A_HEK293", symbol: "LIN28A", name: "LIN28A", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-LIN28A_H9", symbol: "LIN28A", name: "LIN28A", diseaseState: "Normal", cellLine: "H9", species: "Human"},
+        {id: "clipdb-LIN28B_HEK293", symbol: "LIN28B", name: "LIN28B", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-MOV10_HEK293", symbol: "MOV10", name: "MOV10", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-NOP56_HEK293", symbol: "NOP56", name: "NOP56", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-NOP58_HEK293", symbol: "NOP58", name: "NOP58", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-NUDT21_HEK293", symbol: "NUDT21", name: "NUDT21", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-PTBP1PTBP2_HeLa", symbol: "PTBP1/PTBP2", name: "PTBP1/PTBP2", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-PUM2_HEK293", symbol: "PUM2", name: "PUM2", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-QKI_HEK293", symbol: "QKI", name: "QKI", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-RTCB_HEK293", symbol: "RTCB", name: "RTCB", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-TARDBP_SH-SY5Y", symbol: "TARDBP", name: "TARDBP", diseaseState: "Metastatic neuroblastoma", cellLine: "SH-SY5Y", species: "Human"},
+        {id: "clipdb-TARDBP_H9", symbol: "TARDBP", name: "TARDBP", diseaseState: "Normal", cellLine: "H9", species: "Human"},
+        {id: "clipdb-TIA1_HeLa", symbol: "TIA1", name: "TIA1", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-TIAL1_HeLa", symbol: "TIAL1", name: "TIAL1", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-TNRC6A_HEK293", symbol: "TNRC6A", name: "TNRC6A", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-TNRC6B_HEK293", symbol: "TNRC6B", name: "TNRC6B", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-TNRC6C_HEK293", symbol: "TNRC6C", name: "TNRC6C", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"},
+        {id: "clipdb-YTHDF2_HeLa", symbol: "YTHDF2", name: "YTHDF2", diseaseState: "Cervical adenocarcinoma", cellLine: "HeLa", species: "Human"},
+        {id: "clipdb-ZC3H7B_HEK293", symbol: "ZC3H7B", name: "ZC3H7B", diseaseState: "Cancer", cellLine: "HEK293", species: "Human"}
     ],
     encode: [
-        {id: 'encode-AUH_HepG2_ENCSR334QFR', symbol: 'AUH', name: 'AUH', cellLine: 'HepG2'},
-        {id: 'encode-AUH_K562_ENCSR541QHS', symbol: 'AUH', name: 'AUH', cellLine: 'K562'},
-        {id: 'encode-BCCIP_HepG2_ENCSR485QCG', symbol: 'BCCIP', name: 'BCCIP', cellLine: 'HepG2'},
-        {id: 'encode-CPSF6_K562_ENCSR532VUB', symbol: 'CPSF6', name: 'CPSF6', cellLine: 'K562'},
-        {id: 'encode-DDX42_K562_ENCSR576SHT', symbol: 'DDX42', name: 'DDX42', cellLine: 'K562'},
-        {id: 'encode-EIF4G1_K562_ENCSR961WWI', symbol: 'EIF4G1', name: 'EIF4G1', cellLine: 'K562'},
-        {id: 'encode-EIF4G2_K562_ENCSR307YIW', symbol: 'EIF4G2', name: 'EIF4G2', cellLine: 'K562'},
-        {id: 'encode-FKBP4_HepG2_ENCSR018ZUE', symbol: 'FKBP4', name: 'FKBP4', cellLine: 'HepG2'},
-        {id: 'encode-FMR1_K562_ENCSR331VNX', symbol: 'FMR1', name: 'FMR1', cellLine: 'K562'},
-        {id: 'encode-FUS_K562_ENCSR477TRN', symbol: 'FUS', name: 'FUS', cellLine: 'K562'},
-        {id: 'encode-HNRNPA1_HepG2_ENCSR769UEW', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: 'HepG2'},
-        {id: 'encode-HNRNPA1_K562_ENCSR154HRN', symbol: 'HNRNPA1', name: 'HNRNPA1', cellLine: 'K562'},
-        {id: 'encode-HNRNPM_HepG2_ENCSR267UCX', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: 'HepG2'},
-        {id: 'encode-HNRNPM_K562_ENCSR412NOW', symbol: 'HNRNPM', name: 'HNRNPM', cellLine: 'K562'},
-        {id: 'encode-HNRNPU_HepG2_ENCSR240MVJ', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: 'HepG2'},
-        {id: 'encode-HNRNPU_K562_ENCSR520BZQ', symbol: 'HNRNPU', name: 'HNRNPU', cellLine: 'K562'},
-        {id: 'encode-IGF2BP1_HepG2_ENCSR744GEU', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'HepG2'},
-        {id: 'encode-IGF2BP1_K562_ENCSR427DED', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'K562'},
-        {id: 'encode-IGF2BP1_K562_ENCSR975KIR', symbol: 'IGF2BP1', name: 'IGF2BP1', cellLine: 'K562'},
-        {id: 'encode-IGF2BP2_K562_ENCSR062NNB', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: 'K562'},
-        {id: 'encode-IGF2BP2_K562_ENCSR193PVE', symbol: 'IGF2BP2', name: 'IGF2BP2', cellLine: 'K562'},
-        {id: 'encode-IGF2BP3_HepG2_ENCSR993OLA', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: 'HepG2'},
-        {id: 'encode-IGF2BP3_K562_ENCSR096IJV', symbol: 'IGF2BP3', name: 'IGF2BP3', cellLine: 'K562'},
-        {id: 'encode-LARP7_K562_ENCSR456KXI', symbol: 'LARP7', name: 'LARP7', cellLine: 'K562'},
-        {id: 'encode-PRPF8_K562_ENCSR534YOI', symbol: 'PRPF8', name: 'PRPF8', cellLine: 'K562'},
-        {id: 'encode-RBFOX2_HepG2_ENCSR987FTF', symbol: 'RBFOX2', name: 'RBFOX2', cellLine: 'HepG2'},
-        {id: 'encode-SAFB2_K562_ENCSR943MHU', symbol: 'SAFB2', name: 'SAFB2', cellLine: 'K562'},
-        {id: 'encode-SLBP_K562_ENCSR483NOP', symbol: 'SLBP', name: 'SLBP', cellLine: 'K562'},
-        {id: 'encode-SLTM_K562_ENCSR000SSH', symbol: 'SLTM', name: 'SLTM', cellLine: 'K562'},
-        {id: 'encode-SRSF9_HepG2_ENCSR773KRC', symbol: 'SRSF9', name: 'SRSF9', cellLine: 'HepG2'},
-        {id: 'encode-TIA1_HepG2_ENCSR623VEQ', symbol: 'TIA1', name: 'TIA1', cellLine: 'HepG2'},
-        {id: 'encode-TIAL1_K562_ENCSR441YTO', symbol: 'TIAL1', name: 'TIAL1', cellLine: 'K562'},
-        {id: 'encode-TRA2A_HepG2_ENCSR314UMJ', symbol: 'TRA2A', name: 'TRA2A', cellLine: 'HepG2'},
-        {id: 'encode-TRA2A_K562_ENCSR365NVO', symbol: 'TRA2A', name: 'TRA2A', cellLine: 'K562'},
-        {id: 'encode-U2AF1_K562_ENCSR862QCH', symbol: 'U2AF1', name: 'U2AF1', cellLine: 'K562'},
-        {id: 'encode-U2AF2_K562_ENCSR893RAV', symbol: 'U2AF2', name: 'U2AF2', cellLine: 'K562'},
-        {id: 'encode-XRN2_K562_ENCSR657TZB', symbol: 'XRN2', name: 'XRN2', cellLine: 'K562'}
+        {id: 'encode-AUH_HepG2_ENCSR334QFR', symbol: 'AUH', name: 'AUH', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-AUH_K562_ENCSR541QHS', symbol: 'AUH', name: 'AUH', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-BCCIP_HepG2_ENCSR485QCG', symbol: 'BCCIP', name: 'BCCIP', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-CPSF6_K562_ENCSR532VUB', symbol: 'CPSF6', name: 'CPSF6', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-DDX42_K562_ENCSR576SHT', symbol: 'DDX42', name: 'DDX42', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-EIF4G1_K562_ENCSR961WWI', symbol: 'EIF4G1', name: 'EIF4G1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-EIF4G2_K562_ENCSR307YIW', symbol: 'EIF4G2', name: 'EIF4G2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-FKBP4_HepG2_ENCSR018ZUE', symbol: 'FKBP4', name: 'FKBP4', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-FMR1_K562_ENCSR331VNX', symbol: 'FMR1', name: 'FMR1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-FUS_K562_ENCSR477TRN', symbol: 'FUS', name: 'FUS', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-HNRNPA1_HepG2_ENCSR769UEW', symbol: 'HNRNPA1', name: 'HNRNPA1', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-HNRNPA1_K562_ENCSR154HRN', symbol: 'HNRNPA1', name: 'HNRNPA1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-HNRNPM_HepG2_ENCSR267UCX', symbol: 'HNRNPM', name: 'HNRNPM', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-HNRNPM_K562_ENCSR412NOW', symbol: 'HNRNPM', name: 'HNRNPM', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-HNRNPU_HepG2_ENCSR240MVJ', symbol: 'HNRNPU', name: 'HNRNPU', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-HNRNPU_K562_ENCSR520BZQ', symbol: 'HNRNPU', name: 'HNRNPU', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-IGF2BP1_HepG2_ENCSR744GEU', symbol: 'IGF2BP1', name: 'IGF2BP1', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-IGF2BP1_K562_ENCSR427DED', symbol: 'IGF2BP1', name: 'IGF2BP1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-IGF2BP1_K562_ENCSR975KIR', symbol: 'IGF2BP1', name: 'IGF2BP1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-IGF2BP2_K562_ENCSR062NNB', symbol: 'IGF2BP2', name: 'IGF2BP2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-IGF2BP2_K562_ENCSR193PVE', symbol: 'IGF2BP2', name: 'IGF2BP2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-IGF2BP3_HepG2_ENCSR993OLA', symbol: 'IGF2BP3', name: 'IGF2BP3', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-IGF2BP3_K562_ENCSR096IJV', symbol: 'IGF2BP3', name: 'IGF2BP3', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-LARP7_K562_ENCSR456KXI', symbol: 'LARP7', name: 'LARP7', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-PRPF8_K562_ENCSR534YOI', symbol: 'PRPF8', name: 'PRPF8', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-RBFOX2_HepG2_ENCSR987FTF', symbol: 'RBFOX2', name: 'RBFOX2', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-SAFB2_K562_ENCSR943MHU', symbol: 'SAFB2', name: 'SAFB2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-SLBP_K562_ENCSR483NOP', symbol: 'SLBP', name: 'SLBP', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-SLTM_K562_ENCSR000SSH', symbol: 'SLTM', name: 'SLTM', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-SRSF9_HepG2_ENCSR773KRC', symbol: 'SRSF9', name: 'SRSF9', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-TIA1_HepG2_ENCSR623VEQ', symbol: 'TIA1', name: 'TIA1', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-TIAL1_K562_ENCSR441YTO', symbol: 'TIAL1', name: 'TIAL1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-TRA2A_HepG2_ENCSR314UMJ', symbol: 'TRA2A', name: 'TRA2A', diseaseState: "Hepatocellular carcinoma", cellLine: 'HepG2', species: "Human"},
+        {id: 'encode-TRA2A_K562_ENCSR365NVO', symbol: 'TRA2A', name: 'TRA2A', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-U2AF1_K562_ENCSR862QCH', symbol: 'U2AF1', name: 'U2AF1', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-U2AF2_K562_ENCSR893RAV', symbol: 'U2AF2', name: 'U2AF2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"},
+        {id: 'encode-XRN2_K562_ENCSR657TZB', symbol: 'XRN2', name: 'XRN2', diseaseState: "Chronic myelogenous leukemia (CML)", cellLine: 'K562', species: "Human"}
     ]
 };
 
-ReactDOM.render(<SetenApp collections={collections} explore={explore} />, document.querySelector('.container-app'));
+ReactDOM.render(
+    <SetenApp
+        collections={collections}
+        samples={samples}
+        explore={explore}
+        />,
+    document.querySelector('.container-app')
+);

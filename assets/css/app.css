@@ -44,6 +44,11 @@
     cursor: inherit;
     display: block;
 }
+.help-block-samples {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
 .panel-explore, .panel-analyze {
     margin-top: 20px;
 }
@@ -51,7 +56,7 @@
     max-height: 289px;
     overflow-y: auto;
 }
-.table-responsive, .table {
+.table-panel {
     margin-bottom: 0px;
 }
 th {
