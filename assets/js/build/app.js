@@ -6,6 +6,12 @@ Math.log10 = Math.log10 || function (x) {
     return Math.log(x) / Math.LN10;
 };
 
+var clickEvent = new MouseEvent('click', {
+    'view': window,
+    'bubbles': true,
+    'cancelable': false
+});
+
 var PanelExploreItem = React.createClass({
     displayName: 'PanelExploreItem',
 
@@ -74,7 +80,7 @@ var PanelExplore = React.createClass({
                     React.createElement(
                         'p',
                         { className: 'list-group-item-text' },
-                        'Precomputed gene set enrichment analysis results for RBPs from CLIPdb project.'
+                        'Precomputed gene set associations for RBPs from CLIPdb project.'
                     )
                 ),
                 clipdb.map(function (item) {
@@ -94,7 +100,7 @@ var PanelExplore = React.createClass({
                     React.createElement(
                         'p',
                         { className: 'list-group-item-text' },
-                        'Precomputed gene set enrichment analysis results for RBPs from ENCODE project.'
+                        'Precomputed gene set associations for RBPs from ENCODE project.'
                     )
                 ),
                 encode.map(function (item) {
@@ -238,21 +244,27 @@ var PanelAnalyze = React.createClass({
     render: function render() {
         var button;
         if (!this.props.disabled) {
-            button = React.createElement('input', {
-                type: 'submit',
-                className: 'btn btn-primary btn-sm btn-submit',
-                value: 'Submit',
-                disabled: this.props.disabled,
-                onClick: this.props.onInputSubmitClick
-            });
+            button = React.createElement(
+                'button',
+                {
+                    className: 'btn btn-primary btn-sm',
+                    disabled: this.props.disabled,
+                    onClick: this.props.onInputSubmitClick
+                },
+                React.createElement('i', { className: 'fa fa-send' }),
+                ' Submit'
+            );
         } else {
-            button = React.createElement('input', {
-                type: 'submit',
-                className: 'btn btn-danger btn-sm btn-submit',
-                value: 'Cancel',
-                disabled: !this.props.disabled,
-                onClick: this.props.onInputCancelClick
-            });
+            button = React.createElement(
+                'button',
+                {
+                    className: 'btn btn-danger btn-sm',
+                    disabled: !this.props.disabled,
+                    onClick: this.props.onInputCancelClick
+                },
+                React.createElement('i', { className: 'fa fa-times-circle' }),
+                ' Cancel'
+            );
         }
         return React.createElement(
             'div',
@@ -263,7 +275,7 @@ var PanelAnalyze = React.createClass({
                 React.createElement(
                     'h3',
                     { className: 'panel-title' },
-                    React.createElement('i', { className: 'fa fa-bar-chart' }),
+                    React.createElement('i', { className: 'fa fa-flask' }),
                     '  Analyze'
                 )
             ),
@@ -648,11 +660,21 @@ var Result = React.createClass({
                             { className: 'panel-title' },
                             React.createElement(
                                 'a',
-                                { className: 'collapsed', role: 'button', 'data-toggle': 'collapse', href: '#collapse-' + result.id, 'aria-expanded': 'true', 'aria-controls': 'collapse-' + result.id },
-                                result.title,
-                                ' (',
-                                result.enrichment.length,
-                                ')'
+                                {
+                                    className: 'collapsed',
+                                    role: 'button',
+                                    'data-toggle': 'collapse',
+                                    href: '#collapse-' + result.id,
+                                    'aria-expanded': 'true',
+                                    'aria-controls': 'collapse-' + result.id
+                                },
+                                result.title
+                            ),
+                            ' ',
+                            React.createElement(
+                                'span',
+                                { className: 'badge' },
+                                result.enrichment.length
                             )
                         )
                     ),
@@ -661,7 +683,12 @@ var Result = React.createClass({
             ),
             React.createElement(
                 'div',
-                { id: 'collapse-' + result.id, className: 'panel-collapse collapse', role: 'tabpanel', 'aria-labelledby': 'heading-' + result.id },
+                {
+                    id: 'collapse-' + result.id,
+                    className: 'panel-collapse collapse',
+                    role: 'tabpanel',
+                    'aria-labelledby': 'heading-' + result.id
+                },
                 resultBarChart,
                 React.createElement(ResultTable, {
                     result: result,
@@ -1004,7 +1031,7 @@ var SetenApp = React.createClass({
             var data = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
             a.href = window.URL.createObjectURL(data);
             a.setAttribute('download', id + '.svg');
-            a.click();
+            a.dispatchEvent(clickEvent);
             a.remove();
         }
     },
@@ -1025,7 +1052,7 @@ var SetenApp = React.createClass({
             var a = document.createElement('a');
             a.href = window.URL.createObjectURL(data);
             a.setAttribute('download', result[0].id + '.tsv');
-            a.click();
+            a.dispatchEvent(clickEvent);
             a.remove();
         }
     },

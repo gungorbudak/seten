@@ -5,6 +5,12 @@ Math.log10 = Math.log10 || function(x) {
     return Math.log(x) / Math.LN10;
 };
 
+var clickEvent = new MouseEvent('click', {
+    'view': window,
+    'bubbles': true,
+    'cancelable': false
+});
+
 var PanelExploreItem = React.createClass({
     componentDidMount: function(argument) {
         var item = this.getDOMNode();
@@ -57,7 +63,9 @@ var PanelExplore = React.createClass({
                 <div className="list-group list-group-explore">
                     <div className="list-group-item">
                         <h4 className="list-group-item-heading">CLIPdb</h4>
-                        <p className="list-group-item-text">Precomputed gene set enrichment analysis results for RBPs from CLIPdb project.</p>
+                        <p className="list-group-item-text">
+                            Precomputed gene set associations for RBPs from CLIPdb project.
+                            </p>
                     </div>
                     {clipdb.map(function(item) {
                         return (
@@ -69,7 +77,9 @@ var PanelExplore = React.createClass({
                     })}
                     <div className="list-group-item">
                         <h4 className="list-group-item-heading">ENCODE</h4>
-                        <p className="list-group-item-text">Precomputed gene set enrichment analysis results for RBPs from ENCODE project.</p>
+                        <p className="list-group-item-text">
+                            Precomputed gene set associations for RBPs from ENCODE project.
+                        </p>
                     </div>
                     {encode.map(function(item) {
                         return (
@@ -187,30 +197,30 @@ var PanelAnalyze = React.createClass({
         var button;
         if (!this.props.disabled) {
             button = (
-                <input
-                    type="submit"
-                    className="btn btn-primary btn-sm btn-submit"
-                    value="Submit"
+                <button
+                    className="btn btn-primary btn-sm"
                     disabled={this.props.disabled}
                     onClick={this.props.onInputSubmitClick}
-                />
+                    >
+                    <i className="fa fa-send"></i> Submit
+                </button>
             );
         } else {
             button = (
-                <input
-                    type="submit"
-                    className="btn btn-danger btn-sm btn-submit"
-                    value="Cancel"
+                <button
+                    className="btn btn-danger btn-sm"
                     disabled={!this.props.disabled}
                     onClick={this.props.onInputCancelClick}
-                />
+                    >
+                    <i className="fa fa-times-circle"></i> Cancel
+                </button>
             );
         }
         return (
             <div className="panel panel-info panel-analyze">
                 <div className="panel-heading">
                     <h3 className="panel-title">
-                        <i className="fa fa-bar-chart"></i>
+                        <i className="fa fa-flask"></i>
                         &nbsp;
                         Analyze
                     </h3>
@@ -543,15 +553,29 @@ var Result = React.createClass({
                     <div className="row">
                         <div className="col-xs-6">
                             <h4 className="panel-title">
-                                <a className="collapsed" role="button" data-toggle="collapse" href={'#collapse-' + result.id} aria-expanded="true" aria-controls={'collapse-' + result.id}>
-                                    {result.title} ({result.enrichment.length})
+                                <a
+                                    className="collapsed"
+                                    role="button"
+                                    data-toggle="collapse"
+                                    href={'#collapse-' + result.id}
+                                    aria-expanded="true"
+                                    aria-controls={'collapse-' + result.id}
+                                    >
+                                    {result.title}
                                 </a>
+                                &nbsp;
+                                <span className="badge">{result.enrichment.length}</span>
                             </h4>
                         </div>
                         {exportButtons}
                     </div>
                 </div>
-                <div id={'collapse-' + result.id} className="panel-collapse collapse" role="tabpanel" aria-labelledby={'heading-' + result.id}>
+                <div
+                    id={'collapse-' + result.id}
+                    className="panel-collapse collapse"
+                    role="tabpanel"
+                    aria-labelledby={'heading-' + result.id}
+                    >
                     {resultBarChart}
                     <ResultTable
                         result={result}
@@ -840,7 +864,7 @@ var SetenApp = React.createClass({
             var data = new Blob([svg.outerHTML], {type: 'image/svg+xml'});
             a.href = window.URL.createObjectURL(data);
             a.setAttribute('download', id + '.svg');
-            a.click();
+            a.dispatchEvent(clickEvent);
             a.remove();
         }
     },
@@ -879,7 +903,7 @@ var SetenApp = React.createClass({
             var a = document.createElement('a');
             a.href = window.URL.createObjectURL(data);
             a.setAttribute('download', result[0].id + '.tsv');
-            a.click();
+            a.dispatchEvent(clickEvent);
             a.remove();
         }
     },

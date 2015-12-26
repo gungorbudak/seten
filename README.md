@@ -12,7 +12,7 @@ Seten's production server is running on http://www.iupui.edu/~sysbio/seten/
     cd seten/
     python -m SimpleHTTPServer 3000
 
-After the server setup, Seten will run on http://localhost:3000
+After the server setup, Seten will run on `http://localhost:3000`
 
 ## Documentation
 
