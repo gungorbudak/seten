@@ -254,7 +254,7 @@ var ResultBarChart = React.createClass({
         size.height = 450 - size.margin.top - size.margin.bottom;
         return {
             size: size,
-            data: this.props.enrichment.map(function(el) {
+            data: this.props.data.map(function(el) {
                 return {
                     // limit axis tick texts to 32 characters
                     n: (el.geneSet.length > 32) ? el.geneSet.substr(0, 29) + '...': el.geneSet,
@@ -262,7 +262,8 @@ var ResultBarChart = React.createClass({
                     // for better visualization
                     val: -Math.log10(el.cPValue)
                 };
-            })
+            }),
+            id: this.props.id
         };
     },
     renderChart: function(el, size, data) {
@@ -293,13 +294,32 @@ var ResultBarChart = React.createClass({
             .call(xAxis)
 
         x.selectAll("text")
+            .style("font", "10px sans-serif")
             .style("text-anchor", "end")
             .attr("dx", "-1em")
             .attr("dy", "-0.5em")
             .attr("transform", "rotate(-75)");
 
-        chart.selectAll('.y')
+        x.selectAll("path")
+            .style("display", "none");
+
+        x.selectAll("line")
+            .style("fill", "none")
+            .style("stroke", "#000")
+            .style("shape-rendering", "crispEdges");
+
+        var y = chart.selectAll('.y')
             .call(yAxis);
+
+        y.selectAll("path")
+            .style("fill", "none")
+            .style("stroke", "#000")
+            .style("shape-rendering", "crispEdges");
+
+        y.selectAll("line")
+            .style("fill", "none")
+            .style("stroke", "#000")
+            .style("shape-rendering", "crispEdges");
 
         var bar = chart.selectAll('.bars')
             .selectAll(".bar")
@@ -308,7 +328,8 @@ var ResultBarChart = React.createClass({
         bar.enter().append("rect")
             .attr("class", "bar")
 
-        bar.attr("x", function(d) { return xScale(d.n); })
+        bar.style("fill", "#F44336")
+            .attr("x", function(d) { return xScale(d.n); })
             .attr("width", xScale.rangeBand())
             .attr("y", function(d) { return yScale(d.val); })
             .attr("height", function(d) { return size.height - yScale(d.val); });
@@ -318,11 +339,14 @@ var ResultBarChart = React.createClass({
     updateChart: function(el, size, data) {
         this.renderChart(el, size, data);
     },
-    createChart: function(el, size, data) {
+    createChart: function(el, size, data, id) {
         var chart = d3.select(el)
-            .append("svg")
+          .append("svg")
+            .attr("id", id)
             .attr("width", size.width + size.margin.left + size.margin.right)
             .attr("height", size.height + size.margin.top + size.margin.bottom)
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("version", "1.1")
           .append("g")
             .attr("class", "chart")
             .attr("transform", "translate(" + size.margin.left + "," + size.margin.top + ")");
@@ -335,6 +359,7 @@ var ResultBarChart = React.createClass({
             .attr("y", -40)
             .attr("x", -(size.height / 2))
             .attr("dy", "1em")
+            .style("font", "10px sans-serif")
             .style("text-anchor", "middle")
             .text("-Log10(Comb. p-value)");
 
@@ -343,7 +368,7 @@ var ResultBarChart = React.createClass({
     componentDidMount: function() {
         var el = this.getDOMNode();
         var state = this.getChartState();
-        this.createChart(el, state.size, state.data);
+        this.createChart(el, state.size, state.data, state.id);
     },
     componentDidUpdate: function() {
         var el = this.getDOMNode();
@@ -478,12 +503,37 @@ var Result = React.createClass({
                     return el.cPValue < 0.01;
                 })
             },
+            exportButtons,
             resultBarChart;
 
         if (result.enrichment.length > 0) {
+            exportButtons = (
+                <div className="col-xs-6 text-right">
+                    Export
+                    &nbsp;
+                    <i
+                        className="fa fa-bar-chart btn-export"
+                        title="Export bar chart as SVG"
+                        id={result.id}
+                        onClick={this.props.onExportBarChart}
+                        aria-hidden="true"
+                        >
+                    </i>
+                    &nbsp;
+                    <i
+                        className="fa fa-table btn-export"
+                        title="Export table as TSV"
+                        id={result.id}
+                        onClick={this.props.onExportTable}
+                        aria-hidden="true"
+                        >
+                    </i>
+                </div>
+            );
             resultBarChart = (
                 <ResultBarChart
-                    enrichment={result.enrichment}
+                    id={result.id}
+                    data={result.enrichment}
                     />
             );
         }
@@ -498,9 +548,7 @@ var Result = React.createClass({
                                 </a>
                             </h4>
                         </div>
-                        <div className="col-xs-6">
-                            <span className="glyphicon glyphicon-download-alt btn-download pull-right" title="Export as TSV" id={result.id} onClick={this.props.onDownload} aria-hidden="true"></span>
-                        </div>
+                        {exportButtons}
                     </div>
                 </div>
                 <div id={'collapse-' + result.id} className="panel-collapse collapse" role="tabpanel" aria-labelledby={'heading-' + result.id}>
@@ -613,7 +661,8 @@ var ResultGroup = React.createClass({
                                     sortDirections={component.props.sortDirections}
                                     onSort={component.props.onSort}
                                     onViewGenes={component.props.onViewGenes}
-                                    onDownload={component.props.onDownload}
+                                    onExportBarChart={component.props.onExportBarChart}
+                                    onExportTable={component.props.onExportTable}
                                     />
                           );
                     })}
@@ -780,7 +829,22 @@ var SetenApp = React.createClass({
     handleViewGenes: function(e) {
         console.log('Viewing genes');
     },
-    handleDownload: function(e) {
+    handleExportBarChart: function(e) {
+        e.preventDefault();
+        var id = e.currentTarget.id,
+            query = 'svg#' + id,
+            svg = document.querySelector(query),
+            a = document.createElement('a');
+
+        if (svg.outerHTML.length > 0) {
+            var data = new Blob([svg.outerHTML], {type: 'image/svg+xml'});
+            a.href = window.URL.createObjectURL(data);
+            a.setAttribute('download', id + '.svg');
+            a.click();
+            a.remove();
+        }
+    },
+    handleExportTable: function(e) {
         e.preventDefault();
         var id = e.currentTarget.id,
             results = this.state.results,
@@ -917,7 +981,8 @@ var SetenApp = React.createClass({
                             sortDirections={this.state.sortDirections}
                             onSort={this.handleSort}
                             onViewGenes={this.handleViewGenes}
-                            onDownload={this.handleDownload}
+                            onExportBarChart={this.handleExportBarChart}
+                            onExportTable={this.handleExportTable}
                             />
                     </div>
                 </div>

@@ -64,11 +64,12 @@ self.onmessage = function(e) {
         genes,
         t1;
 
-    // main function to map rows in a BED file
-    var mapRows = function(rows) {
+    // main function to map content of a BED file
+    var _map = function(content) {
+        rows = content.trim().split(/\r?\n/);
         // do the mapping for each row
         rows.forEach(function(row) {
-            cols = row.split(/\t/);
+            cols = row.split(/\s/);
             genes = _search(mapping, cols[0], cols[1], cols[2]);
             if (genes.length > 0) {
                 // might return multiple genes
@@ -96,20 +97,16 @@ self.onmessage = function(e) {
 
     // read the file
     if (typeof FileReader !== 'undefined') {
-        console.log('[mappingWorker] Asynchronous reading...');
         reader = new FileReader();
         reader.onload = function(e) {
-            rows = e.target.result.trim().split(/\r?\n/);
-            mapRows(rows);
+            _map(e.target.result);
         };
         reader.readAsText(e.data);
     } else {
         // synchronous reader for browsers
         // that don't support async FileReader
-        console.log('[mappingWorker] Synchronous reading...');
         reader = new FileReaderSync();
         var content = reader.readAsText(e.data);
-        rows = content.trim().split(/\r?\n/);
-        mapRows(rows);
+        _map(content);
     }
 };

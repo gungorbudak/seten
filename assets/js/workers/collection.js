@@ -1,11 +1,20 @@
 'use strict';
 
-Array.prototype.unique = function() {
-    var a = [];
-    for (var i=0, l=this.length; i<l; i++)
-        if (a.indexOf(this[i]) === -1)
-            a.push(this[i]);
-    return a;
+Array.prototype.unique = function(){
+    return Object.keys(this.reduce(function(r,v){ return r[v]=1,r; },{}));
+}
+
+function _getCollectionsSize(cols) {
+    var genes = [],
+        size;
+    for (var c in cols.collections) {
+        var _genes = cols.collections[c].geneSets.reduce(function(a, b) {
+            return a.concat(b.genes);
+        }, []);
+        genes = genes.concat(_genes);
+    }
+    size = genes.unique().length
+    return size;
 }
 
 function _collectGeneSets(filename) {
@@ -21,7 +30,7 @@ function _collectGeneSets(filename) {
             cols = row.split(/\s/);
             geneSets.push({
                 name: cols[0],
-                genes: cols.slice(2, cols.length)
+                genes: cols.slice(2).unique()
             });
         });
     }
@@ -48,6 +57,7 @@ self.onmessage = function(e) {
     });
 
     // size of all collections
+    //_collections.size = _getCollectionsSize(_collections);
     _collections.size = 20651;
 
     t1 = new Date().getTime();

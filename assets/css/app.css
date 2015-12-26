@@ -5,24 +5,9 @@
     background-color: #F44336;
 }
 .navbar-inverse .navbar-brand {
-    color: #F44336;
+    color: #ffffff;
 }
-.bar {
-    fill: #F44336;
-}
-.axis text {
-    font: 10px sans-serif;
-}
-.axis path, .axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
-.x.axis path {
-    display: none;
-}
-.btn-download {
-    display: inline-block;
+.btn-export {
     cursor: pointer;
 }
 .btn-file {
