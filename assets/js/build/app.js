@@ -355,7 +355,7 @@ var ResultBarChart = React.createClass({
 
         var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
-        var yAxis = d3.svg.axis().scale(yScale).orient("left");
+        var yAxis = d3.svg.axis().scale(yScale).orient("left").tickFormat(d3.format("d"));
 
         var chart = d3.select(el).selectAll('.chart');
 
@@ -565,7 +565,7 @@ var ResultTable = React.createClass({
                                     React.createElement(
                                         'abbr',
                                         {
-                                            title: "Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes"
+                                            title: row.overlapSize + "/" + row.geneSetSize
                                         },
                                         row.percent
                                     )
@@ -615,7 +615,7 @@ var Result = React.createClass({
             id: result.id,
             title: result.title,
             enrichment: result.enrichment.filter(function (el) {
-                return el.cPValue < component.props.resultsThreshold;
+                return el.percent > component.props.resultsOptions.percent && el.cPValue < component.props.resultsOptions.pValue;
             })
         },
             exportButtons,
@@ -854,13 +854,28 @@ var ResultGroupOptions = React.createClass({
                     React.createElement(
                         'label',
                         null,
-                        'Comb. p-value threshold'
+                        'Percent >'
                     ),
                     React.createElement('input', {
                         type: 'text',
                         className: 'form-control',
-                        value: this.props.resultsThreshold,
-                        onChange: this.props.onTextOptionsThresholdChange
+                        value: this.props.resultsOptions.percent,
+                        onChange: this.props.onOptionsPercentChange
+                    })
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'form-group' },
+                    React.createElement(
+                        'label',
+                        null,
+                        'Comb. p-value <'
+                    ),
+                    React.createElement('input', {
+                        type: 'text',
+                        className: 'form-control',
+                        value: this.props.resultsOptions.pValue,
+                        onChange: this.props.onOptionsPValueChange
                     })
                 )
             );
@@ -887,8 +902,9 @@ var ResultGroup = React.createClass({
             }),
             React.createElement(ResultGroupOptions, {
                 show: component.props.results.length,
-                resultsThreshold: component.props.resultsThreshold,
-                onTextOptionsThresholdChange: component.props.onTextOptionsThresholdChange
+                resultsOptions: component.props.resultsOptions,
+                onOptionsPercentChange: component.props.onOptionsPercentChange,
+                onOptionsPValueChange: component.props.onOptionsPValueChange
             }),
             React.createElement(
                 'div',
@@ -897,7 +913,7 @@ var ResultGroup = React.createClass({
                     return React.createElement(Result, {
                         result: result,
                         sortDirections: component.props.sortDirections,
-                        resultsThreshold: component.props.resultsThreshold,
+                        resultsOptions: component.props.resultsOptions,
                         onSort: component.props.onSort,
                         onExportBarChart: component.props.onExportBarChart,
                         onExportTable: component.props.onExportTable
@@ -921,7 +937,10 @@ var SetenApp = React.createClass({
             geneCollections: [],
             results: [],
             resultsInfo: {},
-            resultsThreshold: 0.01,
+            resultsOptions: {
+                percent: 5,
+                pValue: 0.01
+            },
             isRunning: false,
             sortAscOrder: false,
             sortDirections: {
@@ -1065,9 +1084,19 @@ var SetenApp = React.createClass({
         this.setState({ sortAscOrder: !order });
         this.setState({ sortDirections: _directions });
     },
-    handleTextOptionsThresholdChange: function handleTextOptionsThresholdChange(e) {
-        var threshold = e.target.value;
-        this.setState({ resultsThreshold: threshold });
+    handleOptionsPercentChange: function handleOptionsPercentChange(e) {
+        var percent = e.target.value,
+            resultsOptions = this.state.resultsOptions;
+
+        resultsOptions.percent = percent;
+        this.setState({ resultsOptions: resultsOptions });
+    },
+    handleOptionsPValueChange: function handleOptionsPValueChange(e) {
+        var pValue = e.target.value;
+        resultsOptions = this.state.resultsOptions;
+
+        resultsOptions.pValue = pValue;
+        this.setState({ resultsOptions: resultsOptions });
     },
     handleExportBarChart: function handleExportBarChart(e) {
         e.preventDefault();
@@ -1208,12 +1237,13 @@ var SetenApp = React.createClass({
                     React.createElement(ResultGroup, {
                         results: this.state.results,
                         resultsInfo: this.state.resultsInfo,
-                        resultsThreshold: this.state.resultsThreshold,
+                        resultsOptions: this.state.resultsOptions,
                         progress: progress,
                         isRunning: this.state.isRunning,
                         sortDirections: this.state.sortDirections,
                         onSort: this.handleSort,
-                        onTextOptionsThresholdChange: this.handleTextOptionsThresholdChange,
+                        onOptionsPercentChange: this.handleOptionsPercentChange,
+                        onOptionsPValueChange: this.handleOptionsPValueChange,
                         onExportBarChart: this.handleExportBarChart,
                         onExportTable: this.handleExportTable
                     })

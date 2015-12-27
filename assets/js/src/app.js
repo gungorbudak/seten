@@ -296,7 +296,8 @@ var ResultBarChart = React.createClass({
 
         var yAxis = d3.svg.axis()
             .scale(yScale)
-            .orient("left");
+            .orient("left")
+            .tickFormat(d3.format("d"));
 
         var chart = d3.select(el).selectAll('.chart');
 
@@ -480,7 +481,7 @@ var ResultTable = React.createClass({
                                             <td>{geneSet}</td>
                                             <td>
                                                 <abbr
-                                                    title={"Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes"}
+                                                    title={row.overlapSize + "/" + row.geneSetSize}
                                                     >
                                                     {row.percent}
                                                 </abbr>
@@ -514,7 +515,8 @@ var Result = React.createClass({
                 id: result.id,
                 title: result.title,
                 enrichment: result.enrichment.filter(function(el) {
-                    return el.cPValue < component.props.resultsThreshold;
+                    return el.percent > component.props.resultsOptions.percent &&
+                           el.cPValue < component.props.resultsOptions.pValue;
                 })
             },
             exportButtons,
@@ -677,12 +679,21 @@ var ResultGroupOptions = React.createClass({
                         <label className="text-muted">Options</label>
                     </div>
                     <div className="form-group">
-                        <label>Comb. p-value threshold</label>
+                        <label>Percent &gt;</label>
                         <input
                             type="text"
                             className="form-control"
-                            value={this.props.resultsThreshold}
-                            onChange={this.props.onTextOptionsThresholdChange}
+                            value={this.props.resultsOptions.percent}
+                            onChange={this.props.onOptionsPercentChange}
+                            />
+                    </div>
+                    <div className="form-group">
+                        <label>Comb. p-value &lt;</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={this.props.resultsOptions.pValue}
+                            onChange={this.props.onOptionsPValueChange}
                             />
                     </div>
                 </div>
@@ -709,8 +720,9 @@ var ResultGroup = React.createClass({
                     />
                 <ResultGroupOptions
                     show={component.props.results.length}
-                    resultsThreshold={component.props.resultsThreshold}
-                    onTextOptionsThresholdChange={component.props.onTextOptionsThresholdChange}
+                    resultsOptions={component.props.resultsOptions}
+                    onOptionsPercentChange={component.props.onOptionsPercentChange}
+                    onOptionsPValueChange={component.props.onOptionsPValueChange}
                     />
                 <div className="panel-group" role="tablist" aria-multiselectable="true">
                     {component.props.results.map(function(result) {
@@ -718,7 +730,7 @@ var ResultGroup = React.createClass({
                                 <Result
                                     result={result}
                                     sortDirections={component.props.sortDirections}
-                                    resultsThreshold={component.props.resultsThreshold}
+                                    resultsOptions={component.props.resultsOptions}
                                     onSort={component.props.onSort}
                                     onExportBarChart={component.props.onExportBarChart}
                                     onExportTable={component.props.onExportTable}
@@ -742,7 +754,10 @@ var SetenApp = React.createClass({
                 geneCollections: [],
                 results: [],
                 resultsInfo: {},
-                resultsThreshold: 0.01,
+                resultsOptions: {
+                    percent: 5,
+                    pValue: 0.01
+                },
                 isRunning: false,
                 sortAscOrder: false,
                 sortDirections: {
@@ -886,9 +901,19 @@ var SetenApp = React.createClass({
         this.setState({sortAscOrder: !order});
         this.setState({sortDirections: _directions});
     },
-    handleTextOptionsThresholdChange: function(e) {
-        var threshold = e.target.value;
-        this.setState({resultsThreshold: threshold});
+    handleOptionsPercentChange: function(e) {
+        var percent = e.target.value,
+            resultsOptions = this.state.resultsOptions;
+
+        resultsOptions.percent = percent;
+        this.setState({resultsOptions: resultsOptions});
+    },
+    handleOptionsPValueChange: function(e) {
+        var pValue = e.target.value;
+        resultsOptions = this.state.resultsOptions;
+
+        resultsOptions.pValue = pValue;
+        this.setState({resultsOptions: resultsOptions});
     },
     handleExportBarChart: function(e) {
         e.preventDefault();
@@ -1037,12 +1062,13 @@ var SetenApp = React.createClass({
                         <ResultGroup
                             results={this.state.results}
                             resultsInfo={this.state.resultsInfo}
-                            resultsThreshold={this.state.resultsThreshold}
+                            resultsOptions={this.state.resultsOptions}
                             progress={progress}
                             isRunning={this.state.isRunning}
                             sortDirections={this.state.sortDirections}
                             onSort={this.handleSort}
-                            onTextOptionsThresholdChange={this.handleTextOptionsThresholdChange}
+                            onOptionsPercentChange={this.handleOptionsPercentChange}
+                            onOptionsPValueChange={this.handleOptionsPValueChange}
                             onExportBarChart={this.handleExportBarChart}
                             onExportTable={this.handleExportTable}
                             />
