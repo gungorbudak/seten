@@ -7,6 +7,17 @@
 .navbar-inverse .navbar-brand {
     color: #ffffff;
 }
+.form-inline {
+    margin-bottom: 20px;
+}
+.form-inline .form-group > * {
+    margin: 0px 3px;
+}
+@media (min-width: 768px) {
+    .form-inline .form-group {
+        vertical-align: baseline;
+    }
+}
 .badge {
     vertical-align: bottom;
 }

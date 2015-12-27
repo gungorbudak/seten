@@ -6,6 +6,7 @@ Math.log10 = Math.log10 || function (x) {
     return Math.log(x) / Math.LN10;
 };
 
+// cross-browser click event for exporting
 var clickEvent = new MouseEvent('click', {
     'view': window,
     'bubbles': true,
@@ -318,8 +319,8 @@ var PanelAnalyze = React.createClass({
 var ResultBarChart = React.createClass({
     displayName: 'ResultBarChart',
 
-    getChartState: function getChartState() {
-        var panelWidth = 1138;
+    getChartState: function getChartState(width) {
+        var panelWidth = width;
         var size = {
             margin: { top: 20, right: 10, bottom: 225, left: 50 }
         };
@@ -399,13 +400,15 @@ var ResultBarChart = React.createClass({
         this.updateChart(el, size, data);
     },
     componentDidMount: function componentDidMount() {
-        var el = this.getDOMNode();
-        var state = this.getChartState();
+        var el = this.getDOMNode(),
+            width = el.parentNode.previousSibling.offsetWidth,
+            state = this.getChartState(width);
         this.createChart(el, state.size, state.data, state.id);
     },
     componentDidUpdate: function componentDidUpdate() {
-        var el = this.getDOMNode();
-        var state = this.getChartState();
+        var el = this.getDOMNode(),
+            width = el.parentNode.previousSibling.offsetWidth,
+            state = this.getChartState(width);
         this.updateChart(el, state.size, state.data);
     },
     render: function render() {
@@ -561,8 +564,8 @@ var ResultTable = React.createClass({
                                     null,
                                     React.createElement(
                                         'abbr',
-                                        { title: "Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes",
-                                            onClick: component.props.onViewGenes
+                                        {
+                                            title: "Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes"
                                         },
                                         row.percent
                                     )
@@ -606,12 +609,13 @@ var Result = React.createClass({
     displayName: 'Result',
 
     render: function render() {
-        var result = this.props.result,
+        var component = this,
+            result = component.props.result,
             result = {
             id: result.id,
             title: result.title,
             enrichment: result.enrichment.filter(function (el) {
-                return el.cPValue < 0.01;
+                return el.cPValue < component.props.resultsThreshold;
             })
         },
             exportButtons,
@@ -626,7 +630,7 @@ var Result = React.createClass({
                     className: 'fa fa-bar-chart btn-export',
                     title: 'Export bar chart as SVG',
                     id: result.id,
-                    onClick: this.props.onExportBarChart,
+                    onClick: component.props.onExportBarChart,
                     'aria-hidden': 'true'
                 }),
                 ' ',
@@ -634,7 +638,7 @@ var Result = React.createClass({
                     className: 'fa fa-table btn-export',
                     title: 'Export table as TSV',
                     id: result.id,
-                    onClick: this.props.onExportTable,
+                    onClick: component.props.onExportTable,
                     'aria-hidden': 'true'
                 })
             );
@@ -692,9 +696,8 @@ var Result = React.createClass({
                 resultBarChart,
                 React.createElement(ResultTable, {
                     result: result,
-                    sortDirections: this.props.sortDirections,
-                    onSort: this.props.onSort,
-                    onViewGenes: this.props.onViewGenes
+                    sortDirections: component.props.sortDirections,
+                    onSort: component.props.onSort
                 })
             )
         );
@@ -828,6 +831,45 @@ var ResultGroupInfo = React.createClass({
     }
 });
 
+var ResultGroupOptions = React.createClass({
+    displayName: 'ResultGroupOptions',
+
+    render: function render() {
+        if (this.props.show) {
+            return React.createElement(
+                'div',
+                { className: 'form-inline' },
+                React.createElement(
+                    'div',
+                    { className: 'form-group' },
+                    React.createElement(
+                        'label',
+                        { className: 'text-muted' },
+                        'Options'
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'form-group' },
+                    React.createElement(
+                        'label',
+                        null,
+                        'Comb. p-value threshold'
+                    ),
+                    React.createElement('input', {
+                        type: 'text',
+                        className: 'form-control',
+                        value: this.props.resultsThreshold,
+                        onChange: this.props.onTextOptionsThresholdChange
+                    })
+                )
+            );
+        } else {
+            return React.createElement('div', null);
+        }
+    }
+});
+
 var ResultGroup = React.createClass({
     displayName: 'ResultGroup',
 
@@ -837,11 +879,16 @@ var ResultGroup = React.createClass({
             'div',
             null,
             React.createElement(ResultGroupProgressBar, {
-                progress: component.props.progress,
-                show: component.props.isRunning
+                show: component.props.isRunning,
+                progress: component.props.progress
             }),
             React.createElement(ResultGroupInfo, {
                 info: component.props.resultsInfo
+            }),
+            React.createElement(ResultGroupOptions, {
+                show: component.props.results.length,
+                resultsThreshold: component.props.resultsThreshold,
+                onTextOptionsThresholdChange: component.props.onTextOptionsThresholdChange
             }),
             React.createElement(
                 'div',
@@ -850,8 +897,8 @@ var ResultGroup = React.createClass({
                     return React.createElement(Result, {
                         result: result,
                         sortDirections: component.props.sortDirections,
+                        resultsThreshold: component.props.resultsThreshold,
                         onSort: component.props.onSort,
-                        onViewGenes: component.props.onViewGenes,
                         onExportBarChart: component.props.onExportBarChart,
                         onExportTable: component.props.onExportTable
                     });
@@ -874,6 +921,7 @@ var SetenApp = React.createClass({
             geneCollections: [],
             results: [],
             resultsInfo: {},
+            resultsThreshold: 0.01,
             isRunning: false,
             sortAscOrder: false,
             sortDirections: {
@@ -1017,8 +1065,9 @@ var SetenApp = React.createClass({
         this.setState({ sortAscOrder: !order });
         this.setState({ sortDirections: _directions });
     },
-    handleViewGenes: function handleViewGenes(e) {
-        console.log('Viewing genes');
+    handleTextOptionsThresholdChange: function handleTextOptionsThresholdChange(e) {
+        var threshold = e.target.value;
+        this.setState({ resultsThreshold: threshold });
     },
     handleExportBarChart: function handleExportBarChart(e) {
         e.preventDefault();
@@ -1159,11 +1208,12 @@ var SetenApp = React.createClass({
                     React.createElement(ResultGroup, {
                         results: this.state.results,
                         resultsInfo: this.state.resultsInfo,
+                        resultsThreshold: this.state.resultsThreshold,
                         progress: progress,
                         isRunning: this.state.isRunning,
                         sortDirections: this.state.sortDirections,
                         onSort: this.handleSort,
-                        onViewGenes: this.handleViewGenes,
+                        onTextOptionsThresholdChange: this.handleTextOptionsThresholdChange,
                         onExportBarChart: this.handleExportBarChart,
                         onExportTable: this.handleExportTable
                     })

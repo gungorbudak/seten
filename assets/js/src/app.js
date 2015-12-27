@@ -5,6 +5,7 @@ Math.log10 = Math.log10 || function(x) {
     return Math.log(x) / Math.LN10;
 };
 
+// cross-browser click event for exporting
 var clickEvent = new MouseEvent('click', {
     'view': window,
     'bubbles': true,
@@ -255,8 +256,8 @@ var PanelAnalyze = React.createClass({
 });
 
 var ResultBarChart = React.createClass({
-    getChartState: function() {
-        var panelWidth = 1138;
+    getChartState: function(width) {
+        var panelWidth = width;
         var size = {
             margin: {top: 20, right: 10, bottom: 225, left: 50}
         };
@@ -376,13 +377,15 @@ var ResultBarChart = React.createClass({
         this.updateChart(el, size, data);
     },
     componentDidMount: function() {
-        var el = this.getDOMNode();
-        var state = this.getChartState();
+        var el = this.getDOMNode(),
+            width = el.parentNode.previousSibling.offsetWidth,
+            state = this.getChartState(width);
         this.createChart(el, state.size, state.data, state.id);
     },
     componentDidUpdate: function() {
-        var el = this.getDOMNode();
-        var state = this.getChartState();
+        var el = this.getDOMNode(),
+            width = el.parentNode.previousSibling.offsetWidth,
+            state = this.getChartState(width);
         this.updateChart(el, state.size, state.data);
     },
     render: function() {
@@ -476,8 +479,8 @@ var ResultTable = React.createClass({
                                         <tr>
                                             <td>{geneSet}</td>
                                             <td>
-                                                <abbr title={"Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes"}
-                                                    onClick={component.props.onViewGenes}
+                                                <abbr
+                                                    title={"Click to view " + row.overlapSize + "/" + row.geneSetSize + " genes"}
                                                     >
                                                     {row.percent}
                                                 </abbr>
@@ -505,12 +508,13 @@ var ResultTable = React.createClass({
 
 var Result = React.createClass({
     render: function() {
-        var result = this.props.result,
+        var component = this,
+            result = component.props.result,
             result = {
                 id: result.id,
                 title: result.title,
                 enrichment: result.enrichment.filter(function(el) {
-                    return el.cPValue < 0.01;
+                    return el.cPValue < component.props.resultsThreshold;
                 })
             },
             exportButtons,
@@ -525,7 +529,7 @@ var Result = React.createClass({
                         className="fa fa-bar-chart btn-export"
                         title="Export bar chart as SVG"
                         id={result.id}
-                        onClick={this.props.onExportBarChart}
+                        onClick={component.props.onExportBarChart}
                         aria-hidden="true"
                         >
                     </i>
@@ -534,7 +538,7 @@ var Result = React.createClass({
                         className="fa fa-table btn-export"
                         title="Export table as TSV"
                         id={result.id}
-                        onClick={this.props.onExportTable}
+                        onClick={component.props.onExportTable}
                         aria-hidden="true"
                         >
                     </i>
@@ -579,9 +583,8 @@ var Result = React.createClass({
                     {resultBarChart}
                     <ResultTable
                         result={result}
-                        sortDirections={this.props.sortDirections}
-                        onSort={this.props.onSort}
-                        onViewGenes={this.props.onViewGenes}
+                        sortDirections={component.props.sortDirections}
+                        onSort={component.props.onSort}
                         />
                 </div>
             </div>
@@ -665,17 +668,49 @@ var ResultGroupInfo = React.createClass({
     }
 });
 
+var ResultGroupOptions = React.createClass({
+    render: function() {
+        if (this.props.show) {
+            return (
+                <div className="form-inline">
+                    <div className="form-group">
+                        <label className="text-muted">Options</label>
+                    </div>
+                    <div className="form-group">
+                        <label>Comb. p-value threshold</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={this.props.resultsThreshold}
+                            onChange={this.props.onTextOptionsThresholdChange}
+                            />
+                    </div>
+                </div>
+            );
+        } else {
+            return (
+                <div></div>
+            );
+        }
+    }
+});
+
 var ResultGroup = React.createClass({
     render: function() {
         var component = this;
         return (
             <div>
                 <ResultGroupProgressBar
-                    progress={component.props.progress}
                     show={component.props.isRunning}
+                    progress={component.props.progress}
                     />
                 <ResultGroupInfo
                     info={component.props.resultsInfo}
+                    />
+                <ResultGroupOptions
+                    show={component.props.results.length}
+                    resultsThreshold={component.props.resultsThreshold}
+                    onTextOptionsThresholdChange={component.props.onTextOptionsThresholdChange}
                     />
                 <div className="panel-group" role="tablist" aria-multiselectable="true">
                     {component.props.results.map(function(result) {
@@ -683,8 +718,8 @@ var ResultGroup = React.createClass({
                                 <Result
                                     result={result}
                                     sortDirections={component.props.sortDirections}
+                                    resultsThreshold={component.props.resultsThreshold}
                                     onSort={component.props.onSort}
-                                    onViewGenes={component.props.onViewGenes}
                                     onExportBarChart={component.props.onExportBarChart}
                                     onExportTable={component.props.onExportTable}
                                     />
@@ -707,6 +742,7 @@ var SetenApp = React.createClass({
                 geneCollections: [],
                 results: [],
                 resultsInfo: {},
+                resultsThreshold: 0.01,
                 isRunning: false,
                 sortAscOrder: false,
                 sortDirections: {
@@ -850,8 +886,9 @@ var SetenApp = React.createClass({
         this.setState({sortAscOrder: !order});
         this.setState({sortDirections: _directions});
     },
-    handleViewGenes: function(e) {
-        console.log('Viewing genes');
+    handleTextOptionsThresholdChange: function(e) {
+        var threshold = e.target.value;
+        this.setState({resultsThreshold: threshold});
     },
     handleExportBarChart: function(e) {
         e.preventDefault();
@@ -1000,11 +1037,12 @@ var SetenApp = React.createClass({
                         <ResultGroup
                             results={this.state.results}
                             resultsInfo={this.state.resultsInfo}
+                            resultsThreshold={this.state.resultsThreshold}
                             progress={progress}
                             isRunning={this.state.isRunning}
                             sortDirections={this.state.sortDirections}
                             onSort={this.handleSort}
-                            onViewGenes={this.handleViewGenes}
+                            onTextOptionsThresholdChange={this.handleTextOptionsThresholdChange}
                             onExportBarChart={this.handleExportBarChart}
                             onExportTable={this.handleExportTable}
                             />

@@ -1,9 +1,17 @@
 'use strict';
 
 function _computeGeneScore(scores, method) {
-    var m = typeof method !== 'undefined' ? method: 'highest';
-    if (m == 'highest') {
+    if (scores.length == 1) {
+        return scores[0];
+    }
+    var m = typeof method !== 'undefined' ? method: 'max';
+    if (m == 'max') {
         return Math.max.apply(null, scores)
+    } else if (m == 'mean') {
+        var sum = scores.reduce(function(a, b) { return a + b; });
+        return sum / scores.length;
+    } else if (m == 'sum') {
+        return scores.reduce(function(a, b) { return a + b; });
     }
 };
 
