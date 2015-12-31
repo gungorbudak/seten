@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Tutorial &ndash; Seten</title>
+    <link rel="shortcut icon" href="assets/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/libs/bootstrap.min.css" charset="utf-8">
+    <link rel="stylesheet" href="assets/css/libs/font-awesome.css" charset="utf-8">
+    <link rel="stylesheet" href="assets/css/app.css" charset="utf-8">
+    <script src="assets/js/libs/jquery-1.11.3.min.js" charset="utf-8"></script>
+    <script src="assets/js/libs/bootstrap.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Seten</h1>
+            <p>
+                A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
+            </p>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Seten</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="index.html"><i class="fa fa-home"></i> Start</a></li>
+                    <li class="active"><a href="tutorial.html"><i class="fa fa-question-circle"></i> Tutorial</a></li>
+                    <li><a href="docs.html"><i class="fa fa-book"></i> Documentation</a></li>
+                    <li>
+                        <a href="https://github.com/gungorbudak/seten-cli" title="Seten command line interface" target="_blank">
+                            <i class="fa fa-terminal"></i> CLI
+                        </a>
+                    </li>
+                    <li><a href="contact.html"><i class="fa fa-envelope"></i> Contact</a></li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Tutorial</h2>
+        <p>
+            This tutorial goes through a sample gene set association analysis covering all features of Seten browser user interface.
+        </p>
+        <h3>1. Select a BED file</h3>
+        <p>
+            <a href="assets/img/tutorial_1.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_1.png" alt="Select a BED file" />
+            </a>
+        </p>
+        <p>
+            Make sure you have <a href="docs.html#inputs-bed-file" target="_blank">a valid BED file</a> or just pick one from <strong>Sample datasets</strong> in the BED file option for analysis.
+        </p>
+        <h3>2. Select gene set collections</h3>
+        <p>
+            <a href="assets/img/tutorial_2.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_2.png" alt="Select gene set collections" />
+            </a>
+        </p>
+        <p>
+            There are <a href="docs.html#inputs-gene-set-collections" target="_blank">multiple gene set collections available</a>, just select the ones you're interested in. If you want to select more than one gene set collection, hold Ctrl key to do so.
+        </p>
+        <h3>3. Start the analysis</h3>
+        <p>
+            <a href="assets/img/tutorial_3.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_3.png" alt="Start the analysis" />
+            </a>
+        </p>
+        <p>
+            After selecting a BED file and gene set collections of interest, you can just click submit to start the analysis. After it starts, there will be a progress bar showing progress of analyzing the dataset for each gene set collection. In latest versions of modern browsers, the entire analyses may take up to several minutes depending on number of gene set collections selected and number of cores available in your machine.
+        </p>
+        <p>
+            Note that the analyze form will be disabled during the analysis and the submit button will be replaced with a cancel button after it starts. You may click to this button, and later confirm to cancel the analysis.
+        </p>
+        <h3>4. View results</h3>
+        <p>
+            <a href="assets/img/tutorial_4.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_4.png" alt="View results" />
+            </a>
+        </p>
+        <p>
+            As the analysis goes on, the results that are ready for a gene set collection will appear under the progress bar. You can click the name of the gene set collection to expand the view. After expanding it, you'll realize for significant hits, there is <a href="docs.html#outputs-bar-charts" target="_blank">a bar chart</a> and <a href="docs.html#outputs-tables" target="_blank">a table</a>. The table is sortable and by default it is sorted by combined p-value in ascending order.
+        </p>
+        <h3>5. Configure results</h3>
+        <p>
+            <a href="assets/img/tutorial_5.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_5.png" alt="Configure results" />
+            </a>
+        </p>
+        <p>
+            Just above the results, there will be a small form named "Options" which can be used to configure viewing options such as precent and combined p-value thresholds. Change default combined p-value threshold 0.01 to 0.05 and observe the results. You may have more gene sets available under this threshold. You may change percent threshold as you wish.
+        </p>
+        <h3>6. Export results</h3>
+        <p>
+            <a href="assets/img/tutorial_6.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_6.png" alt="Export results" />
+            </a>
+        </p>
+        <p>
+            Each result can be exported as a bar chart (SVG formatted) and a table (TSV formatted). Click the bar chart icon on the left of the result header. The bar chart will be downloaded to your computer. You may also click table icon next to it and download a local copy of the result table.
+        </p>
+        <h3>7. Explore available pre-computed results</h3>
+        <p>
+            <a href="assets/img/tutorial_7.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_7.png" alt="Explore available pre-computed results" />
+            </a>
+        </p>
+        <p>
+            We're also providing pre-computed gene set association results from <a href="docs.html#datasets" target="_blank">CLIPdb and ENCODE project datasets</a>. In <strong>Explore</strong> panel, you can click to any of the results to view, configure and export in the same way you did in the previous sections.
+        </p>
+    </div>
+
+    <div class="footer text-center">
+        <div class="container">
+            <span>
+                Seten: A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
+            </span>
+        </div>
+    </div>
+</body>
+
+</html>

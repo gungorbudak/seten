@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Documentation &ndash; Seten</title>
+    <link rel="shortcut icon" href="assets/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/libs/bootstrap.min.css" charset="utf-8">
+    <link rel="stylesheet" href="assets/css/libs/font-awesome.css" charset="utf-8">
+    <link rel="stylesheet" href="assets/css/app.css" charset="utf-8">
+    <script src="assets/js/libs/jquery-1.11.3.min.js" charset="utf-8"></script>
+    <script src="assets/js/libs/bootstrap.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Seten</h1>
+            <p>
+                A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
+            </p>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Seten</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="index.html"><i class="fa fa-home"></i> Start</a></li>
+                    <li><a href="tutorial.html"><i class="fa fa-question-circle"></i> Tutorial</a></li>
+                    <li class="active"><a href="docs.html"><i class="fa fa-book"></i> Documentation</a></li>
+                    <li>
+                        <a href="https://github.com/gungorbudak/seten-cli" title="Seten command line interface" target="_blank">
+                            <i class="fa fa-terminal"></i> CLI
+                        </a>
+                    </li>
+                    <li><a href="contact.html"><i class="fa fa-envelope"></i> Contact</a></li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </nav>
+
+    <div class="container text-justify">
+        <h2>Documentation</h2>
+        <div class="row">
+            <div class="col-sm-8">
+                <a name="introduction"></a>
+                <h3>Introduction</h3>
+                <p>
+                    Seten is a tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles. It has a <a href="#features-browser-user-interface">browser user interface</a> and <a href="#features-command-line-interface">command line interface</a> both of which <a href="#implementation">implement the same method</a>.
+                </p>
+                <a name="features"></a>
+                <h3>Features</h3>
+                <a name="features-browser-user-interface"></a>
+                <h4>Browser user interface</h4>
+                <p>
+                    Seten's browser interface (this website) provides an on-demand application for Seten's implementation.
+                </p>
+                <ul>
+                    <li>Runs almost all latest versions of modern browsers across all operating systems</li>
+                    <li>Requires no installation</li>
+                    <li>Utilizes HTML5 File API to read local files (fast and safe)</li>
+                    <li>Utilizes HTML5 Web Workers for paralel execution of tasks on multiple cores</li>
+                    <li>Visualizes results as bar charts</li>
+                    <li>Provides options to visualize results with different thresholds</li>
+                    <li>Provides export buttons for bar charts and tables of the results</li>
+                </ul>
+                <a name="features-command-line-interface"></a>
+                <h4>Command line interface</h4>
+                <p>
+                    Seten also has a command line interface that implements the same method but also lets you analyze multiple datasets in a single command.
+                </p>
+                <ul>
+                    <li>Runs on all operating systems</li>
+                    <li>Requires single-line command installation (requires Python 2.7+, Python package manager)</li>
+                    <li>Utilizes standard Python multiprocessing module for paralel execution of tasks on multiple cores</li>
+                    <li>Inputs single BED file or multiple BED files in a directory</li>
+                    <li>Provides options to use different columns as scores and different methods to compute gene level scores of multiple binding sites</li>
+                    <li>Outputs results in TSV formatted tables</li>
+                </ul>
+                <p>
+                    Please refer to <a href="https://github.com/gungorbudak/seten-cli" target="_blank">its Github page</a> for install and more detailed usage.
+                </p>
+                <a name="implementation"></a>
+                <h3>Implementation</h3>
+                <p>
+                    <a href="assets/img/docs_1.png" target="_blank">
+                        <img class="img-responsive" src="assets/img/docs_1.png" alt="Seten implementation" />
+                    </a>
+                </p>
+                <p>
+                    Binding sites from the input BED file are mapped onto their corresponding HGNC symbols using a mapping table from Ensembl. After mapping is complete, if multiple scores are available for a gene, highest of the scores is taken to represent that gene, which results in distinct set of genes and their corresponding scores representing the extent of binding by an RBP. Next, for every gene set in a gene set collection; (i) functional enrichment is performed by using Fisher’s Exact test, (ii) gene set enrichment is performed by implementing a permutation based test where for each gene set, the common genes between the gene set and the dataset are found, multiple times (e.g. 1000), the scores of common genes are compared with the scores of randomly picked genes using Mann Whitney U test, and a final p-value is computed by <i>max</i>(1 &ndash; # sign. tests / # total tests, 1 / # total tests), and (iii) after correcting p-values from functional enrichment part, p-values for every gene set from functional enrichment and gene set enrichment are combined to have a single p-value for each gene set by using Fisher’s method of p-value integration. Fisher’s exact test is one of the common ways of measuring functional enrichment of a gene set in a dataset, which takes the number of common genes (but not the extent of binding in the context of CLIP-seq profiles) between a gene set and the input dataset. However, since each gene in the input resulting from CLIP-seq experiments can have a different score, by permuting multiple times and checking if the scores of common genes are significantly higher than randomly picked scores (p < 0.05; 1000 iterations), we’re also taking the scores into account which can’t be handled by standard functional enrichment tests. We have validated that p-values obtained from functional enrichment and gene set enrichment are independent and hence employed Fisher’s method for combining these p-values.
+                </p>
+                <a name="datasets"></a>
+                <h3>Datasets</h3>
+                <p>
+                    The following datasets are used to test Seten during development and also their gene set association results are given in Seten's browser user interface (this website) under Explore panel. We downloaded human RBP datasets including target binding affinity scores from CLIPdb <sup>1</sup> and ENCODE project <sup>2</sup>. Since there are multiple samples of an RBP-cell line pair in CLIPdb, we simple merge them before the gene set association analyses. After preprocessing these datasets, we obtained 68 unique RBP-cell line pairs for CLIPdb and 37 unique RBP-cell line pairs for the ENCODE project.
+                </p>
+                <a name="inputs"></a>
+                <h3>Inputs</h3>
+                <a name="inputs-bed-file"></a>
+                <h4>BED file</h4>
+                <p>
+                    A BED file is an UCSC BED formatted text file which stores chromosomal location data as lines. Seten requires (at least) 5-column BED file having chrom, chromStart, chromEnd, name, score. Go to <a href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1" target="_blank">UCSC's website to obtain more information about BED format</a>.
+                </p>
+                <p>
+                    The first 10 lines of a sample BED file is as following:
+                </p>
+                <pre>
+chr1	566740	566760	binding_site_1	25	.	2.83477e-06
+chr1	566860	566880	binding_site_2	10	.	0.00657314
+chr1	569040	569060	binding_site_3	11	.	0.00469793
+chr1	881160	881180	binding_site_4	9	.	0.00843972
+chr1	1035940	1035960	binding_site_5	8	.	0.00997733
+chr1	1152440	1152460	binding_site_6	8	.	0.00997733
+chr1	1242120	1242140	binding_site_7	9	.	0.00843972
+chr1	1328880	1328900	binding_site_8	10	.	0.00657314
+chr1	1337360	1337380	binding_site_9	8	.	0.00997733
+chr1	1438640	1438660	binding_site_10	12	.	0.00315889
+.
+.
+.</pre>
+                <a name="inputs-gene-set-collections"></a>
+                <h4>Gene set collections</h4>
+                <p>
+                    Following gene set collections are avaliable in Seten's both browser user interface and command line interface.
+                </p>
+                <ul>
+                    <li>Pathways: REACTOME <sup>3</sup></li>
+                    <li>Pathways: BIOCARTA <sup>3</sup></li>
+                    <li>Pathways: KEGG <sup>3</sup></li>
+                    <li>GO: Biological Process <sup>3</sup></li>
+                    <li>GO: Molecular Function <sup>3</sup></li>
+                    <li>GO: Cellular Compartment <sup>3</sup></li>
+                    <li>Human Phenotype Ontology <sup>4</sup></li>
+                    <li>MalaCards Disease Ontology <sup>5</sup></li>
+                </ul>
+                <a name="outputs"></a>
+                <h3>Outputs</h3>
+                <a name="outputs-bar-charts"></a>
+                <h4>Bar charts</h4>
+                <p>
+                    Bar charts are available only in browser user interface. They represent significant results based on percent (defaults to > 5%) and p-value (defaults to < 0.01) thresholds. These thresholds can be configured in the options. X-axis of each bar charts has the names of gene sets and y-axis has the signicifance values obtained by &ndash;<i>Log<sub>10</sub></i>(Combined p-value of the gene set).
+                </p>
+                <a name="outputs-tables"></a>
+                <h4>Tables</h4>
+                <p>
+                    Tables are available in both interfaces of Seten. They are provided for each gene set collection, and they represent gene set association results. In browser user interface, tables can show significant results based on percent (defaults to > 5%) and p-value (defaults to < 0.01) thresholds. Its columns are;
+                    <ul>
+                        <li>Gene set name</li>
+                        <li>Overlapping genes</li>
+                        <li>Number of overlapping genes</li>
+                        <li>Number of genes in the gene set</li>
+                        <li>Percent of overlapping genes in the genes of the gene set</li>
+                        <li>p-value for functional enrichment</li>
+                        <li>Corrected p-value for functional enrichment</li>
+                        <li>p-value for gene set enrichment</li>
+                        <li>Combined p-value from functional (after correction) and gene set enrichment</li>
+                    </ul>
+                </p>
+                <a name="tutorial"></a>
+                <h3>Tutorial</h3>
+                <p>
+                    Please go to <a href="tutorial.html" target="_blank">tutorial page</a> that will guide you to use Seten.
+                </p>
+                <a name="support"></a>
+                <h3>Support</h3>
+                <p>
+                    Please go to <a href="contact.html" target="_blank">contact page</a> to report any issues or reach to us.
+                </p>
+                <a name="source-code"></a>
+                <h3>Source code</h3>
+                <p>
+                    Source code of the two interfaces available on GitHub. Click to go to <a href="https://github.com/gungorbudak/seten" target="_blank">GitHub repository for Seten browser user interface</a> or <a href="https://github.com/gungorbudak/seten-cli" target="_blank">GitHub repository for Seten browser user interface</a>.
+                </p>
+                <a name="references"></a>
+                <h3>References</h3>
+                <ol>
+                    <li>Yang, Y. C. T., Di, C., Hu, B., Zhou, M., Liu, Y., Song, N., ... & Lu, Z. J. (2015). CLIPdb: a CLIP-seq database for protein-RNA interactions. BMC genomics, 16(1), 51.</li>
+                    <li>Lovci, M. T., Ghanem, D., Marr, H., Arnold, J., Gee, S., Parra, M., ... & Massirer, K. B. (2013). Rbfox proteins regulate alternative mRNA splicing through evolutionarily conserved RNA bridges. Nature structural & molecular biology, 20(12), 1434-1442.</li>
+                    <li>Subramanian, A., Tamayo, P., Mootha, V. K., Mukherjee, S., Ebert, B. L., Gillette, M. A., ... & Mesirov, J. P. (2005). Gene set enrichment analysis: a knowledge-based approach for interpreting genome-wide expression profiles. Proceedings of the National Academy of Sciences of the United States of America, 102(43), 15545-15550.</li>
+                    <li>Köhler, S., Doelken, S. C., Mungall, C. J., Bauer, S., Firth, H. V., Bailleul-Forestier, I., ... & FitzPatrick, D. R. (2013). The Human Phenotype Ontology project: linking molecular biology and disease through phenotype data. Nucleic acids research, gkt1026.</li>
+                    <li>Rappaport, N., Twik, M., Nativ, N., Stelzer, G., Bahir, I., Stein, T. I., ... & Lancet, D. (2014). MalaCards: A Comprehensive Automatically‐Mined Database of Human Diseases. Current Protocols in Bioinformatics, 1-24.</li>
+                </ol>
+            </div>
+            <div class="col-sm-4">
+                <h3>Content</h3>
+                <ul>
+                    <li><a href="#introduction">Introduction</a></li>
+                    <li>
+                        <a href="#features">Features</a>
+                        <ul>
+                            <li><a href="#features-browser-user-interface">Browser user interface</a></li>
+                            <li><a href="#features-command-line-interface">Command line interface</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#implementation">Implementation</a></li>
+                    <li><a href="#datasets">Datasets</a></li>
+                    <li>
+                        <a href="#inputs">Inputs</a>
+                        <ul>
+                            <li><a href="#inputs-bed-file">BED file</a></li>
+                            <li><a href="#inputs-gene-set-collections">Gene set collections</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#outputs">Outputs</a>
+                        <ul>
+                            <li><a href="#outputs-bar-charts">Bar charts</a></li>
+                            <li><a href="#outputs-tables">Tables</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="#support">Support</a></li>
+                    <li><a href="#source-code">Source code</a></li>
+                    <li><a href="#references">References</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer text-center">
+        <div class="container">
+            <span>
+                Seten: A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
+            </span>
+        </div>
+    </div>
+</body>
+
+</html>
