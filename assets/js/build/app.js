@@ -243,7 +243,25 @@ var PanelAnalyze = React.createClass({
     displayName: 'PanelAnalyze',
 
     render: function render() {
-        var button;
+        var errors, button;
+        if (this.props.inputErrors.length > 0) {
+            errors = React.createElement(
+                'div',
+                { className: 'alert alert-danger', role: 'alert' },
+                'Please correct following error(s);',
+                React.createElement(
+                    'ul',
+                    null,
+                    this.props.inputErrors.map(function (error) {
+                        return React.createElement(
+                            'li',
+                            null,
+                            error
+                        );
+                    })
+                )
+            );
+        }
         if (!this.props.disabled) {
             button = React.createElement(
                 'button',
@@ -307,6 +325,7 @@ var PanelAnalyze = React.createClass({
                         React.createElement(
                             'div',
                             { className: 'col-sm-offset-2 col-sm-10' },
+                            errors,
                             button
                         )
                     )
@@ -932,6 +951,7 @@ var SetenApp = React.createClass({
             inputBedFile: undefined,
             inputBedFileName: '',
             inputCollections: undefined,
+            inputErrors: [],
             workers: [],
             geneScores: [],
             geneCollections: [],
@@ -992,9 +1012,22 @@ var SetenApp = React.createClass({
     handleInputSubmit: function handleInputSubmit(e) {
         e.preventDefault();
         var bedFile = this.state.inputBedFile,
-            collections = this.state.inputCollections;
+            collections = this.state.inputCollections,
+            errors = [];
 
-        if (bedFile !== undefined && collections !== undefined) {
+        if (bedFile === undefined) {
+            errors.push('You should select a BED file');
+        }
+        if (collections === undefined) {
+            errors.push('You should select at least one gene set collection');
+        }
+        if (errors.length > 0) {
+            // push errors to the state
+            this.setState({ inputErrors: errors });
+        } else {
+            // remove any errors from the state
+            this.setState({ inputErrors: [] });
+
             var mappingWorker = new Worker('assets/js/workers/mapping.js');
 
             // clear the state
@@ -1008,8 +1041,6 @@ var SetenApp = React.createClass({
             this.setState({ resultsInfo: { filename: this.state.inputBedFileName } });
             // add worker to the state
             this.setState({ workers: this.state.workers.concat([mappingWorker]) });
-        } else {
-            console.log('Missing input...');
         }
     },
     handleInputCancel: function handleInputCancel(e) {
@@ -1122,9 +1153,9 @@ var SetenApp = React.createClass({
             return result.id == id;
         });
         if (result.length == 1) {
-            var tsv = ['Gene set', 'Overlap size', 'Gene set size', '%', 'Func. p-value', 'Func. p-value corr.', 'G. set p-value', 'Comb. p-value'].join('\t') + '\n';
+            var tsv = ['Gene set', 'Genes', 'Overlap size', 'Gene set size', '%', 'Func. p-value', 'Func. p-value corr.', 'G. set p-value', 'Comb. p-value'].join('\t') + '\n';
             result[0].enrichment.forEach(function (row) {
-                tsv += [row.geneSet, row.overlapSize, row.geneSetSize, row.percent, row.fPValue, row.fPValueCorr, row.gSPValue, row.cPValue].join('\t') + '\n';
+                tsv += [row.geneSet, row.genes.join(', '), row.overlapSize, row.geneSetSize, row.percent, row.fPValue, row.fPValueCorr, row.gSPValue, row.cPValue].join('\t') + '\n';
             });
             var data = new Blob([tsv], { type: 'text/tsv' });
             var a = document.createElement('a');
@@ -1220,6 +1251,7 @@ var SetenApp = React.createClass({
                         samples: this.props.samples,
                         disabled: this.state.isRunning,
                         inputBedFileName: this.state.inputBedFileName,
+                        inputErrors: this.state.inputErrors,
                         onInputBedFileChange: this.handleInputBedFileChange,
                         onSampleClick: this.handleSample,
                         onSelectCollectionsChange: this.handleSelectCollectionsChange,

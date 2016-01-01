@@ -195,7 +195,22 @@ var SelectCollections = React.createClass({
 
 var PanelAnalyze = React.createClass({
     render: function() {
-        var button;
+        var errors,
+            button;
+        if (this.props.inputErrors.length > 0) {
+            errors = (
+                <div className="alert alert-danger" role="alert">
+                      Please correct following error(s);
+                      <ul>
+                          {this.props.inputErrors.map(function (error) {
+                              return (
+                                  <li>{error}</li>
+                              );
+                          })}
+                      </ul>
+                </div>
+            );
+        }
         if (!this.props.disabled) {
             button = (
                 <button
@@ -245,6 +260,7 @@ var PanelAnalyze = React.createClass({
                         />
                         <div className="form-group">
                             <div className="col-sm-offset-2 col-sm-10">
+                                {errors}
                                 {button}
                             </div>
                         </div>
@@ -749,6 +765,7 @@ var SetenApp = React.createClass({
                 inputBedFile: undefined,
                 inputBedFileName: '',
                 inputCollections: undefined,
+                inputErrors: [],
                 workers: [],
                 geneScores: [],
                 geneCollections: [],
@@ -809,9 +826,22 @@ var SetenApp = React.createClass({
     handleInputSubmit: function(e) {
         e.preventDefault();
         var bedFile = this.state.inputBedFile,
-            collections = this.state.inputCollections;
+            collections = this.state.inputCollections,
+            errors = [];
 
-        if (bedFile !== undefined && collections !== undefined) {
+        if (bedFile === undefined) {
+            errors.push('You should select a BED file');
+        }
+        if (collections === undefined) {
+            errors.push('You should select at least one gene set collection');
+        }
+        if (errors.length > 0) {
+            // push errors to the state
+            this.setState({inputErrors: errors});
+        } else {
+            // remove any errors from the state
+            this.setState({inputErrors: []});
+
             var mappingWorker = new Worker('assets/js/workers/mapping.js');
 
             // clear the state
@@ -825,8 +855,6 @@ var SetenApp = React.createClass({
             this.setState({resultsInfo: {filename: this.state.inputBedFileName}});
             // add worker to the state
             this.setState({workers: this.state.workers.concat([mappingWorker])});
-        } else {
-            console.log('Missing input...');
         }
     },
     handleInputCancel: function(e) {
@@ -941,6 +969,7 @@ var SetenApp = React.createClass({
         if (result.length == 1) {
             var tsv = [
                 'Gene set',
+                'Genes',
                 'Overlap size',
                 'Gene set size',
                 '%',
@@ -952,6 +981,7 @@ var SetenApp = React.createClass({
             result[0].enrichment.forEach(function(row) {
                 tsv += [
                     row.geneSet,
+                    row.genes.join(', '),
                     row.overlapSize,
                     row.geneSetSize,
                     row.percent,
@@ -1049,6 +1079,7 @@ var SetenApp = React.createClass({
                             samples={this.props.samples}
                             disabled={this.state.isRunning}
                             inputBedFileName={this.state.inputBedFileName}
+                            inputErrors={this.state.inputErrors}
                             onInputBedFileChange={this.handleInputBedFileChange}
                             onSampleClick={this.handleSample}
                             onSelectCollectionsChange={this.handleSelectCollectionsChange}
