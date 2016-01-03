@@ -937,8 +937,8 @@ var SetenApp = React.createClass({
         this.setState({resultsOptions: resultsOptions});
     },
     handleOptionsPValueChange: function(e) {
-        var pValue = e.target.value;
-        resultsOptions = this.state.resultsOptions;
+        var pValue = e.target.value,
+            resultsOptions = this.state.resultsOptions;
 
         resultsOptions.pValue = pValue;
         this.setState({resultsOptions: resultsOptions});
