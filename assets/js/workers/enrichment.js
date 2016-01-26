@@ -103,7 +103,7 @@ self.onmessage = function(e) {
         c0 = 5,
         c1 = 0.05,
         times = 1000,
-        results = [],
+        data = [],
         overlapGenes,
         overlapScores,
         fPValue,
@@ -120,7 +120,7 @@ self.onmessage = function(e) {
             fPValue = _fETest(overlapGenes.length,
                 geneSet.genes.length, genes.length, geneCollectionsSize);
             gSPValue = _gSETest(scores, overlapScores, c1, times);
-            results.push({
+            data.push({
                 geneSet: geneSet.name,
                 genes: overlapGenes,
                 overlapSize: overlapGenes.length,
@@ -132,20 +132,21 @@ self.onmessage = function(e) {
         }
     });
     // correct for functional enrichment p-values
-    fPValueCorr = stats.multicomp.bh(results.map(function(r) {
+    fPValueCorr = stats.multicomp.bh(data.map(function(r) {
         return r.fPValue;
     }));
     // combine corrected functional enrichment p-values
     // and gene set enrichment p-values
-    results = results.map(function(r, i) {
+    data = data.map(function(r, i) {
         r.fPValueCorr = fPValueCorr[i];
         r.cPValue = _combinePVals([r.fPValueCorr, r.gSPValue]);
         return r
     });
     // sort by combined p-value in ascending order
-    results = results.sort(function(a, b) {
+    data = data.sort(function(a, b) {
         return a.cPValue - b.cPValue;
     });
+
     t1 = new Date().getTime();
     console.log([
         '[enrichmentWorker] Enrichment for',
@@ -154,9 +155,10 @@ self.onmessage = function(e) {
         ((t1 - t0) / 1000),
         'seconds'
     ].join(' '));
+
     self.postMessage({
         id: geneCollection.id,
         title: geneCollection.name,
-        enrichment: results
+        data: data
     });
 };

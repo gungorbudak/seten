@@ -1,6 +1,6 @@
 'use strict';
 
-function _collectResult(name, collection_id) {
+function _collectResultCollection(name, collection_id) {
     var request = new XMLHttpRequest(),
         rows;
     request.open('GET', '/assets/resources/explore/' + name + '-' + collection_id + '.tsv', false);
@@ -14,21 +14,21 @@ function _collectResult(name, collection_id) {
     return [];
 }
 
-function collectResults(result, collections) {
-    var result = result.split('-'),
+function collectResult(resultId, collections) {
+    var result = resultId.split('-'),
         name = [result[0], result.slice(1, result.length).join('-')].join('/'),
-        results = [],
+        result = {id: resultId, collections: []},
         rows,
         cols;
 
     collections.forEach(function (collection) {
-        var enrichment = [];
+        var data = [];
 
-        rows = _collectResult(name, collection.id);
+        rows = _collectResultCollection(name, collection.id);
         if (rows.length > 0) {
             rows.forEach(function (row) {
                 cols = row.split(/\t/);
-                enrichment.push({
+                data.push({
                     geneSet: cols[0],
                     genes: cols[1].split(', '),
                     overlapSize: parseInt(cols[2]),
@@ -41,32 +41,32 @@ function collectResults(result, collections) {
                 });
             });
 
-            enrichment = enrichment.sort(function(a, b) {
+            data = data.sort(function(a, b) {
                 return a.cPValue - b.cPValue;
             });
 
-            results.push({
+            result.collections.push({
                 id: collection.id,
                 title: collection.name,
-                enrichment: enrichment
+                data: data
             });
         }
     });
 
-    return results;
+    return result;
 }
 
 self.onmessage = function(e) {
     var t0 = new Date().getTime(),
-        result = e.data.result,
+        resultId = e.data.resultId,
         cols = e.data.collections,
-        results,
+        result,
         t1;
 
-    results = collectResults(result, cols);
+    result = collectResult(resultId, cols);
 
-    console.log('[exploreWorker] ' + results.length + ' gene collection(s) collected');
+    console.log('[exploreWorker] ' + result.collections.length + ' gene collection(s) collected');
     t1 = new Date().getTime();
     console.log('[exploreWorker] Completed in ' + ((t1 - t0) / 1000) + ' seconds');
-    self.postMessage(results);
+    self.postMessage(result);
 };

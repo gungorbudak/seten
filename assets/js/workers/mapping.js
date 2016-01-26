@@ -38,7 +38,7 @@ function _search(mapping, chr_name, start, end) {
         c = chr_name.toUpperCase(),
         s = parseInt(start),
         e = parseInt(end),
-        result;
+        result = [];
 
     // fix chromosome namings
     if (!c.indexOf('CHR')) {
@@ -48,13 +48,11 @@ function _search(mapping, chr_name, start, end) {
         c = 'MT';
     }
 
-    try {
+    if (m.hasOwnProperty(c)) {
         result = m[c].filter(function (el) {
             return el.start_position < e &&
                    el.end_position > s;
         });
-    } catch (e) {
-        console.log(e);
     }
 
     return result;

@@ -142,6 +142,8 @@
 
         return {
             tcf: tcf,
+            ux: ux,
+            uy: uy,
             big: Math.max(ux, uy),
             small: Math.min(ux, uy)
         }
@@ -172,8 +174,10 @@
 
         // compute z according to given alternative
         if (alt == 'less') {
-            z = -Math.abs((u.small - mu) / std);
-        } else if (alt == 'greater' || alt == 'two-sided') {
+            z = (u.ux - mu) / std;
+        } else if (alt == 'greater') {
+            z = (u.uy - mu) / std;
+        } else if (alt == 'two-sided') {
             z = Math.abs((u.big - mu) / std);
         } else {
             console.log('Unknown alternative argument');

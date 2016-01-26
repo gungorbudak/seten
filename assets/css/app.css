@@ -1,39 +1,13 @@
-.h4, h4 {
-    font-weight: bold;
-    margin-top: 20px;
-}
-.ul, ul, .ol, ol {
-    padding-left: 2em;
-}
 .header {
     display: none;
-    padding: 20px 0px;
-    color: #ffffff;
-    background-color: #F44336;
 }
-.navbar-inverse .navbar-brand {
-    color: #ffffff;
-}
-.navbar {
-    font-size: 14px;
-    line-height: 1.4;
-}
-.form-inline {
-    margin-bottom: 20px;
-}
-.form-inline .form-group > * {
-    margin: 0px 3px;
-}
-@media (min-width: 768px) {
-    .form-inline .form-group {
-        vertical-align: baseline;
+@media screen and (min-width: 767px) {
+    .header {
+        display: block;
+        padding: 20px 0px;
+        color: #ffffff;
+        background-color: #F44336;
     }
-}
-.badge {
-    vertical-align: bottom;
-}
-.btn-export {
-    cursor: pointer;
 }
 .btn-file {
     position: relative;
@@ -54,14 +28,6 @@
     cursor: inherit;
     display: block;
 }
-.help-block-samples {
-    display: block;
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
-.panel-explore, .panel-analyze {
-    margin-top: 20px;
-}
 .img-tutorial {
     border: solid 1px #f1f1f1;
     box-shadow: #f1f1f1 1px 1px 1px;
@@ -70,51 +36,127 @@
     cursor: -moz-zoom-in;
     cursor: zoom-in;
 }
+.panel-explore,
+.panel-analyze {
+    margin-top: 20px;
+}
 .list-group-explore {
-    max-height: 289px;
+    height: 265px;
+}
+@media screen and (min-width: 767px) {
+    .panel-body-analyze {
+        height: 300px;
+    }
+}
+.list-group-explore,
+.panel-body-analyze {
     overflow-y: auto;
 }
+.list-group-explore .list-group-item:first-child {
+    border-width: 0px;
+}
+.table-responsive-panel,
 .table-panel {
     margin-bottom: 0px;
 }
-th {
+.sortable {
     white-space: nowrap;
     cursor: pointer;
 }
-@media screen and (max-width: 767px) {
-    .table-responsive {
-        margin-bottom: 0px;
-    }
+.has-search {
+    padding: 0px;
 }
-.code {
-    font-family: monospace;
-    padding: 16px;
-    overflow: auto;
-    font-size: 85%;
-    line-height: 1.45;
-    background-color: #f7f7f7;
-    border-radius: 3px;
-    word-wrap: normal;
-    word-break: normal;
-    white-space: pre;
+.has-search .form-control-feedback {
+    right: initial;
+    left: 0;
+    color: #ccc;
+    margin-left: 5px;
+}
+.has-search .form-control {
+    padding-right: 12px;
+    padding-left: 39px;
+    border: 0px;
+    border-radius: 0px;
+    box-shadow: 0px 0px;
+}
+.table-popover {
+    margin-bottom: 0px;
+}
+.table-popover > tbody > tr > td,
+.table-popover > tbody > tr > th {
+    border-top: 0px;
 }
 .footer {
-    margin-top: 70px;
-    padding: 70px 0px;
+    margin-top: 50px;
+    padding: 75px 0px;
     color: #ffffff;
     background-color: #101010;
     box-shadow: 0px 500px 0px 500px #101010;
 }
-@media (min-width: 768px) {
+.list-inline-options {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 14px;
+}
+.list-inline-options li {
+    vertical-align: middle;
+}
+.flex-align {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+}
+.flex-align-bottom {
+      align-self: flex-end;
+}
+.flex-align-center {
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    align-items: center;
+}
+/*
+Override existing classes
+*/
+.h4, h4 {
+    font-weight: bold;
+    margin-top: 20px;
+}
+.ul, ul, .ol, ol {
+    padding-left: 2em;
+}
+.navbar-inverse .navbar-brand {
+    color: #ffffff;
+}
+.navbar {
+    font-size: 14px;
+    line-height: 1.4;
+}
+.popover-content {
+    padding: 5px 8px;
+}
+.form-inline {
+    margin-bottom: 20px;
+}
+.form-inline .form-group > * {
+    margin: 0px 3px;
+}
+@media screen and (min-width: 767px) {
+    .form-inline .form-group {
+        vertical-align: baseline;
+    }
     .form-horizontal .control-label {
         padding-top: 2px;
         margin-bottom: 0;
         text-align: right;
     }
-    .header {
-        display: block;
-    }
     .navbar-brand {
         display: none;
     }
+}
+.badge {
+    vertical-align: bottom;
+}
+.multiselect-container > li > a > label {
+    padding: 3px 20px 3px 30px;
 }
