@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles">
+    <meta name="description" content="A tool for systematic identification and comparison of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>Documentation &ndash; Seten</title>
     <link rel="shortcut icon" href="assets/img/favicon.png" type="image/png">
@@ -19,7 +19,7 @@
         <div class="container">
             <h1>Seten</h1>
             <p>
-                A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
+                A tool for systematic identification and comparison of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
             </p>
         </div>
     </div>
@@ -59,7 +59,7 @@
                 <a name="introduction"></a>
                 <h3>Introduction</h3>
                 <p>
-                    Seten is a tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles. It has a <a href="#features-browser-user-interface">browser user interface</a> and <a href="#features-command-line-interface">command line interface</a> both of which <a href="#implementation">implement the same method</a>.
+                    Seten is a tool for systematic identification and comparison of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles. It has a <a href="#features-browser-user-interface">browser user interface</a> and <a href="#features-command-line-interface">command line interface</a> both of which <a href="#implementation">implement the same method</a>.
                 </p>
                 <a name="features"></a>
                 <h3>Features</h3>
@@ -72,7 +72,7 @@
                     <li>Runs almost all latest versions of modern browsers across all operating systems</li>
                     <li>Requires no installation</li>
                     <li>Utilizes HTML5 File API to read local files (fast and safe)</li>
-                    <li>Utilizes HTML5 Web Workers for paralllel execution of tasks on multiple cores</li>
+                    <li>Utilizes HTML5 Web Workers for parallel execution of tasks on multiple cores</li>
                     <li>Visualizes multiple results as bar charts and bubble charts (for comparison)</li>
                     <li>Provides options to visualize results with different thresholds</li>
                     <li>Provides export buttons for bar charts, tables and bubble charts of the results</li>
@@ -106,7 +106,7 @@
                 <a name="datasets"></a>
                 <h3>Datasets</h3>
                 <p>
-                    The following datasets are used to test Seten during development and also their gene set association results are given in Seten's browser user interface (this website) under <strong>Explore</strong> panel. We downloaded human RBP datasets including target binding affinity scores from CLIPdb <sup>1</sup> and ENCODE project <sup>2</sup>. Since there are multiple samples of an RBP-cell line pair in CLIPdb, we simple merge them before the gene set association analyses. After preprocessing these datasets, we obtained 68 unique RBP-cell line pairs for CLIPdb and 35 unique RBP-cell line pairs for the ENCODE project.
+                    The following datasets are used to test Seten during development and also their gene set association results are given in Seten's browser user interface (this website) under <strong>Explore</strong> panel. We downloaded human RBP datasets including target binding affinity scores from CLIPdb <sup>1</sup> and ENCODE project <sup>2</sup>. Since there are multiple samples for some RBP-cell line pairs in CLIPdb and ENCODE, we simply merged them before the gene set association analyses. After preprocessing these datasets, we obtained 68 unique RBP-cell line pairs for CLIPdb and 35 unique RBP-cell line pairs for the ENCODE project.
                 </p>
                 <a name="inputs"></a>
                 <h3>Inputs</h3>
@@ -171,12 +171,12 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
                 <a name="outputs-bubble-charts"></a>
                 <h4>Bubble charts</h4>
                 <p>
-                    Bubble charts are available only in browser user interface. They represent significant results based on percent (defaults to > 5%) and p-value (defaults to < 0.01) thresholds. These thresholds can be configured in the options. X-axis of bar charts has the names of RBPs and y-axis has the gene set names. The radius of bubbles comes from their corresponding significance values obtained by &ndash;<i>Log<sub>10</sub></i>(Combined p-value of the gene set).
+                    Bubble charts are available only in browser user interface. They represent significant results based on percent (defaults to > 5%) and p-value (defaults to < 0.01) thresholds. These thresholds can be configured in the options. X-axis of bubble charts has the names of RBPs and y-axis has the gene set names. The radius of bubbles comes from their corresponding significance values obtained by &ndash;<i>Log<sub>10</sub></i>(Combined p-value of the gene set).
                 </p>
                 <a name="tutorial"></a>
                 <h3>Tutorial</h3>
                 <p>
-                    Please go to <a href="tutorial.html" target="_blank">tutorial page</a> that will guide you to use Seten.
+                    Please go to <a href="tutorial.html" target="_blank">tutorial page</a> that can guide you to use Seten.
                 </p>
                 <a name="support"></a>
                 <h3>Support</h3>
@@ -250,7 +250,7 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
     <div class="footer text-center">
         <div class="container">
             <span>
-                Seten: A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
+                Seten: A tool for systematic identification and comparison of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
             </span>
         </div>
     </div>

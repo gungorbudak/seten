@@ -1,7 +1,7 @@
 'use strict';
 
 /*
-* Seten source code for browser user iterface
+* Seten source code for browser user interface
 * Author: Gungor Budak
 */
 
@@ -45,7 +45,6 @@ var PanelExploreItem = React.createClass({
                 <span className="label label-info" title={item.id.split('-')[0].toUpperCase()}>
                     {item.id.substr(0, 1).toUpperCase()}
                 </span>
-                &nbsp;
                 <button
                     href="#"
                     className="btn btn-link btn-xs"
@@ -108,8 +107,7 @@ var PanelExplore = React.createClass({
                 <div className="panel-heading">
                     <h3 className="panel-title">
                         <i className="fa fa-globe"></i>
-                        &nbsp;
-                        Explore
+                        <span>&nbsp;Explore</span>
                     </h3>
                 </div>
 
@@ -174,7 +172,6 @@ var PanelAnalyzeBedFile = React.createClass({
                     </div>
                     <p className="help-block">
                         Sample datasets
-                        &nbsp;
                         {component.props.samples.map(function(item) {
                             var dataContent = [
                                 '<table class="table table-condensed table-popover">',
@@ -262,8 +259,7 @@ var PanelAnalyze = React.createClass({
                     onClick={this.props.onInputSubmitClick}
                     >
                     <i className="fa fa-send"></i>
-                    &nbsp;
-                    Submit
+                    <span>&nbsp;Submit</span>
                 </button>
             );
         } else {
@@ -274,8 +270,7 @@ var PanelAnalyze = React.createClass({
                     onClick={this.props.onInputCancelClick}
                     >
                     <i className="fa fa-times-circle"></i>
-                    &nbsp;
-                    Cancel
+                    <span>&nbsp;Cancel</span>
                 </button>
             );
         }
@@ -286,7 +281,7 @@ var PanelAnalyze = React.createClass({
                 <div className="panel-heading">
                     <h3 className="panel-title">
                         <i className="fa fa-flask"></i>
-                        &nbsp;Analyze
+                        <span>&nbsp;Analyze</span>
                     </h3>
                 </div>
 
@@ -709,8 +704,7 @@ var ResultCollection = React.createClass({
         if (data.length > 0) {
             exportButtons = (
                 <div className="col-xs-4 text-right">
-                    Export
-                    &nbsp;
+                    <span className="hidden-xs">Export&nbsp;</span>
                     <button
                         className="btn btn-default btn-xs"
                         id={uniqueId}

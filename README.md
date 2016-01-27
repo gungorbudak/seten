@@ -1,6 +1,6 @@
 # Seten (browser user interface)
 
-A tool for systematic identification of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
+A tool for systematic identification and comparison of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles
 
 ## Production server
 
@@ -13,6 +13,10 @@ Seten's production server is running on http://www.iupui.edu/~sysbio/seten/
     python -m SimpleHTTPServer 3000
 
 After the server setup, Seten will run on `http://localhost:3000`
+
+## Tutorial
+
+A tutorial that can guide you through Seten's features can be found on http://www.iupui.edu/~sysbio/seten/docs.html
 
 ## Documentation
 

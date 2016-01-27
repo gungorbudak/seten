@@ -1,7 +1,7 @@
 'use strict';
 
 /*
-* Seten source code for browser user iterface
+* Seten source code for browser user interface
 * Author: Gungor Budak
 */
 
@@ -42,7 +42,6 @@ var PanelExploreItem = React.createClass({
                 { className: 'label label-info', title: item.id.split('-')[0].toUpperCase() },
                 item.id.substr(0, 1).toUpperCase()
             ),
-            ' ',
             React.createElement(
                 'button',
                 {
@@ -110,7 +109,11 @@ var PanelExplore = React.createClass({
                     'h3',
                     { className: 'panel-title' },
                     React.createElement('i', { className: 'fa fa-globe' }),
-                    '  Explore'
+                    React.createElement(
+                        'span',
+                        null,
+                        ' Explore'
+                    )
                 )
             ),
             React.createElement(
@@ -193,7 +196,7 @@ var PanelAnalyzeBedFile = React.createClass({
                 React.createElement(
                     'p',
                     { className: 'help-block' },
-                    'Sample datasets  ',
+                    'Sample datasets',
                     component.props.samples.map(function (item) {
                         var dataContent = ['<table class="table table-condensed table-popover">', '<tbody>', '<tr><th>Symbol</th><td>' + item.symbol + '</td></tr>', '<tr><th>Cell line</th><td>' + item.cellLine + '</td></tr>', '<tr><th>Species</th><td>' + item.species + '</td></tr>', '<tr><th>Disease state</th><td>' + item.diseaseState + '</td></tr>', '</tbody>', '</table>'].join('');
                         return React.createElement(
@@ -289,7 +292,11 @@ var PanelAnalyze = React.createClass({
                     onClick: this.props.onInputSubmitClick
                 },
                 React.createElement('i', { className: 'fa fa-send' }),
-                '  Submit'
+                React.createElement(
+                    'span',
+                    null,
+                    ' Submit'
+                )
             );
         } else {
             button = React.createElement(
@@ -300,7 +307,11 @@ var PanelAnalyze = React.createClass({
                     onClick: this.props.onInputCancelClick
                 },
                 React.createElement('i', { className: 'fa fa-times-circle' }),
-                '  Cancel'
+                React.createElement(
+                    'span',
+                    null,
+                    ' Cancel'
+                )
             );
         }
 
@@ -314,7 +325,11 @@ var PanelAnalyze = React.createClass({
                     'h3',
                     { className: 'panel-title' },
                     React.createElement('i', { className: 'fa fa-flask' }),
-                    ' Analyze'
+                    React.createElement(
+                        'span',
+                        null,
+                        ' Analyze'
+                    )
                 )
             ),
             React.createElement(
@@ -795,7 +810,11 @@ var ResultCollection = React.createClass({
             exportButtons = React.createElement(
                 'div',
                 { className: 'col-xs-4 text-right' },
-                'Export  ',
+                React.createElement(
+                    'span',
+                    { className: 'hidden-xs' },
+                    'Export '
+                ),
                 React.createElement(
                     'button',
                     {
