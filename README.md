@@ -16,7 +16,7 @@ After the server setup, Seten will run on `http://localhost:3000`
 
 ## Tutorial
 
-A tutorial that can guide you through Seten's features can be found on http://www.iupui.edu/~sysbio/seten/docs.html
+A tutorial that can guide you through Seten's features can be found on http://www.iupui.edu/~sysbio/seten/tutorial.html
 
 ## Documentation
 
