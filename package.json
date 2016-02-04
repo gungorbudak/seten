@@ -1,0 +1,16 @@
+{
+  "name": "seten",
+  "version": "0.0.1",
+  "description": "A tool for systematic identification and comparison of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles",
+  "author": "Gungor Budak",
+  "devDependencies": {
+    "babel-cli": "^6.0.0",
+    "babel-preset-react": "~6.3.13",
+    "babel-preset-es2015": "~6.3.13"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gungorbudak/seten"
+  },
+  "license": "MIT"
+}
