@@ -10,13 +10,6 @@ Math.log10 = Math.log10 || function(x) {
     return Math.log(x) / Math.LN10;
 };
 
-// cross-browser click event for exporting
-var clickEvent = new MouseEvent('click', {
-    'view': window,
-    'bubbles': true,
-    'cancelable': false
-});
-
 var PanelExploreItem = React.createClass({
     componentDidMount: function() {
         var $item = $(this.getDOMNode());
@@ -190,6 +183,7 @@ var PanelAnalyzeBedFile = React.createClass({
                                     title={item.symbol + ' / ' + item.cellLine}
                                     data-original-title={item.symbol + ' / ' + item.cellLine}
                                     data-content={dataContent}
+                                    disabled={component.props.disabled}
                                     onClick={component.props.onInputSampleBedFileClick}
                                     >
                                     {item.symbol + ' / ' + item.cellLine}
@@ -233,23 +227,7 @@ var PanelAnalyzeCollections = React.createClass({
 
 var PanelAnalyze = React.createClass({
     render: function() {
-        var errors,
-            button;
-
-        if (this.props.inputErrors.length > 0) {
-            errors = (
-                <div className="alert alert-danger" role="alert">
-                    Please correct following error(s);
-                    <ul>
-                        {this.props.inputErrors.map(function (error) {
-                            return (
-                                <li>{error}</li>
-                            );
-                        })}
-                    </ul>
-                </div>
-            );
-        }
+        var button;
 
         if (!this.props.disabled) {
             button = (
@@ -304,7 +282,6 @@ var PanelAnalyze = React.createClass({
                         />
                         <div className="form-group">
                             <div className="col-sm-offset-2 col-sm-10">
-                                {errors}
                                 {button}
                             </div>
                         </div>
@@ -362,7 +339,7 @@ var ResultOptions = React.createClass({
                     <label>Percent &gt;</label>
                     <input
                         type="text"
-                        className="form-control input-sm"
+                        className="form-control input-sm input-options"
                         id={this.props.resultId}
                         value={this.props.options.percent}
                         onChange={this.props.onOptionsPercentChange}
@@ -372,7 +349,7 @@ var ResultOptions = React.createClass({
                     <label>Comb. p-value &lt;</label>
                     <input
                         type="text"
-                        className="form-control input-sm"
+                        className="form-control input-sm input-options"
                         id={this.props.resultId}
                         value={this.props.options.cPValue}
                         onChange={this.props.onOptionsCPValueChange}
@@ -1297,15 +1274,11 @@ var SetenApp = React.createClass({
     handleCompareExportClick: function(e) {
         e.preventDefault();
         var id = 'bubble-chart',
-            svg = document.querySelector('svg#' + id),
-            a = document.createElement('a');
+            svg = document.querySelector('svg#' + id);
 
         if (svg.outerHTML.length > 0) {
             var data = new Blob([svg.outerHTML], {type: 'image/svg+xml'});
-            a.href = window.URL.createObjectURL(data);
-            a.setAttribute('download', id + '.svg');
-            a.dispatchEvent(clickEvent);
-            a.remove();
+            saveAs(data, id + '.svg');
         }
     },
     handleResultsClearClick: function(e) {
@@ -1327,18 +1300,20 @@ var SetenApp = React.createClass({
         exploreWorker.postMessage({resultId: resultId, collections: this.state.collections});
         exploreWorker.onmessage = this.exploreWorkerOnMessage;
     },
+    handleInputBedFileChange: function(e) {
+        var file = e.target.files[0];
+        this.setState({inputBedFile: file});
+        this.setState({inputBedFileName: file.name});
+    },
     handleInputSampleBedFileClick: function(e) {
         e.preventDefault();
         var sample = e.currentTarget.id,
             sampleWorker = new Worker('assets/js/workers/sample.js');
 
+        // toggle form
+        this.togglePanelAnalyze();
         sampleWorker.postMessage(sample);
         sampleWorker.onmessage = this.sampleWorkerOnMessage;
-    },
-    handleInputBedFileChange: function(e) {
-        var file = e.target.files[0];
-        this.setState({inputBedFile: file});
-        this.setState({inputBedFileName: file.name});
     },
     handleSelectCollectionsChange: function(e) {
         var options = e.target.options,
@@ -1368,10 +1343,10 @@ var SetenApp = React.createClass({
             errors = [];
 
         if (bedFile === undefined) {
-            errors.push('You should select a BED file');
+            errors.push('Select a BED file');
         }
         if (collections === undefined) {
-            errors.push('You should select at least one gene set collection');
+            errors.push('Select at least one gene set collection');
         }
         if (errors.length > 0) {
             // push errors to the state
@@ -1444,10 +1419,7 @@ var SetenApp = React.createClass({
 
         if (svg.outerHTML.length > 0) {
             var data = new Blob([svg.outerHTML], {type: 'image/svg+xml'});
-            a.href = window.URL.createObjectURL(data);
-            a.setAttribute('download', id + '.svg');
-            a.dispatchEvent(clickEvent);
-            a.remove();
+            saveAs(data, id + '.svg');
         }
     },
     handleExportTableClick: function(e) {
@@ -1472,11 +1444,11 @@ var SetenApp = React.createClass({
             'Genes',
             'Overlap size',
             'Gene set size',
-            '%',
-            'Func. p-value',
-            'Func. p-value corr.',
-            'G. set p-value',
-            'Comb. p-value'
+            'Percent',
+            'Functional p-value',
+            'Functional p-value corrected',
+            'Gene set p-value',
+            'Combined p-value'
         ].join('\t') + '\n';
         collection.data.forEach(function(row) {
             tsv += [
@@ -1492,11 +1464,7 @@ var SetenApp = React.createClass({
             ].join('\t') + '\n';
         });
         var data = new Blob([tsv], {type: 'text/tsv'});
-        var a = document.createElement('a');
-        a.href = window.URL.createObjectURL(data);
-        a.setAttribute('download', id + '.tsv');
-        a.dispatchEvent(clickEvent);
-        a.remove();
+        saveAs(data, id + '.tsv');
     },
     exploreWorkerOnMessage: function(e) {
         var component = this,
@@ -1513,6 +1481,8 @@ var SetenApp = React.createClass({
         component.setState({results: results});
     },
     sampleWorkerOnMessage: function(e) {
+        // toggle form
+        this.togglePanelAnalyze();
         this.setState({inputBedFile: e.data.file});
         this.setState({inputBedFileName: e.data.name});
     },
@@ -1573,13 +1543,34 @@ var SetenApp = React.createClass({
         }
     },
     render: function() {
-        var progress;
+        var errors,
+            progress;
+
+        if (this.state.inputErrors.length > 0) {
+            errors = (
+                <div className="alert alert-danger" role="alert">
+                    Please correct following error(s):
+                    <ul>
+                        {this.state.inputErrors.map(function (error) {
+                            return (
+                                <li>{error}</li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            );
+        }
         if (this.state.runningResult !== undefined && this.state.inputCollections !== undefined) {
             progress = Math.round(
                 (this.state.runningResult.collections.length/this.state.inputCollections.length)*100);
         }
         return (
             <div>
+                <div className="row">
+                    <div className="col-sm-12">
+                        { errors }
+                    </div>
+                </div>
                 <div className="row">
                     <div className="col-sm-4">
                         <PanelExplore
@@ -1595,7 +1586,6 @@ var SetenApp = React.createClass({
                             samples={this.props.samples}
                             disabled={this.state.isRunning}
                             inputBedFileName={this.state.inputBedFileName}
-                            inputErrors={this.state.inputErrors}
                             onInputBedFileChange={this.handleInputBedFileChange}
                             onInputSampleBedFileClick={this.handleInputSampleBedFileClick}
                             onSelectCollectionsChange={this.handleSelectCollectionsChange}

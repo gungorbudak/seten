@@ -11,13 +11,6 @@ Math.log10 = Math.log10 || function (x) {
     return Math.log(x) / Math.LN10;
 };
 
-// cross-browser click event for exporting
-var clickEvent = new MouseEvent('click', {
-    'view': window,
-    'bubbles': true,
-    'cancelable': false
-});
-
 var PanelExploreItem = React.createClass({
     displayName: 'PanelExploreItem',
 
@@ -207,6 +200,7 @@ var PanelAnalyzeBedFile = React.createClass({
                                 title: item.symbol + ' / ' + item.cellLine,
                                 'data-original-title': item.symbol + ' / ' + item.cellLine,
                                 'data-content': dataContent,
+                                disabled: component.props.disabled,
                                 onClick: component.props.onInputSampleBedFileClick
                             },
                             item.symbol + ' / ' + item.cellLine
@@ -262,26 +256,7 @@ var PanelAnalyze = React.createClass({
     displayName: 'PanelAnalyze',
 
     render: function render() {
-        var errors, button;
-
-        if (this.props.inputErrors.length > 0) {
-            errors = React.createElement(
-                'div',
-                { className: 'alert alert-danger', role: 'alert' },
-                'Please correct following error(s);',
-                React.createElement(
-                    'ul',
-                    null,
-                    this.props.inputErrors.map(function (error) {
-                        return React.createElement(
-                            'li',
-                            null,
-                            error
-                        );
-                    })
-                )
-            );
-        }
+        var button;
 
         if (!this.props.disabled) {
             button = React.createElement(
@@ -359,7 +334,6 @@ var PanelAnalyze = React.createClass({
                         React.createElement(
                             'div',
                             { className: 'col-sm-offset-2 col-sm-10' },
-                            errors,
                             button
                         )
                     )
@@ -482,7 +456,7 @@ var ResultOptions = React.createClass({
                 ),
                 React.createElement('input', {
                     type: 'text',
-                    className: 'form-control input-sm',
+                    className: 'form-control input-sm input-options',
                     id: this.props.resultId,
                     value: this.props.options.percent,
                     onChange: this.props.onOptionsPercentChange
@@ -498,7 +472,7 @@ var ResultOptions = React.createClass({
                 ),
                 React.createElement('input', {
                     type: 'text',
-                    className: 'form-control input-sm',
+                    className: 'form-control input-sm input-options',
                     id: this.props.resultId,
                     value: this.props.options.cPValue,
                     onChange: this.props.onOptionsCPValueChange
@@ -1408,15 +1382,11 @@ var SetenApp = React.createClass({
     handleCompareExportClick: function handleCompareExportClick(e) {
         e.preventDefault();
         var id = 'bubble-chart',
-            svg = document.querySelector('svg#' + id),
-            a = document.createElement('a');
+            svg = document.querySelector('svg#' + id);
 
         if (svg.outerHTML.length > 0) {
             var data = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
-            a.href = window.URL.createObjectURL(data);
-            a.setAttribute('download', id + '.svg');
-            a.dispatchEvent(clickEvent);
-            a.remove();
+            saveAs(data, id + '.svg');
         }
     },
     handleResultsClearClick: function handleResultsClearClick(e) {
@@ -1438,18 +1408,20 @@ var SetenApp = React.createClass({
         exploreWorker.postMessage({ resultId: resultId, collections: this.state.collections });
         exploreWorker.onmessage = this.exploreWorkerOnMessage;
     },
+    handleInputBedFileChange: function handleInputBedFileChange(e) {
+        var file = e.target.files[0];
+        this.setState({ inputBedFile: file });
+        this.setState({ inputBedFileName: file.name });
+    },
     handleInputSampleBedFileClick: function handleInputSampleBedFileClick(e) {
         e.preventDefault();
         var sample = e.currentTarget.id,
             sampleWorker = new Worker('assets/js/workers/sample.js');
 
+        // toggle form
+        this.togglePanelAnalyze();
         sampleWorker.postMessage(sample);
         sampleWorker.onmessage = this.sampleWorkerOnMessage;
-    },
-    handleInputBedFileChange: function handleInputBedFileChange(e) {
-        var file = e.target.files[0];
-        this.setState({ inputBedFile: file });
-        this.setState({ inputBedFileName: file.name });
     },
     handleSelectCollectionsChange: function handleSelectCollectionsChange(e) {
         var options = e.target.options,
@@ -1479,10 +1451,10 @@ var SetenApp = React.createClass({
             errors = [];
 
         if (bedFile === undefined) {
-            errors.push('You should select a BED file');
+            errors.push('Select a BED file');
         }
         if (collections === undefined) {
-            errors.push('You should select at least one gene set collection');
+            errors.push('Select at least one gene set collection');
         }
         if (errors.length > 0) {
             // push errors to the state
@@ -1555,10 +1527,7 @@ var SetenApp = React.createClass({
 
         if (svg.outerHTML.length > 0) {
             var data = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
-            a.href = window.URL.createObjectURL(data);
-            a.setAttribute('download', id + '.svg');
-            a.dispatchEvent(clickEvent);
-            a.remove();
+            saveAs(data, id + '.svg');
         }
     },
     handleExportTableClick: function handleExportTableClick(e) {
@@ -1578,16 +1547,12 @@ var SetenApp = React.createClass({
             return coll.id = collId;
         })[0];
 
-        var tsv = ['Gene set', 'Genes', 'Overlap size', 'Gene set size', '%', 'Func. p-value', 'Func. p-value corr.', 'G. set p-value', 'Comb. p-value'].join('\t') + '\n';
+        var tsv = ['Gene set', 'Genes', 'Overlap size', 'Gene set size', 'Percent', 'Functional p-value', 'Functional p-value corrected', 'Gene set p-value', 'Combined p-value'].join('\t') + '\n';
         collection.data.forEach(function (row) {
             tsv += [row.geneSet, row.genes.join(', '), row.overlapSize, row.geneSetSize, row.percent, row.fPValue, row.fPValueCorr, row.gSPValue, row.cPValue].join('\t') + '\n';
         });
         var data = new Blob([tsv], { type: 'text/tsv' });
-        var a = document.createElement('a');
-        a.href = window.URL.createObjectURL(data);
-        a.setAttribute('download', id + '.tsv');
-        a.dispatchEvent(clickEvent);
-        a.remove();
+        saveAs(data, id + '.tsv');
     },
     exploreWorkerOnMessage: function exploreWorkerOnMessage(e) {
         var component = this,
@@ -1604,6 +1569,8 @@ var SetenApp = React.createClass({
         component.setState({ results: results });
     },
     sampleWorkerOnMessage: function sampleWorkerOnMessage(e) {
+        // toggle form
+        this.togglePanelAnalyze();
         this.setState({ inputBedFile: e.data.file });
         this.setState({ inputBedFileName: e.data.name });
     },
@@ -1664,13 +1631,41 @@ var SetenApp = React.createClass({
         }
     },
     render: function render() {
-        var progress;
+        var errors, progress;
+
+        if (this.state.inputErrors.length > 0) {
+            errors = React.createElement(
+                'div',
+                { className: 'alert alert-danger', role: 'alert' },
+                'Please correct following error(s):',
+                React.createElement(
+                    'ul',
+                    null,
+                    this.state.inputErrors.map(function (error) {
+                        return React.createElement(
+                            'li',
+                            null,
+                            error
+                        );
+                    })
+                )
+            );
+        }
         if (this.state.runningResult !== undefined && this.state.inputCollections !== undefined) {
             progress = Math.round(this.state.runningResult.collections.length / this.state.inputCollections.length * 100);
         }
         return React.createElement(
             'div',
             null,
+            React.createElement(
+                'div',
+                { className: 'row' },
+                React.createElement(
+                    'div',
+                    { className: 'col-sm-12' },
+                    errors
+                )
+            ),
             React.createElement(
                 'div',
                 { className: 'row' },
@@ -1692,7 +1687,6 @@ var SetenApp = React.createClass({
                         samples: this.props.samples,
                         disabled: this.state.isRunning,
                         inputBedFileName: this.state.inputBedFileName,
-                        inputErrors: this.state.inputErrors,
                         onInputBedFileChange: this.handleInputBedFileChange,
                         onInputSampleBedFileClick: this.handleInputSampleBedFileClick,
                         onSelectCollectionsChange: this.handleSelectCollectionsChange,

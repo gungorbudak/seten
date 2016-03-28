@@ -112,7 +112,7 @@
         return {
             less: sless,
             greater: slarg,
-            twoTailed: Math.max(sleft + sright, 1)
+            twoTailed: Math.min(sleft + sright, 1)
         };
     }
 
