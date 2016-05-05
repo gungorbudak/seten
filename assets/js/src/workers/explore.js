@@ -2,10 +2,13 @@
 
 import * as _ from 'lodash';
 
-var development = process.env.NODE_ENV !== 'production';
-var resourcesDir = development ? '/assets/resources': '/~sysbio/seten/assets/resources';
 
-function _getResultColletionRows(name, collection_id, enrichmentMethod) {
+var development = process.env.NODE_ENV !== 'production';
+var resourcesDir = development ?
+  '/assets/resources': '/~sysbio/seten/assets/resources';
+
+
+function getResultColletionRows(name, collection_id, enrichmentMethod) {
   var request = new XMLHttpRequest();
   var rows = {};
   var _rows;
@@ -48,9 +51,9 @@ function _getResultColletionRows(name, collection_id, enrichmentMethod) {
 }
 
 
-function _getResultCollection(name, collection_id) {
-  var gSRows = _getResultColletionRows(name, collection_id, 'gse');
-  var fRows = _getResultColletionRows(name, collection_id, 'fe');
+function getResultCollection(name, collection_id) {
+  var gSRows = getResultColletionRows(name, collection_id, 'gse');
+  var fRows = getResultColletionRows(name, collection_id, 'fe');
   var data = [];
 
   if (gSRows !== null || fRows !== null) {
@@ -59,7 +62,8 @@ function _getResultCollection(name, collection_id) {
   return data;
 }
 
-function _getResult(resultId, collections) {
+
+function getResult(resultId, collections) {
   var result = resultId.split('-');
   var name = [result[0], result.slice(1, result.length).join('-')].join('/');
   var result = {
@@ -70,7 +74,7 @@ function _getResult(resultId, collections) {
 
   collections.forEach(function (collection) {
 
-    data = _getResultCollection(name, collection.id);
+    data = getResultCollection(name, collection.id);
     if (data.length > 0) {
       result.collections.push({
         id: collection.id,
@@ -83,6 +87,7 @@ function _getResult(resultId, collections) {
   return result;
 }
 
+
 onmessage = function(e) {
   var t0 = new Date().getTime();
   var resultId = e.data.resultId;
@@ -90,10 +95,14 @@ onmessage = function(e) {
   var result;
   var t1;
 
-  result = _getResult(resultId, collections);
+  result = getResult(resultId, collections);
 
-  console.log('[exploreWorker] ' + result.collections.length + ' gene collection(s) collected');
+  console.log([
+    '[exploreWorker] Got results for',
+    result.collections.length,
+    'gene set collection(s)'
+  ].join(' '));
   t1 = new Date().getTime();
-  console.log('[exploreWorker] Completed in ' + ((t1 - t0) / 1000) + ' seconds');
+  console.log('[exploreWorker] Done in ' + ((t1 - t0) / 1000) + ' seconds');
   postMessage(result);
 };

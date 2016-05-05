@@ -1,9 +1,10 @@
 'use strict';
 
 var development = process.env.NODE_ENV !== 'production';
-var resourcesDir = development ? '/assets/resources': '/~sysbio/seten/assets/resources';
+var resourcesDir = development ?
+  '/assets/resources': '/~sysbio/seten/assets/resources';
 
-function _getSample(sampleId) {
+function getSample(sampleId) {
   var request = new XMLHttpRequest();
   var blob;
 
@@ -23,9 +24,12 @@ onmessage = function(e) {
   var t1;
 
   // get the given sample
-  sample = _getSample(sampleId);
+  sample = getSample(sampleId);
 
   t1 = new Date().getTime();
-  console.log('[sampleWorker] ' + sampleId + ' sample collected in ' + ((t1 - t0) / 1000) + ' seconds');
-  postMessage({file: sample, name: sampleId + '.bed'});
+  console.log('[sampleWorker] Got ' + sampleId + ' in ' + ((t1 - t0) / 1000) + ' seconds');
+  postMessage({
+    file: sample,
+    fileName: sampleId + '.bed'
+  });
 };

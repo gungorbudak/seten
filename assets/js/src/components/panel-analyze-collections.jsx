@@ -107,7 +107,7 @@ var PanelAnalyzeCollections = React.createClass({
         <div className="col-md-6 col-sm-6 col-xs-6">
           <label>
             <span>
-              Gene set collections
+              G. set collections
             </span>
             <a
               className="btn btn-link btn-xs"

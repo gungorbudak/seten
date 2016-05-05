@@ -3,13 +3,14 @@
 importScripts('../libs/jstat.js');
 
 var development = process.env.NODE_ENV !== 'production';
-var resourcesDir = development ? '/assets/resources': '/~sysbio/seten/assets/resources';
+var resourcesDir = development ?
+  '/assets/resources': '/~sysbio/seten/assets/resources';
 
 /*
 Function to compute gene level score from multiple scores
 of the same gene with several options
 */
-function _computeGeneScore(scores, method) {
+function getGeneScore(scores, method) {
   if (scores.length == 1) {
     return scores[0];
   }
@@ -30,9 +31,11 @@ function _computeGeneScore(scores, method) {
 /*
 Reading and parsing mapping file for searching for genes
 */
-function _generateMapping(organism) {
+function getMapping(organism) {
   var request = new XMLHttpRequest();
   var mapping = {};
+  var c = 0;
+
   request.open('GET',
          resourcesDir + '/mappings/' + organism + '.json',
          false);
@@ -40,20 +43,25 @@ function _generateMapping(organism) {
   if (request.status === 200) {
     var data = JSON.parse(request.responseText);
     data.forEach(function(d) {
-      if (!mapping.hasOwnProperty(d.chrName)) {
-        mapping[d.chrName] = []
+      // check if the symbol is available
+      if (d.symbol != '') {
+        if (!mapping.hasOwnProperty(d.chrName)) {
+          mapping[d.chrName] = [];
+        }
+        mapping[d.chrName].push(d);
+        c++;
       }
-      mapping[d.chrName].push(d)
     });
-    console.log('[mappingWorker] ' + data.length + ' mappings loaded');
+    console.log('[mappingWorker] Got ' + c + ' mappings');
   }
+
   return mapping;
 };
 
 /*
 Searching for genes using their coordinates on the chromosomes
 */
-function _getGenes(mapping, chrName, start, end) {
+function getGenes(mapping, chrName, start, end) {
   var m = mapping;
   var c = chrName.toUpperCase();
   var s = parseInt(start);
@@ -80,8 +88,8 @@ function _getGenes(mapping, chrName, start, end) {
 /*
 Parser for BED file
 */
-function _getScoresFromFileBedFile(rows, organism) {
-  var mapping = _generateMapping(organism);
+function getScoresFromFileBedFile(rows, organism) {
+  var mapping = getMapping(organism);
   var scores = {};
   var cols;
   var genes;
@@ -89,7 +97,7 @@ function _getScoresFromFileBedFile(rows, organism) {
   // do the mapping for each row
   rows.forEach(function(row) {
     cols = row.split(/\s/);
-    genes = _getGenes(mapping, cols[0], cols[1], cols[2]);
+    genes = getGenes(mapping, cols[0], cols[1], cols[2]);
     if (genes.length > 0) {
       // might return multiple genes
       genes.forEach(function(gene) {
@@ -109,7 +117,7 @@ function _getScoresFromFileBedFile(rows, organism) {
 /*
 Parser for two column gene - score pair file
 */
-function _getScoresFromTwoColumnFile(rows) {
+function getScoresFromTwoColumnFile(rows) {
   var scores = {};
   var cols;
 
@@ -136,7 +144,7 @@ onmessage = function(e) {
   if (typeof FileReader !== 'undefined') {
     reader = new FileReader();
     reader.onload = function(e) {
-      _getGeneScores(e.target.result, organism);
+      getGeneScores(e.target.result, organism);
     };
     reader.readAsText(e.data.file);
   } else {
@@ -144,11 +152,11 @@ onmessage = function(e) {
     // that don't support async FileReader
     reader = new FileReaderSync();
     var content = reader.readAsText(e.data.file);
-    _getGeneScores(content, organism);
+    getGeneScores(content, organism);
   }
 
   // main function to map content of the input file
-  var _getGeneScores = function(content, organism) {
+  var getGeneScores = function(content, organism) {
     var rows = content.trim().split(/\r?\n/);
     var colSize = rows[0].split(/\s/).length;
     var geneScores = [];
@@ -157,25 +165,25 @@ onmessage = function(e) {
     // get scores according to number of columns
     // in the first row of the file
     if (colSize > 2) {
-      scores = _getScoresFromFileBedFile(rows, organism);
+      scores = getScoresFromFileBedFile(rows, organism);
     } else {
-      scores = _getScoresFromTwoColumnFile(rows);
+      scores = getScoresFromTwoColumnFile(rows);
     }
 
     // compute gene level scores
     for (var gene in scores) {
       geneScores.push({
         gene: gene,
-        score: _computeGeneScore(scores[gene])
+        score: getGeneScore(scores[gene])
       });
     }
 
     if (colSize > 2) {
-      console.log('[mappingWorker] ' + rows.length + ' binding events detected');
+      console.log('[mappingWorker] Got ' + rows.length + ' binding events');
     }
-    console.log('[mappingWorker] ' + geneScores.length + ' gene level scores collected');
+    console.log('[mappingWorker] Got ' + geneScores.length + ' gene level scores');
     t1 = new Date().getTime();
-    console.log('[mappingWorker] Mapping completed in ' + ((t1 - t0)/1000) + ' seconds');
+    console.log('[mappingWorker] Did mapping in ' + ((t1 - t0)/1000) + ' seconds');
     postMessage(geneScores);
   };
 };

@@ -10,13 +10,13 @@ importScripts('../libs/jstat.js');
  * c: dataset genes size
  * d: gene collections size
 */
-function _functionalEnrichment(a, b, c, d) {
+function funcEnrichment(a, b, c, d) {
   var r;
   r = jStat.fishersexact(a, b, c-a, d-b);
   return r.p;
 }
 
-function _geneSetEnrichment(scores, overlapGeneScores, cutoff, times) {
+function geneSetEnrichment(scores, overlapGeneScores, cutoff, times) {
   var tests = [];
   var i = times;
   var overlapScores = _.map(overlapGeneScores, 'score');
@@ -79,7 +79,7 @@ onmessage = function(e) {
         // which enrichment method?
         if (enrichmentMethod == 'fe') {
           // compute functional enrichment p-value
-          fPValue = _functionalEnrichment(
+          fPValue = funcEnrichment(
             overlapGeneScoresSize,
             geneSetSize,
             genesSize,
@@ -87,7 +87,7 @@ onmessage = function(e) {
           );
         } else {
           // compute gene set enrichment p-value
-          gSPValue = _geneSetEnrichment(
+          gSPValue = geneSetEnrichment(
             scores,
             overlapGeneScores,
             significanceCutoff,

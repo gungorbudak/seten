@@ -1,4 +1,5 @@
 import React from 'react';
+import Spinner from 'react-spin';
 import { saveAs } from 'filesaver.js';
 import * as _ from 'lodash';
 import PanelExplore from './panel-explore';
@@ -10,10 +11,11 @@ import MappingWorker from 'worker?name=mapping.worker.js!../workers/mapping';
 import CollectionWorker from 'worker?name=collection.worker.js!../workers/collection';
 import EnrichmentWorker from 'worker?name=enrichment.worker.js!../workers/enrichment';
 
+
 var App = React.createClass({
   getInitialState: function() {
     return {
-      inputFile: undefined,
+      inputFile: null,
       inputFileName: '',
       inputOrganism: 'hsa_hg19',
       inputCollections: [],
@@ -26,14 +28,14 @@ var App = React.createClass({
       inputSignificanceCutoff: 0.05,
       inputNumberOfIterations: 1000,
       inputErrors: [],
-      workers: [],
-      geneSetCollections: [],
       results: [],
+      result: null,
+      workers: [],
       collections: this.props.collections,
       compare: false,
-      result: undefined,
       isRunning: false,
-      areParametersVisible: false
+      areParametersVisible: false,
+      spin: false
     };
   },
   statics: {
@@ -53,7 +55,7 @@ var App = React.createClass({
     // reset some state variables
     this.setState({workers: []});
     this.setState({geneCollections: []});
-    this.setState({result: undefined});
+    this.setState({result: null});
   },
   togglePanelAnalyze: function(e) {
     this.setState({isRunning: !this.state.isRunning});
@@ -79,6 +81,8 @@ var App = React.createClass({
         break;
       }
     }
+
+    // store the updated results in the state
     this.setState({results: results});
 
     // reset some state variables
@@ -93,8 +97,10 @@ var App = React.createClass({
     workers.forEach(function(worker) {
       worker.terminate();
     });
+
     // reset some state variables
     this.resetSomeState();
+
     // enable the panel back
     this.togglePanelAnalyze();
   },
@@ -102,6 +108,7 @@ var App = React.createClass({
     var selection = e;
     var collections = this.state.collections;
     var inputCollectionsCompared = this.state.inputCollectionsCompared;
+
     // select all is unchecked or
     // user unchecked all one by one
     if (selection === true) {
@@ -121,6 +128,7 @@ var App = React.createClass({
         inputCollectionsCompared.push(collection);
       }
     }
+
     // store it back in the state
     this.setState({inputCollectionsCompared: inputCollectionsCompared});
   },
@@ -128,6 +136,7 @@ var App = React.createClass({
     e.preventDefault();
     var id = 'bubble-chart';
     var svg = document.querySelector('svg#' + id);
+
     // save if there is any SVG markup
     if (svg.outerHTML.length > 0) {
       var data = new Blob([svg.outerHTML], {type: 'image/svg+xml'});
@@ -150,6 +159,9 @@ var App = React.createClass({
     var resultId = e.currentTarget.id,
     exploreWorker = new ExploreWorker();
 
+    // start spinning
+    this.setState({spin: true});
+
     exploreWorker.postMessage({
       resultId: resultId,
       collections: this.state.collections
@@ -158,20 +170,28 @@ var App = React.createClass({
   },
   handleInputFileChange: function(e) {
     var file = e.target.files[0];
+
     this.setState({inputFile: file});
     this.setState({inputFileName: file.name});
   },
   handleInputSampleFileClick: function(e) {
     e.preventDefault();
-    var sample = e.currentTarget.id;
+    var sampleId = e.currentTarget.id;
     var sampleWorker = new SampleWorker();
+
+    // start spinning
+    this.setState({spin: true});
+
     // toggle form
     this.togglePanelAnalyze();
-    sampleWorker.postMessage(sample);
+
+    // send the sample ID to the worker
+    sampleWorker.postMessage(sampleId);
     sampleWorker.onmessage = this.sampleWorkerOnMessage;
   },
   handleSelectOrganismChange: function(e) {
     var organism = e.get(0).value;
+
     // update the organism in the state
     this.setState({inputOrganism: organism});
     this.setState({inputCollections: []});
@@ -179,12 +199,14 @@ var App = React.createClass({
   handleSelectCollectionsChange: function(e) {
     var collection = e.get(0).value;
     var inputCollections = this.state.inputCollections;
+
     // if the selected collection is not in input
     if (_.indexOf(inputCollections, collection) !== -1) {
       inputCollections = _.pull(inputCollections, collection);
     } else {
       inputCollections.push(collection);
     }
+
     this.setState({inputCollections: inputCollections});
   },
   handleClickToggleParameters: function(e) {
@@ -209,6 +231,7 @@ var App = React.createClass({
   },
   handleGeneSetCutoffChange: function(e) {
     var val = e.target.value;
+
     if (val != '') {
       val = parseInt(val);
     }
@@ -216,6 +239,7 @@ var App = React.createClass({
   },
   handleOverlapCutoffChange: function(e) {
     var val = e.target.value;
+
     if (val != '') {
       val = parseInt(val);
     }
@@ -223,6 +247,7 @@ var App = React.createClass({
   },
   handleSignificanceCutoffChange: function(e) {
     var val = e.target.value;
+
     if (val != '') {
       val = parseFloat(val);
     }
@@ -230,6 +255,7 @@ var App = React.createClass({
   },
   handleNumberOfIterationsChange: function(e) {
     var val = e.target.value;
+
     if (val != '') {
       val = parseInt(val);
     }
@@ -249,16 +275,24 @@ var App = React.createClass({
     var numberOfIterations = this.state.inputNumberOfIterations;
     var errors = [];
 
-    if (file === undefined) {
+    if (file === null) {
       errors.push('Select a file');
     }
-    if (organism === undefined) {
+    if (organism === null) {
       errors.push('Select an organism');
     }
     if (collections.length == 0) {
       errors.push('Select at least one gene set collection');
     }
-    // TODO: implement error checks for other parameters
+    if (enrichmentMethod === null) {
+      errors.push('Select an enrichment method');
+    }
+    if (scoringMethod === null) {
+      errors.push('Select a scoring method');
+    }
+    if (correctionMethod === null) {
+      errors.push('Select a correction method');
+    }
     if (geneSetCutoff === '') {
       errors.push('Enter a positive number for gene set cutoff, default: 350');
     } else {
@@ -294,6 +328,9 @@ var App = React.createClass({
       var mappingWorker = new MappingWorker();
       var results = this.state.results;
 
+      // remove possible previous errors from the state
+      this.setState({inputErrors: []});
+
       // initiate a temporary result variable
       var result = {
         id: this.constructor.getResultIdFromFileName(this.state.inputFileName),
@@ -307,19 +344,21 @@ var App = React.createClass({
         collections: []
       };
 
-      // remove previous errors from the state
-      this.setState({inputErrors: []});
       // hide advanced parameters to save some space
       this.hideAdvancedParameters();
+
       // toggle form
       this.togglePanelAnalyze();
+
       // add running results to the results
       results.unshift(result);
       this.setState({results: results});
       this.setState({result: result});
+
       // start mapping worker to read and map the file
       mappingWorker.postMessage({file: file, organism: organism});
       mappingWorker.onmessage = this.mappingWorkerOnMessage;
+
       // add worker to the state
       this.setState({workers: this.state.workers.concat([mappingWorker])});
     }
@@ -391,7 +430,6 @@ var App = React.createClass({
   },
   handleExportBarChartClick: function(e) {
     e.preventDefault();
-
     var id = e.currentTarget.id;
     var svg = document.querySelector('svg#' + id);
 
@@ -402,7 +440,6 @@ var App = React.createClass({
   },
   handleExportTableClick: function(e) {
     e.preventDefault();
-
     var id = e.currentTarget.id;
     var resultId = id.split('__')[0];
     var collId = id.split('__')[1];
@@ -451,7 +488,7 @@ var App = React.createClass({
     var results = component.state.results;
     var result = e.data;
 
-    // add missing result attributes
+    // add missing attributes for the result
     result['summary'] = component.props.explore.filter(function(item) {
       return item.id == result.id;
     })[0];
@@ -461,16 +498,25 @@ var App = React.createClass({
     result['organism'] = 'hsa_hg19';
     result['shownPValue'] = 'gSPValue';
     result['enrichmentMethod'] = 'both';
+
     // add the complete result to the results in the state
     results.unshift(result);
 
+    // save results in the state
     component.setState({results: results});
+
+    // end spinning
+    this.setState({spin: false});
   },
   sampleWorkerOnMessage: function(e) {
     this.setState({inputFile: e.data.file});
-    this.setState({inputFileName: e.data.name});
+    this.setState({inputFileName: e.data.fileName});
+
     // toggle form
     this.togglePanelAnalyze();
+
+    // end spinning
+    this.setState({spin: false});
   },
   mappingWorkerOnMessage: function(e) {
     var geneScores = e.data;
@@ -482,6 +528,7 @@ var App = React.createClass({
     // add gene scores to the running result
     result.geneScores = geneScores;
     this.setState({result: result});
+
     // collect all collections
     collectionWorker = new CollectionWorker();
     collectionWorker.postMessage({
@@ -489,14 +536,15 @@ var App = React.createClass({
       collections: collections,
     });
     collectionWorker.onmessage = this.collectionWorkerOnMessage;
+
     // add worker to the state
     this.setState({workers: this.state.workers.concat([collectionWorker])});
   },
   collectionWorkerOnMessage: function(e) {
     var component = this;
-    var inputCollections = component.state.inputCollections;
-    var geneScores = component.state.result.geneScores;
     var geneSetCollections = e.data;
+    var geneScores = component.state.result.geneScores;
+    var inputCollections = component.state.inputCollections;
     var enrichmentMethod = component.state.inputEnrichmentMethod;
     var scoringMethod = component.state.inputScoringMethod;
     var correctionMethod = component.state.inputCorrectionMethod;
@@ -505,9 +553,6 @@ var App = React.createClass({
     var significanceCutoff = component.state.inputSignificanceCutoff;
     var numberOfIterations = component.state.inputNumberOfIterations;
     var enrichmentWorker;
-
-    // store gene collections in the state
-    component.setState({geneSetCollections: geneSetCollections});
 
     // start an enrichment worker for each collection
     inputCollections.forEach(function(inputCollection) {
@@ -525,33 +570,55 @@ var App = React.createClass({
         'numberOfIterations': numberOfIterations
       });
       enrichmentWorker.onmessage = component.enrichmentWorkerOnMessage;
+
       // add worker to the state
-      component.setState({workers: component.state.workers.concat([enrichmentWorker])});
+      component.setState({
+        workers: component.state.workers.concat([enrichmentWorker])
+      });
     });
   },
   enrichmentWorkerOnMessage: function(e) {
     var currentCollection = e.data;
     var results = this.state.results;
     var result = this.state.result;
+
     // add current collection to the running result in the state
     result.collections.push(currentCollection);
 
     // update running result in results in the state
-    this.setState({results: results.map(function(r) {
-      // update the running result element in results
-      if (r.id == result.id) {
-        r = result;
-      }
-      return r;
-    })});
+    this.setState({
+      results: results.map(function(r) {
+        // update the running result element in results
+        if (r.id == result.id) {
+          r = result;
+        }
+        return r;
+        })
+    });
+
     // check if job is complete
     if (result.collections.length == this.state.inputCollections.length) {
       this.completeAnalysis();
     }
   },
   render: function() {
+    var spinnerConfig = {
+      lines: 15,
+      length: 14,
+      width: 10,
+      radius: 12,
+      color: '#F44336',
+      position: 'fixed'
+    };
+    var spinner;
     var errors;
     var progress;
+
+    if (this.state.spin) {
+      spinner = (
+        <Spinner config={spinnerConfig} />
+        );
+    }
 
     if (this.state.inputErrors.length > 0) {
       errors = (
@@ -569,15 +636,17 @@ var App = React.createClass({
         </div>
       );
     }
-    if (this.state.result !== undefined &&
-        this.state.inputCollections !== undefined) {
+
+    if (this.state.result !== null && this.state.inputCollections !== null) {
       progress = Math.round(
         100 * (this.state.result.collections.length /
               this.state.inputCollections.length)
       );
     }
+    
     return (
       <div>
+        { spinner }
         <div className="row">
           <div className="col-sm-12">
             { errors }

@@ -53,7 +53,7 @@ var PanelAnalyzeFile = React.createClass({
               />
           </div>
           <p className="help-block">
-            <span className="hidden-sm">Sample datasets</span>
+            <span className="hidden-xs hidden-sm">Sample datasets</span>
             { component.props.samples.map(function(item, i) {
               item.name = item.symbol + ' / ' + item.cellLine;
               var itemSummary = [
