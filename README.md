@@ -12,21 +12,21 @@ Seten's production server is running on http://www.iupui.edu/~sysbio/seten/.
 
 * Node.js version 5.x
 
-    \# remove if an old version was installed
-    \# sudo apt-get remove nodejs
-    curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+        # remove if an old version was installed
+        # sudo apt-get remove nodejs
+        curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
+        sudo apt-get install -y nodejs
 
 * Node Package Manager (NPM) latest version
 
-    sudo apt-get install npm
-    sudo npm install -g npm \# upgrades itself to the latest version
+        sudo apt-get install npm
+        sudo npm install -g npm # upgrades itself to the latest version
 
 ### Setup
 
     git clone https://github.com/gungorbudak/seten.git
     cd seten/
-    \# download and untar the resources (around 300 MB)
+    # download and untar the resources (around 300 MB)
     wget http://www.iupui.edu/~sysbio/seten/assets/resources.tar.gz
     tar xzf resources.tar.gz -C assets/ && rm resources.tar.gz
     npm install --production
