@@ -42,7 +42,12 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="https://github.com/gungorbudak/seten-cli" title="Seten command line interface" target="_blank">
+                        <a href="https://github.com/gungorbudak/seten" title="GitHub page for Seten web interface" target="_blank">
+                            <i class="fa fa-github"></i> GitHub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/gungorbudak/seten-cli" title="GitHub page for Seten command line interface" target="_blank">
                             <i class="fa fa-terminal"></i> Seten CLI
                         </a>
                     </li>
@@ -64,10 +69,10 @@
                 </p>
                 <a name="features"></a>
                 <h3>Features</h3>
-                <a name="features-browser-user-interface"></a>
-                <h4>Browser user interface</h4>
+                <a name="features-web-interface"></a>
+                <h4>Web interface</h4>
                 <p>
-                    Seten's browser interface (this website) provides an on-demand application for Seten's implementation.
+                    Seten's web interface (this website) provides an on-demand application for Seten's implementation.
                 </p>
                 <ul>
                     <li>Runs almost all latest versions of modern browsers across all operating systems</li>
@@ -107,14 +112,18 @@
                 <a name="datasets"></a>
                 <h3>Datasets</h3>
                 <p>
-                    The following datasets are used to test Seten during development and also their gene set association results are given in Seten's browser user interface (this website) under <strong>Explore</strong> panel. We downloaded human RBP datasets including target binding affinity scores from CLIPdb <sup>1</sup> and ENCODE project <sup>2</sup>. Since there are multiple samples for some RBP-cell line pairs in CLIPdb and ENCODE, we simply merged them before the gene set association analyses. After preprocessing these datasets, we obtained 68 unique RBP-cell line pairs for CLIPdb and 84 unique RBP-cell line pairs for the ENCODE project.
+                    The following datasets are used to test Seten during development and also their gene set association results are given in Seten's browser user interface (this website) under <strong>Explore</strong> panel. We downloaded human RBP datasets including target binding affinity scores from CLIPdb <sup>1</sup> and ENCODE project <sup>2</sup>. Since there are multiple samples for some RBP-cell line pairs in CLIPdb and ENCODE, we simply merged them before the gene set association analyses. After preprocessing these datasets, we obtained 68 unique RBP-cell line pairs for CLIPdb and 138 unique RBP-cell line pairs for the ENCODE project.
                 </p>
                 <a name="inputs"></a>
                 <h3>Inputs</h3>
-                <a name="inputs-bed-file"></a>
-                <h4>BED file</h4>
+                <a name="inputs-file"></a>
+                <h4>File</h4>
                 <p>
-                    A BED file is an UCSC BED formatted text file which stores chromosomal location data as lines. Seten requires (at least) 5-column BED file having chrom, chromStart, chromEnd, name, score. Go to <a href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1" target="_blank">UCSC's website to obtain more information about BED format</a>.
+                  The input file for Seten can be a UCSC BED formatted text file or Tab-separated (two-column) gene - score file. The BED file is the most common format used by peak callers. However, if you have a two-column gene - score file, you can also use it but please make sure you use the official gene name for the corresponding organism (e.g. FlyBase Gene Name for fruit fly datasets) and don't include the header line.
+                  The input file for Seten can be a UCSC BED formatted text file or Tab-separated (two-column) gene - score file. The BED file is the most common format used by peak callers. However, if you have a two-column gene - score file, you can also use it but please make sure you use the official gene name for the corresponding organism (e.g. FlyBase Gene Name for fruit fly datasets) and don't include the header lorganism
+                </p>
+                <p>
+                    A BED file is a UCSC BED formatted text file which stores chromosomal location data as lines. Seten requires (at least) 5-column BED file having chrom, chromStart, chromEnd, name, score. Go to <a href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1" target="_blank">UCSC's website to obtain more information about BED format</a>.
                 </p>
                 <p>
                     The first 10 lines of a sample BED file is as following:
@@ -131,27 +140,82 @@ chr1	1328880	1328900	binding_site_8	10	.	0.00657314
 chr1	1337360	1337380	binding_site_9	8	.	0.00997733
 chr1	1438640	1438660	binding_site_10	12	.	0.00315889
 ...</pre>
+                <a name="inputs-organism"></a>
+                <h4>Organism</h4>
+                <p>
+                  There are four available organisms provided in Seten's web interface: Human (hg19 build), mouse (mm10 build), rat (rn6 build), fruit fly (dme6 build). It's possible to extend the Seten for more organisms; however, this is only available for Seten's command line interface. Please refer to its GitHub page for more information.
+                </p>
                 <a name="inputs-gene-set-collections"></a>
                 <h4>Gene set collections</h4>
                 <p>
-                    Following gene set collections are available in Seten's both browser user interface and command line interface.
+                    Following gene set collections are available in Seten's both web interface and command line interface. In parenthesis, the availability of that gene set collection for the corresponding organisms is given.
                 </p>
                 <ul>
-                    <li>Pathways: REACTOME <sup>3</sup></li>
-                    <li>Pathways: BIOCARTA <sup>3</sup></li>
-                    <li>Pathways: KEGG <sup>3</sup></li>
-                    <li>GO: Biological Process <sup>3</sup></li>
-                    <li>GO: Molecular Function <sup>3</sup></li>
-                    <li>GO: Cellular Compartment <sup>3</sup></li>
-                    <li>Human Phenotype Ontology <sup>4</sup></li>
-                    <li>MalaCards Disease Ontology <sup>5</sup></li>
+                    <li>Pathways: BIOCARTA (human, mouse)</li>
+                    <li>Pathways: REACTOME (human, mouse, rat, fruit fly)</li>
+                    <li>Pathways: KEGG (human, mouse, rat, fruit fly)</li>
+                    <li>GO: Biological Process (human, mouse, rat, fruit fly)</li>
+                    <li>GO: Molecular Function (human, mouse, rat, fruit fly)</li>
+                    <li>GO: Cellular Compartment (human, mouse, rat, fruit fly)</li>
+                    <li>Human Phenotype Ontology (human)</li>
+                    <li>MalaCards Disease Ontology (human)</li>
                 </ul>
+                <a name="inputs-enrichment-method"></a>
+                <h4>Enrichment method</h4>
+                <p>
+                    By default, Seten uses a gene set enrichment method based on permutation. It also provides a traditional functional enrichment analysis method (implementing Fisher's exact test or FET).
+                </p>
+                <a name="inputs-scoring-method"></a>
+                <h4>Scoring method</h4>
+                <p>
+                    The scoring method is used to compute single gene level score from multiple scores for the same gene (after mapping to genes from chromosomal locations or given multiple scores in the two column gene - score file) in CLIP-seq datasets. By default, maximum method is selected, which gets the maximum score among all scores for the same gene and does the gene set enrichment based on that score. Other methods are minimum, mean, median, sum.
+                </p>
+                <p>
+                    Note that it's only available for gene set enrichment analysis.
+                </p>
+                <a name="inputs-correction-method"></a>
+                <h4>Correction method</h4>
+                <p>
+                  The correction method is used to correct p-values obtained from functional enrichment analysis (Fisher's exact test or FET). Currently, Seten's web interface has only one method, which is false discovery rate (FDR) or Benjamini - Hochberg. Seten's command line interface includes several more methods or correcting these p-values.
+                </p>
+                <p>
+                    Note that it's only available for functional enrichment analysis.
+                </p>
+                <a name="inputs-gene-set-cutoff"></a>
+                <h4>Gene set cutoff</h4>
+                <p>
+                    The gene set cutoff (defaulting to 350) is used to set an upper limit to gene set enrichment analysis or functional analysis for doing the analysis on the gene sets that are more specific.
+                </p>
+                <a name="inputs-overlap-cutoff"></a>
+                <h4>Overlap cutoff</h4>
+                <p>
+                  The overlap cutoff (defaulting to 5) is used to set a lower limit to number of overlapping genes between each gene set and the CLIP-seq dataset to eliminate the gene sets that have a few genes in common with the given datasets.
+                </p>
+                <p>
+                    For getting statistically meaningful results, it's better to set it as at least 5.
+                </p>
+                <a name="inputs-significance-cutoff"></a>
+                <h4>Significance cutoff</h4>
+                <p>
+                    The significance cutoff (defaulting to 0.05) is used to set an upper limit to the p-value obtained from Mann-Whitney U test done in each permutation of gene set enrichment analysis to check if the scores (of genes common between each gene set and the given dataset) are significantly higher than randomly picked scores the same dataset.
+                </p>
+                <p>
+                    Note that it's only available for gene set enrichment analysis.
+                </p>
+                <a name="inputs-number-of-iterations"></a>
+                <h4>Number of iterations</h4>
+                <p>
+                    The number of iterations (defaulting to 1000) is the number of times to permutate and check for significance using randomly picked scores.
+                </p>
+                <p>
+                    Note that it's only available for gene set enrichment analysis.
+                </p>
                 <a name="outputs"></a>
                 <h3>Outputs</h3>
                 <a name="outputs-bar-charts"></a>
                 <h4>Bar charts</h4>
                 <p>
-                    Bar charts are available only in browser user interface. They represent significant results based on percent (defaults to > 5%) and p-value (defaults to < 0.01) thresholds. These thresholds can be configured in the options. X-axis of bar charts has the names of gene sets and y-axis has the significance values obtained by &ndash;<i>Log<sub>10</sub></i>(Combined p-value of the gene set).
+                    Bar charts are available only in web interface. They represent significant results based on percent (defaults to > 5%) and p-value (defaults to < 0.01) thresholds. These thresholds can be configured in the options. X-axis of bar charts has the names of gene sets and y-axis has the significance values obtained by &ndash;<i>Log<sub>10</sub></i>(Combined p-value of the gene set).
                 </p>
                 <a name="outputs-tables"></a>
                 <h4>Tables</h4>
@@ -172,7 +236,7 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
                 <a name="outputs-bubble-charts"></a>
                 <h4>Bubble charts</h4>
                 <p>
-                    Bubble charts are available only in browser user interface. They represent significant results based on percent (defaults to > 5%) and p-value (defaults to < 0.01) thresholds. These thresholds can be configured in the options. X-axis of bubble charts has the names of RBPs and y-axis has the gene set names. The radius of bubbles comes from their corresponding significance values obtained by &ndash;<i>Log<sub>10</sub></i>(Combined p-value of the gene set).
+                    Bubble charts are available only in web interface. They represent significant results based on percent (defaults to > 5%) and p-value (defaults to < 0.01) thresholds. These thresholds can be configured in the options. X-axis of bubble charts has the names of RBPs and y-axis has the gene set names. The radius of bubbles comes from their corresponding significance values obtained by &ndash;<i>Log<sub>10</sub></i>(Combined p-value of the gene set).
                 </p>
                 <a name="tutorial"></a>
                 <h3>Tutorial</h3>
@@ -192,7 +256,7 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
                 <ul>
                     <li>
                         <a href="https://github.com/gungorbudak/seten" target="_blank">
-                            Seten (browser user interface) source code
+                            Seten (web interface) source code
                         </a>
                     </li>
                     <li>
@@ -218,7 +282,7 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
                     <li>
                         <a href="#features">Features</a>
                         <ul>
-                            <li><a href="#features-browser-user-interface">Browser user interface</a></li>
+                            <li><a href="#features-web-interface">Web interface</a></li>
                             <li><a href="#features-command-line-interface">Command line interface</a></li>
                         </ul>
                     </li>
@@ -227,8 +291,16 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
                     <li>
                         <a href="#inputs">Inputs</a>
                         <ul>
-                            <li><a href="#inputs-bed-file">BED file</a></li>
+                            <li><a href="#inputs-file">File</a></li>
+                            <li><a href="#inputs-organism">Organism</a></li>
                             <li><a href="#inputs-gene-set-collections">Gene set collections</a></li>
+                            <li><a href="#inputs-enrichment-method">Enrichment method</a></li>
+                            <li><a href="#inputs-scoring-method">Scoring method</a></li>
+                            <li><a href="#inputs-correction-method">Correction method</a></li>
+                            <li><a href="#inputs-gene-set-cutoff">Gene set cutoff</a></li>
+                            <li><a href="#inputs-overlap-cutoff">Overlap cutoff</a></li>
+                            <li><a href="#inputs-significance-cutoff">Significance cutoff</a></li>
+                            <li><a href="#inputs-number-of-iterations">Number of iterations</a></li>
                         </ul>
                     </li>
                     <li>
@@ -255,7 +327,7 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
             </span>
         </div>
     </div>
-    <script src="assets/js/libs/jquery-1.11.3.min.js" charset="utf-8"></script>
+    <script src="assets/js/libs/jquery.min.js" charset="utf-8"></script>
     <script src="assets/js/libs/bootstrap.min.js" charset="utf-8"></script>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

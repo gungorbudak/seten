@@ -1,3 +1,4 @@
 node_modules/
 assets/resources/
-assets/resources.zip
+assets/resources.tar.gz
+npm-debug.log
