@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import * as _ from 'lodash';
 
+
 var ResultGroupCompareCollections = React.createClass({
   componentDidMount: function() {
     var $node = $(ReactDOM.findDOMNode(this));
@@ -16,7 +17,7 @@ var ResultGroupCompareCollections = React.createClass({
   },
   render: function() {
     var component = this;
-    var options;
+    var options = null;
 
     // get all available options
     options = component.props.collections.map(function (option, i) {
@@ -25,7 +26,7 @@ var ResultGroupCompareCollections = React.createClass({
           key={'item' + i}
           value={option.id}
           defaultValue={_.indexOf(component.props.inputCollectionsCompared, option.id) !== -1}>
-          {option.name}
+          { option.name }
         </option>
       );
     });
@@ -47,5 +48,6 @@ var ResultGroupCompareCollections = React.createClass({
     );
   }
 });
+
 
 export default ResultGroupCompareCollections;

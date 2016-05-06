@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 var ResultTitle = React.createClass({
   render: function() {
     var enrichmentMethod;
@@ -90,5 +91,6 @@ var ResultTitle = React.createClass({
     );
   }
 });
+
 
 export default ResultTitle;

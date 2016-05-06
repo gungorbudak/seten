@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 var ResultSummary = React.createClass({
   render: function() {
     return (
@@ -8,11 +9,15 @@ var ResultSummary = React.createClass({
           <table className="table">
             <thead>
               <tr>
-                <th>Symbol</th>
+                <th>
+                  Symbol
+                </th>
                 <th>
                   Cell line
                 </th>
-                <th>Species</th>
+                <th>
+                  Species
+                </th>
                 <th>
                   Disease state
                 </th>
@@ -40,5 +45,6 @@ var ResultSummary = React.createClass({
     );
   }
 });
+
 
 export default ResultSummary;

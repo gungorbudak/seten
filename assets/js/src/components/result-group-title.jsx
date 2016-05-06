@@ -1,12 +1,41 @@
 import React from 'react';
 import ResultGroupCompareCollections from './result-group-compare-collections';
 
+
 var ResultGroupTitle = React.createClass({
   render: function() {
     var title = (this.props.compare) ? 'Compare': 'View';
     var toggle = (this.props.compare) ? 'toggle-on': 'toggle-off';
-    var compareCollections;
-    var compareExport;
+    var resultsClear = null;
+    var compareToggle = null;
+    var compareCollections = null;
+    var compareExport = null;
+
+    resultsClear = (
+      <li>
+        <button
+          className="btn btn-default btn-xs"
+          title="Clear results"
+          onClick={this.props.onResultsClearClick}>
+          <i className="fa fa-trash fa-fw">
+          </i>
+          <span className="hidden-xs">&nbsp;Clear</span>
+        </button>
+      </li>
+    );
+
+    compareToggle = (
+      <li>
+        <button
+          className="btn btn-default btn-xs"
+          title="Toggle view/compare"
+          onClick={this.props.onResultsCompareClick}>
+          <i className={"fa fa-" + toggle + " fa-fw"}>
+          </i>
+          <span className="hidden-xs">&nbsp;Compare</span>
+        </button>
+      </li>
+    );
 
     if (this.props.compare) {
       compareCollections = (
@@ -43,31 +72,14 @@ var ResultGroupTitle = React.createClass({
           <ul className="list-inline list-inline-buttons">
             { compareCollections }
             { compareExport }
-            <li>
-              <button
-                className="btn btn-default btn-xs"
-                title="Clear results"
-                onClick={this.props.onResultsClearClick}>
-                <i className="fa fa-trash fa-fw">
-                </i>
-                <span className="hidden-xs">&nbsp;Clear</span>
-              </button>
-            </li>
-            <li>
-              <button
-                className="btn btn-default btn-xs"
-                title="Toggle view/compare"
-                onClick={this.props.onResultsCompareClick}>
-                <i className={"fa fa-" + toggle + " fa-fw"}>
-                </i>
-                <span className="hidden-xs">&nbsp;Compare</span>
-              </button>
-            </li>
+            { resultsClear }
+            { compareToggle }
           </ul>
         </div>
       </div>
     );
   }
 });
+
 
 export default ResultGroupTitle;

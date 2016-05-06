@@ -8,7 +8,7 @@ var PanelExplore = React.createClass({
     }
   },
   handleSearchChange: function(e) {
-    var query = e.target.value.toLowerCase();
+    var query = e.target.value.toLowerCase().trim();
     var explore = this.props.explore;
 
     if (query.length > 0) {

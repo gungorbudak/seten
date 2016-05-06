@@ -31,11 +31,10 @@ var App = React.createClass({
       results: [],
       result: null,
       workers: [],
-      collections: this.props.collections,
+      spin: false,
       compare: false,
-      isRunning: false,
-      areParametersVisible: false,
-      spin: false
+      analyze: true,
+      configure: false,
     };
   },
   statics: {
@@ -53,15 +52,16 @@ var App = React.createClass({
   },
   resetSomeState: function() {
     // reset some state variables
-    this.setState({workers: []});
-    this.setState({geneCollections: []});
-    this.setState({result: null});
+    this.setState({
+      workers: [],
+      result: null
+    });
   },
   togglePanelAnalyze: function(e) {
-    this.setState({isRunning: !this.state.isRunning});
+    this.setState({analyze: !this.state.analyze});
   },
   hideAdvancedParameters: function(e) {
-    this.setState({areParametersVisible: false});
+    this.setState({configure: false});
   },
   cancelAnalysis: function() {
     var workers = this.state.workers;
@@ -106,7 +106,7 @@ var App = React.createClass({
   },
   handleCompareCollectionsChange: function(e) {
     var selection = e;
-    var collections = this.state.collections;
+    var collections = this.props.collections;
     var inputCollectionsCompared = this.state.inputCollectionsCompared;
 
     // select all is unchecked or
@@ -164,7 +164,7 @@ var App = React.createClass({
 
     exploreWorker.postMessage({
       resultId: resultId,
-      collections: this.state.collections
+      collections: this.props.collections
     });
     exploreWorker.onmessage = this.exploreWorkerOnMessage;
   },
@@ -212,7 +212,7 @@ var App = React.createClass({
   handleClickToggleParameters: function(e) {
     e.preventDefault();
 
-    this.setState({areParametersVisible: !this.state.areParametersVisible});
+    this.setState({configure: !this.state.configure});
   },
   handleSelectEnrichmentMethodChange: function(e) {
     var method = e.target.options[e.target.options.selectedIndex].value;
@@ -445,43 +445,72 @@ var App = React.createClass({
     var collId = id.split('__')[1];
     var results = this.state.results;
     var result;
+    var geneSet;
     var collection;
 
     result = results.filter(function(result) {
       return result.id == resultId;
     })[0];
 
+    geneSet = result.enrichmentMethod == 'gse' ||
+      (result.enrichmentMethod == 'both' &&
+       result.shownPValue == 'gSPValue') ? true: false;
+
     collection = result.collections.filter(function(coll) {
       return coll.id == collId;
     })[0];
 
-    var tsv = [
-      'Gene set ID',
-      'Gene set',
-      'Genes',
-      'Overlap size',
-      'Gene set size',
-      'Percent',
-      'Functional p-value',
-      'Functional p-value corrected',
-      'Gene set p-value'
-    ].join('\t') + '\n';
-    collection.data.forEach(function(row) {
-      tsv += [
-        row.geneSetId,
-        row.geneSet,
-        row.genes.join(', '),
-        row.overlapSize,
-        row.geneSetSize,
-        row.percent,
-        row.fPValue,
-        row.fPValueCorr,
-        row.gSPValue
-      ].join('\t') + '\n';
-    });
-    var data = new Blob([tsv], {type: 'text/tsv'});
+    if (collection.data.length > 0) {
+      var tsv;
+      var row = [
+        'Gene set ID',
+        'Gene set',
+        'Genes',
+        'Overlap size',
+        'Gene set size',
+        'Percent'
+      ];
 
-    saveAs(data, id + '.tsv');
+      if (geneSet) {
+        row.push([
+          'Gene set p-value'
+        ]);
+      } else {
+        row.push([
+          'Functional p-value',
+          'Functional p-value corrected'
+        ]);
+      }
+
+      tsv = row.join('\t') + '\n'
+
+      collection.data.forEach(function(d) {
+        row = [
+          d.geneSetId,
+          d.geneSet,
+          d.genes.join(', '),
+          d.overlapSize,
+          d.geneSetSize,
+          d.percent
+        ];
+
+        if (geneSet) {
+          row.push([
+            d.gSPValue
+          ]);
+        } else {
+          row.push([
+            d.fPValue,
+            d.fPValueCorr,
+          ]);
+        }
+
+        tsv += row.join('\t') + '\n';
+      });
+      var data = new Blob([tsv], {type: 'text/tsv'});
+
+      saveAs(data, id + '.tsv');
+    }
   },
   exploreWorkerOnMessage: function(e) {
     var component = this;
@@ -498,6 +527,9 @@ var App = React.createClass({
     result['organism'] = 'hsa_hg19';
     result['shownPValue'] = 'gSPValue';
     result['enrichmentMethod'] = 'both';
+
+    // make a unique ID
+    result['id'] += eval(parseInt(Math.random() * (9999 - 1000 + 1)) + 1000);
 
     // add the complete result to the results in the state
     results.unshift(result);
@@ -610,9 +642,9 @@ var App = React.createClass({
       color: '#F44336',
       position: 'fixed'
     };
-    var spinner;
-    var errors;
-    var progress;
+    var spinner = null;
+    var errors = null;
+    var progress = null;
 
     if (this.state.spin) {
       spinner = (
@@ -637,13 +669,13 @@ var App = React.createClass({
       );
     }
 
-    if (this.state.result !== null && this.state.inputCollections !== null) {
+    if (this.state.result !== null && this.state.inputCollections.length > 0) {
       progress = Math.round(
         100 * (this.state.result.collections.length /
               this.state.inputCollections.length)
       );
     }
-    
+
     return (
       <div>
         { spinner }
@@ -679,8 +711,8 @@ var App = React.createClass({
               inputOverlapCutoff={this.state.inputOverlapCutoff}
               inputSignificanceCutoff={this.state.inputSignificanceCutoff}
               inputNumberOfIterations={this.state.inputNumberOfIterations}
-              areParametersVisible={this.state.areParametersVisible}
-              disabled={this.state.isRunning}
+              configure={this.state.configure}
+              disabled={!this.state.analyze}
               onInputFileChange={this.handleInputFileChange}
               onInputSampleFileClick={this.handleInputSampleFileClick}
               onSelectOrganismChange={this.handleSelectOrganismChange}
@@ -706,7 +738,6 @@ var App = React.createClass({
               inputCollectionsCompared={this.state.inputCollectionsCompared}
               compare={this.state.compare}
               progress={progress}
-              isRunning={this.state.isRunning}
               onCompareCollectionsChange = {this.handleCompareCollectionsChange}
               onCompareExportClick = {this.handleCompareExportClick}
               onResultsClearClick = {this.handleResultsClearClick}

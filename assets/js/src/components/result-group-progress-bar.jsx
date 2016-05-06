@@ -2,13 +2,15 @@ import React from 'react';
 
 var ResultGroupProgressBar = React.createClass({
   render: function() {
-    if (this.props.show && this.props.progress !== undefined) {
+    var progress = null;
+
+    if (this.props.progress !== null) {
       var barStyle = {
         minWidth: "2em",
         width: this.props.progress + "%"
       };
 
-      return (
+      progress = (
         <div className="progress">
           <div
             className="progress-bar progress-bar-info progress-bar-striped active"
@@ -22,12 +24,13 @@ var ResultGroupProgressBar = React.createClass({
           </div>
         </div>
       );
-    } else {
-      return (
-        <div>
-        </div>
-      );
     }
+
+    return (
+      <div>
+        { progress }
+      </div>
+    );
   }
 });
 

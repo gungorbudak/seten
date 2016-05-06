@@ -12,7 +12,7 @@ var PanelAnalyzeParameters = React.createClass({
   render: function() {
     var parameters;
 
-    if (this.props.visible) {
+    if (this.props.configure) {
       parameters = (
         <div>
           <div className="form-group clearfix">
@@ -39,6 +39,7 @@ var PanelAnalyzeParameters = React.createClass({
               />
 
           </div>
+
           <div className="form-group clearfix">
 
             <PanelAnalyzeParametersGeneSetCutoff

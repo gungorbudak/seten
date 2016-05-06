@@ -2,6 +2,7 @@ import React from 'react';
 import ResultCollectionBarChart from './result-collection-bar-chart';
 import ResultCollectionTable from './result-collection-table';
 
+
 var ResultCollection = React.createClass({
   render: function() {
     var component = this;
@@ -94,8 +95,8 @@ var ResultCollection = React.createClass({
           >
           { barChart }
           <ResultCollectionTable
-            collection={collection}
             data={data}
+            collection={collection}
             organism={component.props.organism}
             shownPValue={component.props.shownPValue}
             enrichmentMethod={component.props.enrichmentMethod}
@@ -105,5 +106,6 @@ var ResultCollection = React.createClass({
     );
   }
 });
+
 
 export default ResultCollection;

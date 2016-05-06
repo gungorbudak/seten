@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 var ResultOptions = React.createClass({
   render: function() {
     return (
@@ -43,5 +44,6 @@ var ResultOptions = React.createClass({
     );
   }
 });
+
 
 export default ResultOptions;

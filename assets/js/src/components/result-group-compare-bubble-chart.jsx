@@ -3,16 +3,18 @@ import ReactDOM from 'react-dom';
 import * as _ from 'lodash';
 import d3 from 'd3';
 
+
 var ResultGroupCompareBubbleChart = React.createClass({
   handleResize: function() {
     this.forceUpdate();
   },
   getChartState: function(width) {
     var component = this;
-    var margin = {top: 150, right: 20, bottom: 20, left: 300};
+    var margin = {top: 150, right: 10, bottom: 10, left: 250};
     var collections = this.props.inputCollectionsCompared;
     var data = [];
     var pValue;
+    var sample;
     // collect chart data from results
     component.props.results.forEach(function(result) {
       // determine which p-value is active for the result
@@ -20,6 +22,8 @@ var ResultGroupCompareBubbleChart = React.createClass({
         (result.enrichmentMethod == 'both' &&
          result.shownPValue == 'gSPValue') ?
         'gSPValue': 'fPValueCorr';
+      sample = (pValue == 'gSPValue') ?
+        '(GS) ' + result.title: '(F) ' + result.title;
       // for each collection available for that result
       result.collections.forEach(function(collection) {
         // check if the collection is among the ones given
@@ -30,10 +34,10 @@ var ResultGroupCompareBubbleChart = React.createClass({
             if (row[pValue] < result.options.pValue &&
                 row.percent > result.options.percent) {
               data.push({
-                sample: (result.title.length > 21) ?
-                  result.title.substr(0, 18) + '...': result.title,
-                geneSet: (row.geneSet.length > 42) ?
-                  row.geneSet.substr(0, 39) + '...': row.geneSet,
+                sample: (sample.length > 21) ?
+                  sample.substr(0, 18) + '...': sample,
+                geneSet: (row.geneSet.length > 38) ?
+                  row.geneSet.substr(0, 35) + '...': row.geneSet,
                 pValue: row[pValue]
               });
             }
