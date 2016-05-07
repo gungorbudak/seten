@@ -7,13 +7,15 @@ var ResultTitle = React.createClass({
     var switchShownPValue;
     var exportButton;
 
-    if (this.props.enrichmentMethod == 'gse') {
+    if (this.props.enrichmentMethod == 'gse' ||
+        (this.props.enrichmentMethod == 'both' &&
+        this.props.shownPValue == 'gSPValue')) {
       enrichmentMethod = (
        <span className="label label-success label-title">
          Gene set
        </span>
      );
-    } else if (this.props.enrichmentMethod == 'fe') {
+    } else {
       enrichmentMethod = (
         <span className="label label-success label-title">
           Functional
