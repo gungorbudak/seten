@@ -63,28 +63,41 @@
         <p>
             This tutorial goes through a sample gene set association analysis covering all features of Seten browser user interface.
         </p>
-        <h3>1. Select a BED file</h3>
+
+        <h3>1. Select a file</h3>
         <p>
             <a href="assets/img/tutorial_1.png" target="_blank">
-                <img class="img-tutorial img-responsive" src="assets/img/tutorial_1.png" alt="Select a BED file" />
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_1.png" alt="Select a file" />
             </a>
         </p>
         <p>
-            Make sure you have <a href="docs.html#inputs-bed-file" target="_blank">a valid BED file</a> or just pick one from <strong>Sample datasets</strong> in the BED file option for analysis.
+            Make sure you have <a href="docs.html#inputs-file" target="_blank">a valid file</a> or just pick one BED file from <strong>Sample datasets</strong> in the file option for analysis.
         </p>
-        <h3>2. Select gene set collections</h3>
+
+        <h3>2. Select an organism and gene set collections</h3>
         <p>
             <a href="assets/img/tutorial_2.png" target="_blank">
-                <img class="img-tutorial img-responsive" src="assets/img/tutorial_2.png" alt="Select gene set collections" />
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_2.png" alt="Select an organism and gene set collections" />
             </a>
         </p>
         <p>
-            There are <a href="docs.html#inputs-gene-set-collections" target="_blank">multiple gene set collections available</a>, just select the ones you are interested in. If you want to select more than one gene set collection, hold Ctrl key to do so.
+            There are <a href="docs.html#inputs-organism" target="_blank">multiple organisms</a> and <a href="docs.html#inputs-gene-set-collections" target="_blank">multiple gene set collections available</a>, just select the organism and gene set collections you are interested in.
         </p>
-        <h3>3. Start the analysis</h3>
+
+        <h3>3. Advanced parameters</h3>
         <p>
             <a href="assets/img/tutorial_3.png" target="_blank">
-                <img class="img-tutorial img-responsive" src="assets/img/tutorial_3.png" alt="Start the analysis" />
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_3.png" alt="Advanced parameters" />
+            </a>
+        </p>
+        <p>
+            There are a number of parameters to customize the enrichment analysis. For this tutorial, you can keep them as default. These parameters are documented in the <a href="docs.html" target="_blank">Documentation</a>.
+        </p>
+
+        <h3>4. Start the analysis</h3>
+        <p>
+            <a href="assets/img/tutorial_4.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_4.png" alt="Start the analysis" />
             </a>
         </p>
         <p>
@@ -93,46 +106,64 @@
         <p>
             Note that the <strong>Analyze</strong> panel will be disabled during the analysis and the <strong>Submit</strong> button will be replaced with the <strong>Cancel</strong> button after it starts. You may click to this button, and later confirm to cancel the analysis.
         </p>
-        <h3>4. View results</h3>
-        <p>
-            <a href="assets/img/tutorial_4.png" target="_blank">
-                <img class="img-tutorial img-responsive" src="assets/img/tutorial_4.png" alt="View results" />
-            </a>
-        </p>
-        <p>
-            As the analysis goes on, the results that are complete will appear below the progress bar. You can click the name of the gene set collection in the result header to expand the view. After expanding it, for significant hits, you will see <a href="docs.html#outputs-bar-charts" target="_blank">a bar chart</a> and <a href="docs.html#outputs-tables" target="_blank">a table</a>. The table is sortable and by default it is sorted by combined p-value in ascending order.
-        </p>
-        <h3>5. Compare results</h3>
+
+        <h3>5. View results</h3>
         <p>
             <a href="assets/img/tutorial_5.png" target="_blank">
-                <img class="img-tutorial img-responsive" src="assets/img/tutorial_5.png" alt="Compare results" />
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_5.png" alt="View results" />
             </a>
         </p>
         <p>
-            Using the <strong>Compare</strong> button, you can switch to another view where via <a href="docs.html#outputs-bubble-charts" target="_blank">a bubble chart</a> you can compare multiple gene set association results you obtained from <strong>Explore</strong> and/or <strong>Analyze</strong> panels. Just click again to switch back to the previous view.
+            As the analysis goes on, the results that are complete will appear below the progress bar. You can click the name of the gene set collection in the result header to expand the view. After expanding it, for significant hits, you will see <a href="docs.html#outputs-bar-charts" target="_blank">a bar chart</a> and <a href="docs.html#outputs-tables" target="_blank">a table</a>. The table is sortable and by default it is sorted by gene set p-value or corrected functional p-value in ascending order.
         </p>
-        <h3>6. Configure results</h3>
+
+        <h3>6. View overlapping genes per gene set</h3>
         <p>
             <a href="assets/img/tutorial_6.png" target="_blank">
-                <img class="img-tutorial img-responsive" src="assets/img/tutorial_6.png" alt="Configure results" />
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_6.png" alt="View overlapping genes per gene set" />
             </a>
         </p>
         <p>
-            Just above the results, there will be a small form named <strong>Options</strong> which can be used to configure view based on precent and combined p-value thresholds. Change the default combined p-value threshold 0.01 to 0.05 and observe the results. You may have more gene sets available under this threshold. You may change the percent threshold as you wish.
+            In the results table, each percentage value has a link to a pop up where the overlapping genes between the dataset given and corresponsing gene set are listed along with their scores that are used in the gene set enrichment analysis. Also, these genes are linked to their respective sources for further understanding.
         </p>
-        <h3>7. Export results</h3>
+        <p>
+          The gene and scores in the pop up can be exported using the <strong>Export</strong> button on the pop up. Also, using <strong>Export gene scores</strong> button on the righthand side of the result title, it's possible to obtain scores for all distinct genes in the dataset.
+        </p>
+
+        <h3>7. Configure results</h3>
         <p>
             <a href="assets/img/tutorial_7.png" target="_blank">
-                <img class="img-tutorial img-responsive" src="assets/img/tutorial_7.png" alt="Export results" />
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_7.png" alt="Configure results" />
+            </a>
+        </p>
+        <p>
+            Just above the results, there will be a small form named <strong>Options</strong> which can be used to configure view based on precent and combined p-value thresholds. Change the default combined p-value threshold 0.05 to 0.01 and observe the results. You may have less number of gene sets available under this threshold. You may change the percent threshold as you wish.
+        </p>
+
+        <h3>8. Export results</h3>
+        <p>
+            <a href="assets/img/tutorial_8.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_8.png" alt="Export results" />
             </a>
         </p>
         <p>
             Each result can be exported as a bar chart (SVG formatted) and a table (TSV formatted). Click the bar chart icon on the right of the result header. The bar chart will be downloaded to your computer. You may also click table icon next to it and download a local copy of the result table.
         </p>
-        <h3>8. Explore available precomputed results</h3>
+
+        <h3>9. Compare results</h3>
         <p>
-            <a href="assets/img/tutorial_8.png" target="_blank">
-                <img class="img-tutorial img-responsive" src="assets/img/tutorial_8.png" alt="Explore available pre-computed results" />
+            <a href="assets/img/tutorial_9.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_9.png" alt="Compare results" />
+            </a>
+        </p>
+        <p>
+            Using the <strong>Compare</strong> button, you can switch to another view where via <a href="docs.html#outputs-bubble-charts" target="_blank">a bubble chart</a> you can compare multiple gene set association results you obtained from <strong>Explore</strong> and/or <strong>Analyze</strong> panels. Just click again to switch back to the previous view.
+        </p>
+
+        <h3>10. Explore available precomputed results</h3>
+        <p>
+            <a href="assets/img/tutorial_10.png" target="_blank">
+                <img class="img-tutorial img-responsive" src="assets/img/tutorial_10.png" alt="Explore available pre-computed results" />
             </a>
         </p>
         <p>

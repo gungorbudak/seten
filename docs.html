@@ -93,7 +93,6 @@
                     <li>Requires single-line command installation (requires Python 2.7+, Python package manager)</li>
                     <li>Utilizes standard Python multiprocessing module for parallel execution of tasks on multiple cores</li>
                     <li>Inputs single BED file or multiple BED files in a directory</li>
-                    <li>Provides options to use different columns as scores and different methods to compute gene level scores of multiple binding sites</li>
                     <li>Outputs results in TSV formatted tables</li>
                 </ul>
                 <p>
@@ -143,7 +142,18 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
                 <a name="inputs-organism"></a>
                 <h4>Organism</h4>
                 <p>
-                  There are four available organisms provided in Seten's web interface: Human (hg19 build), mouse (mm10 build), rat (rn6 build), fruit fly (dme6 build). It's possible to extend the Seten for more organisms; however, this is only available for Seten's command line interface. Please refer to its GitHub page for more information.
+                  There are six available organisms provided in Seten's web interface:
+                </p>
+                <ul>
+                  <li>Human (hg19 build and hg38 build)</li>
+                  <li>Mouse (mm10 build)</li>
+                  <li>Rat (rn6 build)</li>
+                  <li>Fruit fly (dme6 build)</li>
+                  <li>Worm (cel235 build)</li>
+                  <li>Yeast (r64-1-1 build)</li>
+                </ul>
+                <p>
+                  It's possible to extend the Seten for more organisms; however, this is only available for Seten's command line interface. Please refer to <a href="https://github.com/gungorbudak/seten-cli" target="_blank">its Github page</a> for more information.
                 </p>
                 <a name="inputs-gene-set-collections"></a>
                 <h4>Gene set collections</h4>
@@ -152,11 +162,11 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
                 </p>
                 <ul>
                     <li>Pathways: BIOCARTA (human, mouse)</li>
-                    <li>Pathways: REACTOME (human, mouse, rat, fruit fly)</li>
-                    <li>Pathways: KEGG (human, mouse, rat, fruit fly)</li>
-                    <li>GO: Biological Process (human, mouse, rat, fruit fly)</li>
-                    <li>GO: Molecular Function (human, mouse, rat, fruit fly)</li>
-                    <li>GO: Cellular Compartment (human, mouse, rat, fruit fly)</li>
+                    <li>Pathways: REACTOME (human, mouse, rat, fruit fly, worm, yeast)</li>
+                    <li>Pathways: KEGG (human, mouse, rat, fruit fly, worm, yeast)</li>
+                    <li>GO: Biological Process (human, mouse, rat, fruit fly, worm, yeast)</li>
+                    <li>GO: Molecular Function (human, mouse, rat, fruit fly, worm, yeast)</li>
+                    <li>GO: Cellular Compartment (human, mouse, rat, fruit fly, worm, yeast)</li>
                     <li>Human Phenotype Ontology (human)</li>
                     <li>MalaCards Disease Ontology (human)</li>
                 </ul>
