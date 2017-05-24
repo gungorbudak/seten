@@ -119,13 +119,12 @@
                 <h4>File</h4>
                 <p>
                   The input file for Seten can be a UCSC BED formatted text file or Tab-separated (two-column) gene - score file. The BED file is the most common format used by peak callers. However, if you have a two-column gene - score file, you can also use it but please make sure you use the official gene name for the corresponding organism (e.g. FlyBase Gene Name for fruit fly datasets) and don't include the header line.
-                  The input file for Seten can be a UCSC BED formatted text file or Tab-separated (two-column) gene - score file. The BED file is the most common format used by peak callers. However, if you have a two-column gene - score file, you can also use it but please make sure you use the official gene name for the corresponding organism (e.g. FlyBase Gene Name for fruit fly datasets) and don't include the header lorganism
                 </p>
                 <p>
                     A BED file is a UCSC BED formatted text file which stores chromosomal location data as lines. Seten requires (at least) 5-column BED file having chrom, chromStart, chromEnd, name, score. Go to <a href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1" target="_blank">UCSC's website to obtain more information about BED format</a>.
                 </p>
                 <p>
-                    The first 10 lines of a sample BED file is as following:
+                    The first 10 lines of a sample BED file is as follows:
                 </p>
                 <pre>
 chr1	566740	566760	binding_site_1	25	.	2.83477e-06
@@ -326,6 +325,16 @@ chr1	1438640	1438660	binding_site_10	12	.	0.00315889
                     <li><a href="#source-code">Source code</a></li>
                     <li><a href="#references">References</a></li>
                 </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="panel panel-success">
+            <div class="panel-heading"><h3 class="panel-title">Publication</h3></div>
+            <div class="panel-body">
+                <p>Please cite Seten in your publications as:</p>
+                <p>Budak, G., Srivastava, R., & Janga, S. C. (2017). <a href="http://rnajournal.cshlp.org/content/23/6/836.short" target="_blank">Seten: a tool for systematic identification and comparison of processes, phenotypes, and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles.</a> RNA, 23(6), 836-846.</p>
             </div>
         </div>
     </div>
