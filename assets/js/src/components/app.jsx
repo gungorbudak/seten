@@ -5,11 +5,11 @@ import * as _ from 'lodash';
 import PanelExplore from './panel-explore';
 import PanelAnalyze from './panel-analyze';
 import ResultGroup from './result-group';
-import ExploreWorker from 'worker?name=explore.worker.js!../workers/explore';
-import SampleWorker from 'worker?name=sample.worker.js!../workers/sample';
-import MappingWorker from 'worker?name=mapping.worker.js!../workers/mapping';
-import CollectionWorker from 'worker?name=collection.worker.js!../workers/collection';
-import EnrichmentWorker from 'worker?name=enrichment.worker.js!../workers/enrichment';
+import ExploreWorker from 'worker-loader?name=explore.worker.js!../workers/explore';
+import SampleWorker from 'worker-loader?name=sample.worker.js!../workers/sample';
+import MappingWorker from 'worker-loader?name=mapping.worker.js!../workers/mapping';
+import CollectionWorker from 'worker-loader?name=collection.worker.js!../workers/collection';
+import EnrichmentWorker from 'worker-loader?name=enrichment.worker.js!../workers/enrichment';
 
 
 var App = React.createClass({

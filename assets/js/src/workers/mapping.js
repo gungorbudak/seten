@@ -4,7 +4,7 @@ importScripts('../libs/jstat.js');
 
 var development = process.env.NODE_ENV !== 'production';
 var resourcesDir = development ?
-  '/assets/resources': '/~sysbio/seten/assets/resources';
+  '/assets/resources': '/seten/assets/resources';
 
 /*
 Function to compute gene level score from multiple scores

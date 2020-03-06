@@ -1,6 +1,6 @@
 {
   "name": "seten",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A tool for systematic identification and comparison of processes, phenotypes and diseases associated with RNA-binding proteins from condition-specific CLIP-seq profiles",
   "author": "Gungor Budak",
   "scripts": {
@@ -10,13 +10,15 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "babel-loader": "^6.2.4",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
     "babel-preset-es2015": "~6.6.0",
     "babel-preset-react": "~6.5.0",
-    "http-server": "^0.9.0",
-    "webpack": "^1.12.14",
-    "webpack-dev-server": "^1.14.1",
-    "worker-loader": "^0.7.0"
+    "http-server": "^0.12.1",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3",
+    "worker-loader": "^2.0.0"
   },
   "repository": {
     "type": "git",
@@ -24,7 +26,7 @@
   },
   "bugs": {
     "url": "https://github.com/gungorbudak/seten/issues",
-    "email": "gbudak@iupui.edu"
+    "email": "gngrbdk@gmail.com"
   },
   "license": "MIT",
   "dependencies": {

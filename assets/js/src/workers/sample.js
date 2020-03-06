@@ -2,7 +2,7 @@
 
 var development = process.env.NODE_ENV !== 'production';
 var resourcesDir = development ?
-  '/assets/resources': '/~sysbio/seten/assets/resources';
+  '/assets/resources': '/seten/assets/resources';
 
 function getSample(sampleId) {
   var request = new XMLHttpRequest();

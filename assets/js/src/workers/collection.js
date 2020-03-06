@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 
 var development = process.env.NODE_ENV !== 'production';
 var resourcesDir = development ?
-  '/assets/resources': '/~sysbio/seten/assets/resources';
+  '/assets/resources': '/seten/assets/resources';
 
 
 function getSize(colls) {

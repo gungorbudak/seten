@@ -4,7 +4,7 @@ A tool for systematic identification and comparison of processes, phenotypes and
 
 ## Production server
 
-Seten's production server is running on http://www.iupui.edu/~sysbio/seten/.
+Seten's production server is running on https://sysbio.sitehost.iu.edu/seten/.
 
 ## Development server
 
@@ -27,7 +27,7 @@ Seten's production server is running on http://www.iupui.edu/~sysbio/seten/.
     git clone https://github.com/gungorbudak/seten.git
     cd seten/
     # download and untar the resources (around 300 MB)
-    wget http://www.iupui.edu/~sysbio/seten/assets/resources.tar.gz
+    wget https://sysbio.sitehost.iu.edu/seten/assets/resources.tar.gz
     tar xzf resources.tar.gz -C assets/ && rm resources.tar.gz
     npm install --production
     npm start
@@ -58,11 +58,11 @@ For live test, you should be using unminified version of the bundle, `assets/js/
 
 ## Tutorial
 
-A tutorial that can guide you through Seten's features can be found on http://www.iupui.edu/~sysbio/seten/tutorial.html
+A tutorial that can guide you through Seten's features can be found on https://sysbio.sitehost.iu.edu/seten/tutorial.html
 
 ## Documentation
 
-Seten's documentation can be found on http://www.iupui.edu/~sysbio/seten/docs.html
+Seten's documentation can be found on https://sysbio.sitehost.iu.edu/seten/docs.html
 
 ## Command line interface
 
