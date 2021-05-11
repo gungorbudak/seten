@@ -32,7 +32,7 @@
   "dependencies": {
     "d3": "^3.5.16",
     "filesaver.js": "^0.2.0",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "react": "^0.14.8",
     "react-dom": "^0.14.8",
     "react-spin": "^0.6.2"
